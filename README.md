@@ -1,5 +1,9 @@
 # Grand Gateway 66 Agent
 
+**Live demo:** https://grand-gateway-agent-production.up.railway.app
+(text chat works out of the box; voice narration needs the demo's ElevenLabs
+billing to be active — falls back to text-only if not, rather than erroring)
+
 A bilingual (Chinese/English) conversational guide for Grand Gateway 66
 (港汇恒隆广场), Shanghai. Given a photo or a typed question, it identifies a
 store/facility, narrates a grounded introduction aloud, and answers visitor
@@ -83,7 +87,7 @@ system prompt and retrieval logic, not just to run it once.
 - [x] Spatial wayfinding: `learn_location` + `get_directions`, tested including a caught-and-fixed false-connectivity bug
 - [x] TTS and vision endpoints verified live (TTS needs ElevenLabs billing set up to actually speak; degrades gracefully to text-only if it fails)
 - [x] Any tool failure degrades gracefully instead of crashing the whole turn
-- [ ] Deployed demo link
+- [x] Deployed demo link (Railway) — see top of this file
 - [ ] Fuller eval iteration history documented below
 
 ## Known limitations (intentional scope cuts)
