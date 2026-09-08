@@ -1,0 +1,16 @@
+{
+  "id": "shan_huanhuan_hotpot",
+  "category": "dining",
+  "floor": "L5 (North Tower 532 / 北座532)",
+  "name_en": "Shan Huanhuan Hotpot",
+  "name_zh": "山缓缓火锅",
+  "description_en": "Viral Guizhou-style hotpot restaurant, known for its Guizhou sour soup base and beef, plus a drinks menu. Offers free fresh fruit such as lychee.",
+  "description_zh": "网络爆火的贵州风味火锅店，以贵州酸汤锅底和牛肉、特色饮品闻名，还提供新鲜水果（如荔枝）免费畅吃。",
+  "tags": [
+    "hotpot",
+    "guizhou",
+    "viral",
+    "L5"
+  ],
+  "canary": false
+}

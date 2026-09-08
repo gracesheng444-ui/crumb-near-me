@@ -1,0 +1,16 @@
+{
+  "id": "nunu_donut",
+  "category": "dining",
+  "floor": "B1",
+  "name_en": "Nunu Donut",
+  "name_zh": "Nunu Donut",
+  "description_en": "Donut shop known for very long queues and high social media virality, open since 2022. Known for filled donuts (black sesame soy milk, pistachio, matcha green grape, pandan mango), mochi donuts (caramel crunch, matcha white chocolate, Valrhona dark chocolate, meiji strawberry), and signature crunch donuts (matcha cream, rose cream, Thai milk tea cream, yulan magnolia crunch).",
+  "description_zh": "以超长排队和社交媒体爆火著称的甜甜圈店，2022年开业。招牌为夹心甜甜圈（黑芝麻豆浆、开心果、抹茶青提、班兰芒果等口味）、麻薯甜甜圈（焦糖脆、抹茶白巧克力、法芙娜黑巧克力、明治草莓等口味），以及原创的酥脆甜甜圈（抹茶奶油、玫瑰奶油、泰式奶茶奶油、玉兰花酥脆）。",
+  "tags": [
+    "donut",
+    "dessert",
+    "viral",
+    "B1"
+  ],
+  "canary": false
+}

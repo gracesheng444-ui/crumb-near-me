@@ -1,0 +1,15 @@
+{
+  "id": "professor_lee",
+  "category": "dining",
+  "floor": "L1 (West Gate, shop 169 / 西门一楼169商铺)",
+  "name_en": "Professor Lee",
+  "name_zh": "Professor Lee",
+  "description_en": "Viral Korean cuisine restaurant under the belloco brand. Known for tiramisu, charcoal-grilled beef bulgogi DIY tacos, spam kimchi fried rice with onsen egg, and potato mash.",
+  "description_zh": "belloco旗下的爆款韩餐厅。招牌菜包括提拉米苏、炭烤牛肉不古歧DIY卷饼、午餐肉泡菜炒饭配温泉蛋、以及土豆泥。",
+  "tags": [
+    "korean",
+    "viral",
+    "L1"
+  ],
+  "canary": false
+}

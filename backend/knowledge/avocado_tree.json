@@ -1,0 +1,16 @@
+{
+  "id": "avocado_tree",
+  "category": "dining",
+  "floor": "L6 (South Tower 602 / 南座602)",
+  "name_en": "Avocado Tree",
+  "name_zh": "油梨树",
+  "description_en": "Healthy bowl and burrito spot with barbacoa, chicken, tofu, and carnitas options. Popular with office workers for being a healthy lunch choice.",
+  "description_zh": "健康碗餐和墨西哥卷饼店，可选牛肉、鸡肉、豆腐、猪肉等配料，深受上班族喜爱，因为健康。",
+  "tags": [
+    "healthy",
+    "bowls",
+    "burritos",
+    "L6"
+  ],
+  "canary": false
+}

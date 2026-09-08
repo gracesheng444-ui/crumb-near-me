@@ -1,0 +1,16 @@
+{
+  "id": "shanxin_chaoshan_dessert",
+  "category": "dining",
+  "floor": "L6 (North Tower, near the cinema / 北座近影院)",
+  "name_en": "Shanxin Chaoshan Sweet Soup",
+  "name_zh": "汕心·潮汕甜汤",
+  "description_en": "Chaoshan-style sweet dessert soup shop with customizable toppings. Two base options: snow fungus and milk. Popular toppings include peach gum, Chaoshan tangyuan, and cassava.",
+  "description_zh": "潮汕风味甜汤店，可自选配料。两种汤底：雪耳和牛奶。热门配料包括桃胶、潮汕汤圆和木薯。",
+  "tags": [
+    "dessert",
+    "chaoshan",
+    "sweet soup",
+    "L6"
+  ],
+  "canary": false
+}

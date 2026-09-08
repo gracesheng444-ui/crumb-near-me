@@ -1,0 +1,15 @@
+{
+  "id": "tian_cui_ting",
+  "category": "dining",
+  "floor": "L5 (South Tower 505A / 南座505A)",
+  "name_en": "Tian Cui Ting",
+  "name_zh": "天萃庭",
+  "description_en": "Huaiyang cuisine restaurant that also serves Peking roast duck.",
+  "description_zh": "淮扬菜餐厅，同时供应北京烤鸭。",
+  "tags": [
+    "huaiyang",
+    "roast duck",
+    "L5"
+  ],
+  "canary": false
+}

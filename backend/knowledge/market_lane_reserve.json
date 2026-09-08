@@ -1,0 +1,14 @@
+{
+  "id": "market_lane_reserve",
+  "category": "dining",
+  "floor": "L2 (North Tower 266 / 北座266)",
+  "name_en": "The Market Lane · Reserve",
+  "name_zh": "The Market Lane · Reserve",
+  "description_en": "Thai cuisine restaurant on L2, North Tower.",
+  "description_zh": "位于L2层北座的泰式餐厅。",
+  "tags": [
+    "thai",
+    "L2"
+  ],
+  "canary": false
+}

@@ -1,0 +1,15 @@
+{
+  "id": "ayuluo_japanese",
+  "category": "dining",
+  "floor": "L6 (South Tower 615A/D / 南座615A、D)",
+  "name_en": "Ayuluo Yueyong Fine Japanese",
+  "name_zh": "阿吾罗·月咏精致日料",
+  "description_en": "Fine Japanese cuisine restaurant. Recommended dishes include beef tongue, sashimi, goose liver, and sukiyaki.",
+  "description_zh": "精致日料餐厅。推荐菜品包括牛舌、刺身、鹅肝和寿喜烧。",
+  "tags": [
+    "japanese",
+    "fine dining",
+    "L6"
+  ],
+  "canary": false
+}

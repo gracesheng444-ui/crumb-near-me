@@ -1,0 +1,15 @@
+{
+  "id": "shake_shack",
+  "category": "dining",
+  "floor": "L3 (South Tower 305 / 南座305)",
+  "name_en": "Shake Shack",
+  "name_zh": "Shake Shack",
+  "description_en": "American burger chain on L3, South Tower.",
+  "description_zh": "位于L3层南座的美式汉堡连锁店。",
+  "tags": [
+    "burger",
+    "western",
+    "L3"
+  ],
+  "canary": false
+}

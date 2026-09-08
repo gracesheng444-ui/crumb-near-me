@@ -1,0 +1,15 @@
+{
+  "id": "the_boots",
+  "category": "dining",
+  "floor": "L3 (South Tower 301/301A / 南座301/301A)",
+  "name_en": "The Boots",
+  "name_zh": "泥靴",
+  "description_en": "New Western food restaurant, quite viral online.",
+  "description_zh": "新开的西餐厅，网络上小有热度。",
+  "tags": [
+    "western",
+    "viral",
+    "L3"
+  ],
+  "canary": false
+}

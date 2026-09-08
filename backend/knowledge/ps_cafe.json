@@ -1,0 +1,14 @@
+{
+  "id": "ps_cafe",
+  "category": "dining",
+  "floor": "L2 (South Tower 202 / 南座202)",
+  "name_en": "PS.Cafe",
+  "name_zh": "PS.Cafe",
+  "description_en": "Cafe on L2, South Tower.",
+  "description_zh": "位于L2层南座的咖啡馆。",
+  "tags": [
+    "cafe",
+    "L2"
+  ],
+  "canary": false
+}

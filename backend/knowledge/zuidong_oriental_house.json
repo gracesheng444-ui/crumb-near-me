@@ -1,0 +1,15 @@
+{
+  "id": "zuidong_oriental_house",
+  "category": "dining",
+  "floor": "L5 (North Tower 540 / 北座540)",
+  "name_en": "Oriental House",
+  "name_zh": "醉东",
+  "description_en": "Jiangsu-Zhejiang (Su-Zhe) cuisine restaurant known for braised sea anemone with sweet potato noodles (沙蒜豆面), home-style braised yellow croaker (家烧大黄鱼), and roast chicken.",
+  "description_zh": "苏浙菜餐厅，招牌菜包括沙蒜豆面、家烧大黄鱼和烤鸡。",
+  "tags": [
+    "jiangzhe",
+    "seafood",
+    "L5"
+  ],
+  "canary": false
+}

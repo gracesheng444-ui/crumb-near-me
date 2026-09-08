@@ -1,0 +1,15 @@
+{
+  "id": "godiva",
+  "category": "dining",
+  "floor": "B1 (B105J)",
+  "name_en": "GODIVA",
+  "name_zh": "GODIVA",
+  "description_en": "Belgian chocolate brand on B1.",
+  "description_zh": "位于B1层的比利时巧克力品牌。",
+  "tags": [
+    "chocolate",
+    "dessert",
+    "B1"
+  ],
+  "canary": false
+}

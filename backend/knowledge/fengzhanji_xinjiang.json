@@ -1,0 +1,15 @@
+{
+  "id": "fengzhanji_xinjiang",
+  "category": "dining",
+  "floor": "L6 (South Tower 610 / 南座610)",
+  "name_en": "Fengzhanji Xinjiang",
+  "name_zh": "風毡記",
+  "description_en": "Viral Xinjiang cuisine restaurant. Popular dishes include da pan ji / big plate chicken (大盘鸡), milk-skin yogurt (奶皮子酸奶), and milk tea.",
+  "description_zh": "网络爆火的新疆菜餐厅。热门菜品包括大盘鸡、奶皮子酸奶和奶茶。",
+  "tags": [
+    "xinjiang",
+    "viral",
+    "L6"
+  ],
+  "canary": false
+}

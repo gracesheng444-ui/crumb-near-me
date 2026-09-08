@@ -1,0 +1,16 @@
+{
+  "id": "ningjia_shizhi",
+  "category": "dining",
+  "floor": "L6 (South Tower 611 / 南座611)",
+  "name_en": "Ningjia Shizhi",
+  "name_zh": "宁家十職",
+  "description_en": "Ningbo cuisine restaurant with very long queues (expect up to a 2-hour wait). Known for sea urchin dumplings (海胆大馄饨), braised sea anemone with sweet potato noodles (沙蒜豆面), sesame rice cakes, and seafood.",
+  "description_zh": "宁波菜餐厅，排队很长（可能需等待约2小时）。招牌菜包括海胆大馄饨、沙蒜豆面、芝麻年糕和海鲜。",
+  "tags": [
+    "ningbo",
+    "seafood",
+    "popular",
+    "L6"
+  ],
+  "canary": false
+}

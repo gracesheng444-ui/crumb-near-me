@@ -1,0 +1,15 @@
+{
+  "id": "laderach",
+  "category": "dining",
+  "floor": "B1 (B108, near Ole supermarket)",
+  "name_en": "Läderach",
+  "name_zh": "Läderach",
+  "description_en": "Swiss chocolate brand located near the Ole supermarket entrance on B1.",
+  "description_zh": "瑞士巧克力品牌，位于B1层Ole超市入口附近。",
+  "tags": [
+    "chocolate",
+    "dessert",
+    "B1"
+  ],
+  "canary": false
+}

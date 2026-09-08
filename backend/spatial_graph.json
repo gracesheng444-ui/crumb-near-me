@@ -1,0 +1,304 @@
+{
+  "nodes": {
+    "ningjia_shizhi": {
+      "type": "venue",
+      "name_en": "Ningjia Shizhi",
+      "name_zh": "宁家十職",
+      "floor": "L6",
+      "tower": "South Tower"
+    },
+    "zone_L6_South_Tower": {
+      "type": "zone",
+      "name_en": "L6 South Tower",
+      "name_zh": "L6 South Tower"
+    },
+    "ayuluo_japanese": {
+      "type": "venue",
+      "name_en": "Ayuluo Yueyong Fine Japanese",
+      "name_zh": "阿吾罗·月咏精致日料",
+      "floor": "L6",
+      "tower": "South Tower"
+    },
+    "nunu_donut": {
+      "type": "venue",
+      "name_en": "Nunu Donut",
+      "name_zh": "Nunu Donut",
+      "floor": "B1"
+    },
+    "zone_B1": {
+      "type": "zone",
+      "name_en": "B1",
+      "name_zh": "B1"
+    },
+    "ps_cafe": {
+      "type": "venue",
+      "name_en": "PS.Cafe",
+      "name_zh": "PS.Cafe",
+      "floor": "L2",
+      "tower": "South Tower"
+    },
+    "zone_L2_South_Tower": {
+      "type": "zone",
+      "name_en": "L2 South Tower",
+      "name_zh": "L2 South Tower"
+    },
+    "tian_cui_ting": {
+      "type": "venue",
+      "name_en": "Tian Cui Ting",
+      "name_zh": "天萃庭",
+      "floor": "L5",
+      "tower": "South Tower"
+    },
+    "zone_L5_South_Tower": {
+      "type": "zone",
+      "name_en": "L5 South Tower",
+      "name_zh": "L5 South Tower"
+    },
+    "professor_lee": {
+      "type": "venue",
+      "name_en": "Professor Lee",
+      "name_zh": "Professor Lee",
+      "floor": "L1"
+    },
+    "zone_L1": {
+      "type": "zone",
+      "name_en": "L1",
+      "name_zh": "L1"
+    },
+    "laderach": {
+      "type": "venue",
+      "name_en": "Läderach",
+      "name_zh": "Läderach",
+      "floor": "B1"
+    },
+    "godiva": {
+      "type": "venue",
+      "name_en": "GODIVA",
+      "name_zh": "GODIVA",
+      "floor": "B1"
+    },
+    "zuidong_oriental_house": {
+      "type": "venue",
+      "name_en": "Oriental House",
+      "name_zh": "醉东",
+      "floor": "L5",
+      "tower": "North Tower"
+    },
+    "zone_L5_North_Tower": {
+      "type": "zone",
+      "name_en": "L5 North Tower",
+      "name_zh": "L5 North Tower"
+    },
+    "shan_huanhuan_hotpot": {
+      "type": "venue",
+      "name_en": "Shan Huanhuan Hotpot",
+      "name_zh": "山缓缓火锅",
+      "floor": "L5",
+      "tower": "North Tower"
+    },
+    "shanxin_chaoshan_dessert": {
+      "type": "venue",
+      "name_en": "Shanxin Chaoshan Sweet Soup",
+      "name_zh": "汕心·潮汕甜汤",
+      "floor": "L6",
+      "tower": "North Tower"
+    },
+    "zone_L6_North_Tower": {
+      "type": "zone",
+      "name_en": "L6 North Tower",
+      "name_zh": "L6 North Tower"
+    },
+    "the_boots": {
+      "type": "venue",
+      "name_en": "The Boots",
+      "name_zh": "泥靴",
+      "floor": "L3",
+      "tower": "South Tower"
+    },
+    "zone_L3_South_Tower": {
+      "type": "zone",
+      "name_en": "L3 South Tower",
+      "name_zh": "L3 South Tower"
+    },
+    "shake_shack": {
+      "type": "venue",
+      "name_en": "Shake Shack",
+      "name_zh": "Shake Shack",
+      "floor": "L3",
+      "tower": "South Tower"
+    },
+    "fengzhanji_xinjiang": {
+      "type": "venue",
+      "name_en": "Fengzhanji Xinjiang",
+      "name_zh": "風毡記",
+      "floor": "L6",
+      "tower": "South Tower"
+    },
+    "market_lane_reserve": {
+      "type": "venue",
+      "name_en": "The Market Lane · Reserve",
+      "name_zh": "The Market Lane · Reserve",
+      "floor": "L2",
+      "tower": "North Tower"
+    },
+    "zone_L2_North_Tower": {
+      "type": "zone",
+      "name_en": "L2 North Tower",
+      "name_zh": "L2 North Tower"
+    },
+    "herers_cake": {
+      "type": "venue",
+      "name_en": "HERERS",
+      "name_zh": "赫芮斯·轻糖蛋糕",
+      "floor": "B1"
+    },
+    "avocado_tree": {
+      "type": "venue",
+      "name_en": "Avocado Tree",
+      "name_zh": "油梨树",
+      "floor": "L6",
+      "tower": "South Tower"
+    },
+    "shilu_noble": {
+      "type": "venue",
+      "name_en": "Noble",
+      "name_zh": "食廬",
+      "floor": "L6",
+      "tower": "South Tower"
+    },
+    "cappuccetto_rosso": {
+      "type": "venue",
+      "name_en": "Cappuccetto Rosso",
+      "name_zh": "帽总小红帽三明治",
+      "floor": "B1"
+    },
+    "nintea_matcha": {
+      "type": "venue",
+      "name_en": "Nintea Matcha",
+      "name_zh": "九十葉",
+      "floor": "B1"
+    }
+  },
+  "edges": [
+    {
+      "from": "ningjia_shizhi",
+      "to": "zone_L6_South_Tower",
+      "relation": "located_in",
+      "note": ""
+    },
+    {
+      "from": "ayuluo_japanese",
+      "to": "zone_L6_South_Tower",
+      "relation": "located_in",
+      "note": ""
+    },
+    {
+      "from": "nunu_donut",
+      "to": "zone_B1",
+      "relation": "located_in",
+      "note": ""
+    },
+    {
+      "from": "ps_cafe",
+      "to": "zone_L2_South_Tower",
+      "relation": "located_in",
+      "note": ""
+    },
+    {
+      "from": "tian_cui_ting",
+      "to": "zone_L5_South_Tower",
+      "relation": "located_in",
+      "note": ""
+    },
+    {
+      "from": "professor_lee",
+      "to": "zone_L1",
+      "relation": "located_in",
+      "note": ""
+    },
+    {
+      "from": "laderach",
+      "to": "zone_B1",
+      "relation": "located_in",
+      "note": ""
+    },
+    {
+      "from": "godiva",
+      "to": "zone_B1",
+      "relation": "located_in",
+      "note": ""
+    },
+    {
+      "from": "zuidong_oriental_house",
+      "to": "zone_L5_North_Tower",
+      "relation": "located_in",
+      "note": ""
+    },
+    {
+      "from": "shan_huanhuan_hotpot",
+      "to": "zone_L5_North_Tower",
+      "relation": "located_in",
+      "note": ""
+    },
+    {
+      "from": "shanxin_chaoshan_dessert",
+      "to": "zone_L6_North_Tower",
+      "relation": "located_in",
+      "note": ""
+    },
+    {
+      "from": "the_boots",
+      "to": "zone_L3_South_Tower",
+      "relation": "located_in",
+      "note": ""
+    },
+    {
+      "from": "shake_shack",
+      "to": "zone_L3_South_Tower",
+      "relation": "located_in",
+      "note": ""
+    },
+    {
+      "from": "fengzhanji_xinjiang",
+      "to": "zone_L6_South_Tower",
+      "relation": "located_in",
+      "note": ""
+    },
+    {
+      "from": "market_lane_reserve",
+      "to": "zone_L2_North_Tower",
+      "relation": "located_in",
+      "note": ""
+    },
+    {
+      "from": "herers_cake",
+      "to": "zone_B1",
+      "relation": "located_in",
+      "note": ""
+    },
+    {
+      "from": "avocado_tree",
+      "to": "zone_L6_South_Tower",
+      "relation": "located_in",
+      "note": ""
+    },
+    {
+      "from": "shilu_noble",
+      "to": "zone_L6_South_Tower",
+      "relation": "located_in",
+      "note": ""
+    },
+    {
+      "from": "cappuccetto_rosso",
+      "to": "zone_B1",
+      "relation": "located_in",
+      "note": ""
+    },
+    {
+      "from": "nintea_matcha",
+      "to": "zone_B1",
+      "relation": "located_in",
+      "note": ""
+    }
+  ]
+}

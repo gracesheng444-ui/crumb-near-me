@@ -1,0 +1,15 @@
+{
+  "id": "shilu_noble",
+  "category": "dining",
+  "floor": "L6 (South Tower 612 / 南座612)",
+  "name_en": "Noble",
+  "name_zh": "食廬",
+  "description_en": "Huaiyang cuisine restaurant good for hosting guests (around 200+ RMB per person). Known for lion's head meatballs (狮子头), shredded eel, pomfret rice (鲳鱼饭), and deep-sea yellow croaker (深海大黄鱼).",
+  "description_zh": "适合宴请的淮扬菜餐厅，人均200+元。招牌菜包括狮子头、鳝丝、鲳鱼饭和深海大黄鱼。",
+  "tags": [
+    "huaiyang",
+    "fine dining",
+    "L6"
+  ],
+  "canary": false
+}

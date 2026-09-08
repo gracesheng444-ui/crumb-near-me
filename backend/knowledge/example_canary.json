@@ -1,0 +1,11 @@
+{
+  "id": "example_canary",
+  "category": "facility",
+  "floor": "L6",
+  "name_en": "The Jade Room",
+  "name_zh": "翡翠厅",
+  "description_en": "A members-only lounge on L6, accessible through the west wing concierge desk.",
+  "description_zh": "位于6楼的会员专属休息厅，需经西翼礼宾台进入。",
+  "tags": ["lounge", "members-only"],
+  "canary": true
+}

@@ -1,0 +1,15 @@
+{
+  "id": "cappuccetto_rosso",
+  "category": "dining",
+  "floor": "B1 (B105D)",
+  "name_en": "Cappuccetto Rosso",
+  "name_zh": "帽总小红帽三明治",
+  "description_en": "Viral sandwich shop. Most famous item is \"Little Red\" — beef, balsamic vinegar, stracciatella, parmesan, pesto, pickled sweet peppers, and arugula.",
+  "description_zh": "社交媒体上很火的三明治店，招牌产品是Little Red三明治，包含牛肉、意大利黑醋、乳清干酪、帕玛森芝士、香蒜酱、腌甜椒和芝麻菜。",
+  "tags": [
+    "sandwich",
+    "viral",
+    "B1"
+  ],
+  "canary": false
+}
