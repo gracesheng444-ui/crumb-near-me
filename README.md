@@ -37,7 +37,7 @@ once actually confirmed.
 ## Architecture
 
 ```
-frontend/index.html      one-page chat UI, plain JS
+backend/frontend/index.html  one-page chat UI, plain JS (lives inside backend/ so it deploys together with it)
 backend/main.py          FastAPI app: /chat, /identify, /health
 backend/agent.py         the Claude tool-use loop (the "agent")
 backend/tools.py         retrieve_info, identify_exhibit, speak, get_directions, learn_location
