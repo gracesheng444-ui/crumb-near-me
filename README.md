@@ -88,7 +88,46 @@ system prompt and retrieval logic, not just to run it once.
 - [x] TTS and vision endpoints verified live (TTS needs ElevenLabs billing set up to actually speak; degrades gracefully to text-only if it fails)
 - [x] Any tool failure degrades gracefully instead of crashing the whole turn
 - [x] Deployed demo link (Railway) — see top of this file
-- [ ] Fuller eval iteration history documented below
+- [x] Eval iteration history documented below
+
+## Eval iteration history
+
+Raw runs are in `backend/eval/results/`. The average `grounded`/`on_task`
+score (out of 2) across the test set, run to run:
+
+| Run | grounded | on_task | What changed |
+|---|---|---|---|
+| 1 | 1.33 | 1.50 | Baseline after first working end-to-end version |
+| 2 | 1.67 | 1.67 | Fixed the system prompt to require confident, consistent grounding regardless of reply language (it was hedging on retrieved facts in Chinese but not English); fixed the eval judge, which was penalizing correct answers it couldn't independently verify as plausible |
+| 3 | 1.50 | 1.67 | Real content replaced placeholder/canary-only data — score dipped because Chinese-language retrieval was silently broken (see bug list below), which the smaller placeholder set hadn't exposed |
+| 4 | 1.67 | 1.67 | Fixed the Chinese tokenizer bug; fixed a crash in the judge caused by extended-thinking response blocks; corrected an eval question's expected-answer field that was too narrow, causing the judge to dock credit for additional true details |
+
+The score isn't the interesting part on its own — it's that each change maps
+to a specific, diagnosed cause, not prompt-tweaking by vibes.
+
+## Real bugs found during development (and how)
+
+- **Chinese retrieval silently returned nothing.** Naive `\w+` tokenization
+  swallowed an entire Chinese sentence as one token (no spaces to split on),
+  so it never matched anything. Found by testing a real Chinese query
+  end-to-end, not by code review. Fixed with character-bigram tokenization
+  for CJK text.
+- **The agent invented a walking route between two towers with zero
+  evidence they connect**, because early seed data grouped all venues on a
+  floor under one shared node, and pathfinding treated that as "walkable."
+  Found by deliberately testing a cross-tower directions query. Fixed by
+  making zone (floor+tower) the smallest unit assumed walkable.
+- **A relation-vocabulary gap silently distorted taught facts** — teaching
+  the agent about a "walkway" got stored as "connected via escalator"
+  because that was the closest option in a too-narrow enum. Fixed by
+  widening the vocabulary.
+- **Any single tool failure crashed the entire chat turn** (found via a
+  real ElevenLabs billing error) — fixed so the agent degrades to a text
+  answer and says what didn't work, instead of a raw 500 error.
+- **Deploy-only bugs**: a path mismatch meant the frontend wasn't included
+  in what actually got uploaded to Railway (worked locally, 404'd in
+  prod), and the public domain was pointed at the wrong port. Both only
+  surfaced by testing the live deployed URL, not the local dev server.
 
 ## Known limitations (intentional scope cuts)
 
