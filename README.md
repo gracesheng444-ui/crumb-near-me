@@ -1,13 +1,25 @@
-# Grand Gateway 66 Agent
+# Shanghai Dessert Guide Agent
 
 **Live demo:** https://grand-gateway-agent-production.up.railway.app
 (text chat works out of the box; voice narration needs the demo's ElevenLabs
-billing to be active — falls back to text-only if not, rather than erroring)
+billing to be active — falls back to text-only if not, rather than erroring.
+**Note:** this project was just repurposed from a single-mall guide to a
+city-wide dessert guide — the live demo above still reflects the old
+single-mall version until redeployed.)
 
-A bilingual (Chinese/English) conversational guide for Grand Gateway 66
-(港汇恒隆广场), Shanghai. Given a photo or a typed question, it identifies a
-store/facility, narrates a grounded introduction aloud, and answers visitor
-follow-up questions — refusing to guess when it doesn't actually know.
+A bilingual (Chinese/English) conversational guide to dessert spots across
+Shanghai — chocolate, cakes, gelato, Chinese sweet soups, bubble tea, and
+more. Given a photo or a typed question, it identifies a shop, narrates a
+grounded introduction aloud, gives real metro/bus directions, and answers
+visitor follow-up questions — refusing to guess when it doesn't actually
+know.
+
+This project started scoped to a single mall (Grand Gateway 66, 港汇恒隆广场)
+and was later broadened into a general Shanghai dessert guide once the core
+pattern (grounded retrieval, real routing, graceful degradation) proved out.
+The original mall-tenant entries are preserved in
+`backend/knowledge/_archive_grand_gateway_66/` for reference — they're
+outside `retrieve_info`'s glob, so they're not loaded.
 
 Built independently, informed by evaluation work during an internship
 building/testing a similar TTS exhibit-guide system (no internal content,
@@ -24,19 +36,12 @@ technique — a deliberately fabricated fact planted in the knowledge base
 (see `backend/knowledge/example_canary.json`) that the agent can only get
 right by actually retrieving it.
 
-The agent also builds its own spatial understanding of the mall
-incrementally, rather than relying on a hand-fed map: `learn_location`
-extracts spatial facts from free-text descriptions and merges them into a
-graph, and `get_directions` does real pathfinding over whatever's been
-learned so far — returning "I don't have a confirmed route yet" rather than
-inventing one when two places aren't actually connected in the graph. This
-caught a real bug during development: an early version of the seed data
-grouped every venue under a shared "floor" node for organizational
-convenience, which let pathfinding treat "same floor number" as "walkable
-connection" and confidently invent a route between two towers that were
-never actually confirmed to connect. Fixed by making zones (floor+tower)
-the smallest unit assumed walkable, with cross-zone connections only added
-once actually confirmed.
+Directions work on the same grounding principle: `get_transit_directions`
+calls Amap's real transit-routing API for metro/bus directions between two
+places, rather than letting the model guess a line or a bus number. If Amap
+can't resolve a place or find a route, the agent says so plainly instead of
+inventing turns — same philosophy as `retrieve_info`, just for wayfinding
+instead of facts.
 
 ## Architecture
 
@@ -44,9 +49,7 @@ once actually confirmed.
 backend/frontend/index.html  one-page chat UI, plain JS (lives inside backend/ so it deploys together with it)
 backend/main.py          FastAPI app: /chat, /identify, /health
 backend/agent.py         the Claude tool-use loop (the "agent")
-backend/tools.py         retrieve_info, identify_exhibit, speak, get_directions, learn_location
-backend/spatial_graph.py graph store + pathfinding for the wayfinding feature
-backend/seed_graph.py    seeds the spatial graph from knowledge/*.json (run once, or after adding entries)
+backend/tools.py         retrieve_info, identify_exhibit, speak, get_transit_directions (Amap-backed)
 backend/knowledge/*.json the grounding source of truth for retrieve_info
 backend/eval/            test questions + LLM-judge scoring harness
 ```
@@ -59,6 +62,12 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp ../.env.example ../.env   # then fill in your real API keys
 ```
+
+`AMAP_API_KEY` is optional — `get_transit_directions` degrades gracefully
+(tells the visitor it doesn't have a route right now) if it's left blank.
+It requires a real-name-verified Amap Open Platform developer account
+(`lbs.amap.com`), a Chinese regulatory requirement for API access, not
+something specific to this project.
 
 Run it:
 
@@ -83,14 +92,21 @@ system prompt and retrieval logic, not just to run it once.
 ## Status
 
 - [x] Project scaffold, bilingual agent loop, keyword-based retrieval, TTS/vision tools wired
-- [x] Real knowledge base content — 20 F&B entries at Grand Gateway 66
-- [x] Spatial wayfinding: `learn_location` + `get_directions`, tested including a caught-and-fixed false-connectivity bug
+- [x] Repurposed from a single-mall guide to a city-wide Shanghai dessert guide
+- [x] Real knowledge base content — 6 dessert entries carried over so far, growing as more are added
+- [ ] Live transit directions via Amap — code wired (`get_transit_directions`), pending a real-name-verified Amap API key
 - [x] TTS and vision endpoints verified live (TTS needs ElevenLabs billing set up to actually speak; degrades gracefully to text-only if it fails)
 - [x] Any tool failure degrades gracefully instead of crashing the whole turn
-- [x] Deployed demo link (Railway) — see top of this file
-- [x] Eval iteration history documented below
+- [ ] Redeploy demo (Railway) to reflect the new dessert-guide scope
+- [x] Eval iteration history documented below (from the original single-mall version)
 
 ## Eval iteration history
+
+Runs 1-4 below are from the original single-mall version, before the pivot
+to a city-wide dessert guide — kept as the historical record of how the
+score moved with each diagnosed fix. New runs against the dessert-scoped
+eval questions (`backend/eval/test_questions.json`) will start a fresh
+baseline.
 
 Raw runs are in `backend/eval/results/`. The average `grounded`/`on_task`
 score (out of 2) across the test set, run to run:
@@ -113,14 +129,16 @@ to a specific, diagnosed cause, not prompt-tweaking by vibes.
   end-to-end, not by code review. Fixed with character-bigram tokenization
   for CJK text.
 - **The agent invented a walking route between two towers with zero
-  evidence they connect**, because early seed data grouped all venues on a
-  floor under one shared node, and pathfinding treated that as "walkable."
-  Found by deliberately testing a cross-tower directions query. Fixed by
-  making zone (floor+tower) the smallest unit assumed walkable.
-- **A relation-vocabulary gap silently distorted taught facts** — teaching
-  the agent about a "walkway" got stored as "connected via escalator"
-  because that was the closest option in a too-narrow enum. Fixed by
-  widening the vocabulary.
+  evidence they connect** (from the original mall-wayfinding feature,
+  since retired in favor of live Amap transit routing) — early seed data
+  grouped all venues on a floor under one shared node, and pathfinding
+  treated that as "walkable." Found by deliberately testing a cross-tower
+  directions query. Fixed by making zone (floor+tower) the smallest unit
+  assumed walkable.
+- **A relation-vocabulary gap silently distorted taught facts** (same
+  retired feature) — teaching the agent about a "walkway" got stored as
+  "connected via escalator" because that was the closest option in a
+  too-narrow enum. Fixed by widening the vocabulary.
 - **Any single tool failure crashed the entire chat turn** (found via a
   real ElevenLabs billing error) — fixed so the agent degrades to a text
   answer and says what didn't work, instead of a raw 500 error.
@@ -141,7 +159,6 @@ to a specific, diagnosed cause, not prompt-tweaking by vibes.
   was scoped out deliberately — it needs a separate web-search API
   dependency, and a heuristic ad-classifier can't honestly claim validated
   accuracy without real labeled data (see eval notes on that distinction).
-- Spatial graph only knows what's been seeded from the knowledge base or
-  explicitly taught via `learn_location` — it will correctly say "I don't
-  have a confirmed route" for anything not yet connected, rather than
-  guess.
+- Directions only work for places that are either in the knowledge base or
+  resolvable by Amap's place search — it will correctly say "couldn't
+  locate" or "no route found" rather than guess.

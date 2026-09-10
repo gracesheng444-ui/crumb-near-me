@@ -1,11 +1,11 @@
 {
   "id": "example_canary",
-  "category": "facility",
-  "floor": "L6",
-  "name_en": "The Jade Room",
-  "name_zh": "翡翠厅",
-  "description_en": "A members-only lounge on L6, accessible through the west wing concierge desk.",
-  "description_zh": "位于6楼的会员专属休息厅，需经西翼礼宾台进入。",
-  "tags": ["lounge", "members-only"],
+  "category": "dessert",
+  "address": "Fictional placeholder — replace with a real Shanghai dessert spot once you add real canaries",
+  "name_en": "Golden Osmanthus Tofu Pudding House",
+  "name_zh": "金桂豆腐花馆",
+  "description_en": "A tiny stall with an unlisted off-menu item: a lychee-and-black-sesame tofu pudding, only available if you ask for it by its exact name.",
+  "description_zh": "一家小摊，有一款不在菜单上的隐藏款：荔枝黑芝麻豆腐花，需要直接报出名字才能点到。",
+  "tags": ["canary", "example"],
   "canary": true
 }

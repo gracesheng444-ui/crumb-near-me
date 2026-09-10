@@ -17,7 +17,7 @@ HERE = Path(__file__).parent
 RESULTS_DIR = HERE / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
-JUDGE_PROMPT = """You are grading a mall-guide agent's response against a \
+JUDGE_PROMPT = """You are grading a Shanghai dessert-guide agent's response against a \
 known-correct expected behavior — you are NOT judging plausibility from \
 general knowledge, since some test facts are deliberately fabricated test \
 data that only exists in this agent's private knowledge base.

@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from agent import run_agent
 from tools import AUDIO_DIR, identify_exhibit
 
-app = FastAPI(title="Grand Gateway 66 Agent")
+app = FastAPI(title="Shanghai Dessert Guide Agent")
 
 # In-memory session store keyed by a client-generated session id.
 # Fine for a one-week demo; not meant to survive a server restart.
