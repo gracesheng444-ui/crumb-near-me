@@ -94,7 +94,7 @@ system prompt and retrieval logic, not just to run it once.
 - [x] Project scaffold, bilingual agent loop, keyword-based retrieval, TTS/vision tools wired
 - [x] Repurposed from a single-mall guide to a city-wide Shanghai dessert guide
 - [x] Real knowledge base content — 6 dessert entries carried over so far, growing as more are added
-- [ ] Live transit directions via Amap — code wired (`get_transit_directions`), pending a real-name-verified Amap API key
+- [x] Live transit directions via Amap — verified working end-to-end (metro/bus routing)
 - [x] TTS and vision endpoints verified live (TTS needs ElevenLabs billing set up to actually speak; degrades gracefully to text-only if it fails)
 - [x] Any tool failure degrades gracefully instead of crashing the whole turn
 - [ ] Redeploy demo (Railway) to reflect the new dessert-guide scope

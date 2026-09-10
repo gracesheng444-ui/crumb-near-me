@@ -158,16 +158,38 @@ def speak(text: str, lang: str = "zh") -> str:
     return str(out_path)
 
 
-def _resolve_place(query: str) -> str:
-    """If the query matches a known knowledge-base entry, geocode using its
-    real name + address (more precise than whatever the user typed);
-    otherwise treat the query itself as a literal place name/address."""
-    matches = retrieve_info(query, top_k=1)
-    if matches:
-        entry = matches[0]
-        name = entry.get("name_zh") or entry.get("name_en", "")
-        return f"{name} {entry.get('address', '')}".strip()
-    return query
+def _resolve_place(query: str) -> tuple[str | None, list[str] | None]:
+    """If the query matches known knowledge-base entries, resolve to the
+    real name + address for geocoding precision. If multiple entries tie
+    for the top match (e.g. a brand with several locations), that's
+    ambiguous — return the candidate names instead of silently picking
+    one. Returns (resolved_place, None) on a clean resolution/passthrough,
+    or (None, [candidate names]) when ambiguous."""
+    matches = retrieve_info(query, top_k=5)
+    if not matches:
+        return query, None
+
+    top_score = len(_tokenize(query) & _tokenize(" ".join(
+        [matches[0].get("name_en", ""), matches[0].get("name_zh", ""),
+         matches[0].get("description_en", ""), matches[0].get("description_zh", ""),
+         " ".join(matches[0].get("tags", []))]
+    )))
+    tied = [
+        m for m in matches
+        if len(_tokenize(query) & _tokenize(" ".join(
+            [m.get("name_en", ""), m.get("name_zh", ""),
+             m.get("description_en", ""), m.get("description_zh", ""),
+             " ".join(m.get("tags", []))]
+        ))) == top_score
+    ]
+    if len(tied) > 1:
+        names = [m.get("name_zh") or m.get("name_en", "") for m in tied]
+        if len(set(names)) > 1 or len(tied) > 1:
+            return None, [f"{n} — {m.get('address', '')}" for n, m in zip(names, tied)]
+
+    entry = matches[0]
+    name = entry.get("name_zh") or entry.get("name_en", "")
+    return f"{name} {entry.get('address', '')}".strip(), None
 
 
 def _amap_geocode(place: str) -> tuple[float, float] | None:
@@ -206,8 +228,22 @@ def get_transit_directions(from_place: str, to_place: str) -> dict:
             "reason": "transit routing isn't configured yet (no Amap API key)",
         }
 
-    origin = _amap_geocode(_resolve_place(from_place))
-    dest = _amap_geocode(_resolve_place(to_place))
+    from_resolved, from_options = _resolve_place(from_place)
+    to_resolved, to_options = _resolve_place(to_place)
+    if from_options or to_options:
+        return {
+            "found": False,
+            "ambiguous": True,
+            "reason": (
+                f"'{from_place if from_options else to_place}' matches multiple "
+                "known locations — ask the visitor which one they mean before "
+                "trying again"
+            ),
+            "options": from_options or to_options,
+        }
+
+    origin = _amap_geocode(from_resolved)
+    dest = _amap_geocode(to_resolved)
     if not origin or not dest:
         unresolved = [p for p, c in [(from_place, origin), (to_place, dest)] if not c]
         return {"found": False, "reason": f"couldn't locate: {', '.join(unresolved)}"}
