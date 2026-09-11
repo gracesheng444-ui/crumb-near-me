@@ -11,6 +11,7 @@ from fastapi.staticfiles import StaticFiles
 
 from agent import run_agent
 from collection import PHOTO_DIR, add_log, delete_log, list_logs, save_photo, summarize_taste
+from community import add_note, delete_note, list_notes
 from tools import AUDIO_DIR, identify_exhibit
 
 app = FastAPI(title="Shanghai Dessert Guide Agent")
@@ -88,6 +89,38 @@ def remove_log(log_id: int, user_id: str):
 @app.get("/log/summary")
 def get_summary(user_id: str):
     return {"summary": summarize_taste(user_id)}
+
+
+@app.post("/notes")
+async def create_note(
+    place_name: str = Form(...),
+    note: str = Form(...),
+    user_id: str = Form(""),
+    author_name: str = Form(""),
+    photo: UploadFile | None = File(None),
+):
+    photo_url = None
+    if photo is not None and photo.filename:
+        contents = await photo.read()
+        photo_url = save_photo(contents, Path(photo.filename).suffix)
+    return add_note(
+        place_name=place_name,
+        note=note,
+        user_id=user_id or None,
+        author_name=author_name or None,
+        photo_url=photo_url,
+    )
+
+
+@app.get("/notes")
+def get_notes():
+    return list_notes()
+
+
+@app.delete("/notes/{note_id}")
+def remove_note(note_id: int, user_id: str):
+    deleted = delete_note(user_id, note_id)
+    return {"deleted": deleted}
 
 
 app.mount("/audio", StaticFiles(directory=str(AUDIO_DIR)), name="audio")

@@ -7,3 +7,4 @@ audio_output/
 dessert_photos/
 .DS_Store
 backend/collection.db
+backend/community.db
