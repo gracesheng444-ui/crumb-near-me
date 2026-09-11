@@ -2,61 +2,507 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Shanghai Dessert Guide</title>
 <style>
-  html { color-scheme: light; }
-  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; background: #fff; color: #111; }
-  #log { border: 1px solid #ddd; border-radius: 8px; padding: 12px; height: 320px; overflow-y: auto; margin-bottom: 12px; background: #fff; }
-  .msg { margin-bottom: 10px; }
-  .msg.user { text-align: right; color: #444; }
-  .msg.agent { text-align: left; color: #111; }
-  form { display: flex; gap: 8px; }
-  input[type=text] { flex: 1; padding: 8px; }
-  button { padding: 8px 14px; }
+  :root {
+    --bg: #fdf6f1;
+    --bg-accent: #fff;
+    --text: #2a221e;
+    --text-dim: #8a7b73;
+    --card: #ffffff;
+    --border: #f0e0d6;
+    --accent: #e2694d;
+    --accent-dim: #f6d9ce;
+    --user-bubble: #e2694d;
+    --user-text: #fff;
+    --agent-bubble: #fff;
+    --shadow: 0 2px 10px rgba(60, 30, 15, 0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #201a17;
+      --bg-accent: #2a221e;
+      --text: #f3e9e2;
+      --text-dim: #a8968b;
+      --card: #2a221e;
+      --border: #3c322c;
+      --accent: #f0855f;
+      --accent-dim: #4a352b;
+      --user-bubble: #f0855f;
+      --user-text: #201a17;
+      --agent-bubble: #2f2621;
+      --shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background:
+      radial-gradient(circle at 15% 0%, var(--accent-dim), transparent 45%),
+      var(--bg);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+  }
+  .app {
+    width: 100%;
+    max-width: 640px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    padding: 20px 20px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), #ffb199);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    box-shadow: var(--shadow);
+  }
+  header h1 {
+    font-size: 17px;
+    margin: 0;
+    line-height: 1.25;
+  }
+  header p {
+    margin: 2px 0 0;
+    font-size: 12.5px;
+    color: var(--text-dim);
+  }
+
+  #log {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .empty-state {
+    margin: auto;
+    text-align: center;
+    color: var(--text-dim);
+    padding: 20px;
+  }
+  .empty-state .big { font-size: 34px; margin-bottom: 8px; }
+  .empty-state p { font-size: 13.5px; max-width: 320px; margin: 4px auto 0; }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 16px;
+  }
+  .chip {
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 7px 13px;
+    font-size: 12.5px;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  .chip:hover { border-color: var(--accent); transform: translateY(-1px); }
+
+  .row {
+    display: flex;
+    gap: 8px;
+    max-width: 88%;
+    animation: rise 0.2s ease;
+  }
+  .row.user { align-self: flex-end; flex-direction: row-reverse; }
+  .row.agent { align-self: flex-start; }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    background: var(--accent-dim);
+  }
+  .row.user .avatar { background: var(--accent); }
+
+  .bubble-col { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+
+  .bubble {
+    padding: 10px 13px;
+    border-radius: 15px;
+    font-size: 14.5px;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    box-shadow: var(--shadow);
+  }
+  .row.user .bubble {
+    background: var(--user-bubble);
+    color: var(--user-text);
+    border-bottom-right-radius: 4px;
+  }
+  .row.agent .bubble {
+    background: var(--agent-bubble);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+  }
+  .row.agent .bubble.error {
+    background: #fdeceb;
+    border-color: #f3b8b0;
+    color: #a63a2b;
+  }
+
+  .replay-btn {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text-dim);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11.5px;
+    cursor: pointer;
+  }
+  .replay-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+  .id-card {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    padding: 8px 12px;
+    box-shadow: var(--shadow);
+    font-size: 13px;
+  }
+  .id-card .thumb {
+    width: 38px; height: 38px; border-radius: 9px;
+    object-fit: cover; flex-shrink: 0; background: var(--accent-dim);
+  }
+  .id-card .name { font-weight: 600; }
+  .id-card .sub { color: var(--text-dim); font-size: 11.5px; }
+
+  .typing {
+    display: inline-flex;
+    gap: 4px;
+    padding: 12px 14px;
+    background: var(--agent-bubble);
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    border-bottom-left-radius: 4px;
+    box-shadow: var(--shadow);
+  }
+  .typing span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--text-dim);
+    animation: bounce 1.2s infinite ease-in-out;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.15s; }
+  .typing span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
+
+  form#chat-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 10px 16px calc(14px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    background: var(--bg-accent);
+  }
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text-dim);
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .icon-btn:disabled { opacity: 0.5; cursor: default; }
+
+  #message {
+    flex: 1;
+    resize: none;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 10px 15px;
+    font-size: 14.5px;
+    font-family: inherit;
+    background: var(--card);
+    color: var(--text);
+    max-height: 110px;
+    line-height: 1.4;
+  }
+  #message:focus { outline: none; border-color: var(--accent); }
+
+  #send-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: opacity 0.15s ease, transform 0.1s ease;
+  }
+  #send-btn:disabled { opacity: 0.4; cursor: default; }
+  #send-btn:not(:disabled):active { transform: scale(0.92); }
+
+  #log::-webkit-scrollbar { width: 6px; }
+  #log::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 </style>
 </head>
 <body>
-<h2>Shanghai Dessert Guide</h2>
-<div id="log"></div>
-<form id="chat-form">
-  <input type="text" id="message" placeholder="Ask about a dessert spot, or 说中文也可以…" autocomplete="off" />
-  <button type="submit">Send</button>
-</form>
+<div class="app">
+  <header>
+    <div class="logo">🍰</div>
+    <div>
+      <h1>Shanghai Dessert Guide</h1>
+      <p>Bilingual · chocolate, cakes, gelato & more · 中英双语</p>
+    </div>
+  </header>
+
+  <div id="log">
+    <div class="empty-state" id="empty-state">
+      <div class="big">🧋🍫🍮</div>
+      <p>Ask about a dessert spot, upload a photo to identify a shop, or get real metro/bus directions.</p>
+      <p>问我关于上海甜品店的问题，也可以拍照识别、查路线。</p>
+      <div class="chips">
+        <button type="button" class="chip" data-q="Best chocolate shops near Jing'an?">Best chocolate near Jing'an?</button>
+        <button type="button" class="chip" data-q="南京西路附近有哪些甜品店？">南京西路附近的甜品店？</button>
+        <button type="button" class="chip" data-q="How do I get to Nunu Donut by metro?">Directions to Nunu Donut</button>
+      </div>
+    </div>
+  </div>
+
+  <form id="chat-form">
+    <input type="file" id="photo-input" accept="image/*" hidden />
+    <button type="button" id="photo-btn" class="icon-btn" title="Identify a shop from a photo">📷</button>
+    <textarea id="message" rows="1" placeholder="Ask about a dessert spot, or 说中文也可以…" autocomplete="off"></textarea>
+    <button type="submit" id="send-btn" title="Send">➤</button>
+  </form>
+</div>
 
 <script>
 const log = document.getElementById('log');
+const emptyState = document.getElementById('empty-state');
 const form = document.getElementById('chat-form');
 const input = document.getElementById('message');
+const sendBtn = document.getElementById('send-btn');
+const photoInput = document.getElementById('photo-input');
+const photoBtn = document.getElementById('photo-btn');
 const sessionId = crypto.randomUUID();
 
-function addMessage(text, who) {
-  const div = document.createElement('div');
-  div.className = `msg ${who}`;
-  div.textContent = text;
-  log.appendChild(div);
+function hideEmptyState() {
+  if (emptyState) emptyState.remove();
+}
+
+function scrollToBottom() {
   log.scrollTop = log.scrollHeight;
 }
 
-form.addEventListener('submit', async (e) => {
+function addRow(text, who, { isError = false } = {}) {
+  hideEmptyState();
+  const row = document.createElement('div');
+  row.className = `row ${who}`;
+
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar';
+  avatar.textContent = who === 'user' ? '🙂' : '🍰';
+
+  const col = document.createElement('div');
+  col.className = 'bubble-col';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble' + (isError ? ' error' : '');
+  bubble.textContent = text;
+
+  col.appendChild(bubble);
+  row.appendChild(avatar);
+  row.appendChild(col);
+  log.appendChild(row);
+  scrollToBottom();
+  return col;
+}
+
+function addTypingRow() {
+  hideEmptyState();
+  const row = document.createElement('div');
+  row.className = 'row agent';
+  row.innerHTML = `<div class="avatar">🍰</div><div class="typing"><span></span><span></span><span></span></div>`;
+  log.appendChild(row);
+  scrollToBottom();
+  return row;
+}
+
+function addReplayButton(col, audioUrl) {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'replay-btn';
+  btn.innerHTML = '🔊 Play narration';
+  btn.addEventListener('click', () => new Audio(audioUrl).play());
+  col.appendChild(btn);
+}
+
+function addIdCard(entry) {
+  hideEmptyState();
+  const row = document.createElement('div');
+  row.className = 'row agent';
+  const known = entry && entry.id && entry.id !== 'unknown';
+  row.innerHTML = `
+    <div class="avatar">📍</div>
+    <div class="id-card">
+      <div class="thumb"></div>
+      <div>
+        <div class="name">${known ? escapeHtml(entry.name_en || entry.name_zh) : "Couldn't identify that shop"}</div>
+        <div class="sub">${known ? escapeHtml(entry.name_zh || '') : 'Try a clearer photo of the storefront or packaging'}</div>
+      </div>
+    </div>`;
+  log.appendChild(row);
+  scrollToBottom();
+  return known;
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+async function sendMessage(message) {
+  addRow(message, 'user');
+  const typingRow = addTypingRow();
+  sendBtn.disabled = true;
+
+  try {
+    const body = new FormData();
+    body.append('message', message);
+    body.append('session_id', sessionId);
+    const res = await fetch('/chat', { method: 'POST', body });
+    if (!res.ok) throw new Error(`Server returned ${res.status}`);
+    const data = await res.json();
+    typingRow.remove();
+    const col = addRow(data.reply, 'agent');
+    if (data.audio_url) {
+      addReplayButton(col, data.audio_url);
+      new Audio(data.audio_url).play().catch(() => {});
+    }
+  } catch (err) {
+    typingRow.remove();
+    addRow(`Something went wrong reaching the guide — ${err.message}. Please try again.`, 'agent', { isError: true });
+  } finally {
+    sendBtn.disabled = input.value.trim().length === 0;
+  }
+}
+
+form.addEventListener('submit', (e) => {
   e.preventDefault();
   const message = input.value.trim();
   if (!message) return;
-  addMessage(message, 'user');
   input.value = '';
+  input.style.height = 'auto';
+  sendBtn.disabled = true;
+  sendMessage(message);
+});
 
-  const body = new FormData();
-  body.append('message', message);
-  body.append('session_id', sessionId);
+input.addEventListener('input', () => {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 110) + 'px';
+  sendBtn.disabled = input.value.trim().length === 0;
+});
 
-  const res = await fetch('/chat', { method: 'POST', body });
-  const data = await res.json();
-  addMessage(data.reply, 'agent');
-
-  if (data.audio_url) {
-    const audio = new Audio(data.audio_url);
-    audio.play();
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    form.requestSubmit();
   }
 });
+
+document.querySelectorAll('.chip').forEach((chip) => {
+  chip.addEventListener('click', () => {
+    input.value = chip.dataset.q;
+    sendBtn.disabled = false;
+    form.requestSubmit();
+  });
+});
+
+photoBtn.addEventListener('click', () => photoInput.click());
+
+photoInput.addEventListener('change', async () => {
+  const file = photoInput.files[0];
+  photoInput.value = '';
+  if (!file) return;
+
+  hideEmptyState();
+  const row = document.createElement('div');
+  row.className = 'row user';
+  row.innerHTML = `<div class="avatar">🙂</div><div class="bubble-col"><div class="bubble">📷 ${escapeHtml(file.name)}</div></div>`;
+  log.appendChild(row);
+  scrollToBottom();
+
+  const typingRow = addTypingRow();
+  try {
+    const body = new FormData();
+    body.append('image', file);
+    const res = await fetch('/identify', { method: 'POST', body });
+    if (!res.ok) throw new Error(`Server returned ${res.status}`);
+    const entry = await res.json();
+    typingRow.remove();
+    const known = addIdCard(entry);
+    if (known) {
+      const name = entry.name_en || entry.name_zh;
+      sendMessage(`Tell me about ${name}`);
+    }
+  } catch (err) {
+    typingRow.remove();
+    addRow(`Couldn't identify that photo — ${err.message}.`, 'agent', { isError: true });
+  }
+});
+
+sendBtn.disabled = true;
 </script>
 </body>
 </html>
