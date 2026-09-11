@@ -10,6 +10,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from agent import run_agent
+from collection import add_log, delete_log, list_logs, summarize_taste
 from tools import AUDIO_DIR, identify_exhibit
 
 app = FastAPI(title="Shanghai Dessert Guide Agent")
@@ -48,6 +49,39 @@ async def identify(image: UploadFile = File(...)):
     image_b64 = base64.b64encode(image_bytes).decode()
     match = identify_exhibit(image_b64, media_type=image.content_type or "image/jpeg")
     return match
+
+
+@app.post("/log")
+def create_log(
+    user_id: str = Form(...),
+    dessert_name: str = Form(...),
+    store_name: str = Form(""),
+    rating: int | None = Form(None),
+    note: str = Form(""),
+):
+    return add_log(
+        user_id=user_id,
+        dessert_name=dessert_name,
+        store_name=store_name or None,
+        rating=rating,
+        note=note or None,
+    )
+
+
+@app.get("/log")
+def get_logs(user_id: str):
+    return list_logs(user_id)
+
+
+@app.delete("/log/{log_id}")
+def remove_log(log_id: int, user_id: str):
+    deleted = delete_log(user_id, log_id)
+    return {"deleted": deleted}
+
+
+@app.get("/log/summary")
+def get_summary(user_id: str):
+    return {"summary": summarize_taste(user_id)}
 
 
 app.mount("/audio", StaticFiles(directory=str(AUDIO_DIR)), name="audio")

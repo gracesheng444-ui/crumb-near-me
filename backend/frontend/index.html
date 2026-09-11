@@ -86,6 +86,14 @@
     color: var(--text-dim);
   }
 
+  #chat-view {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  #chat-view[hidden] { display: none; }
+
   #log {
     flex: 1;
     overflow-y: auto;
@@ -293,6 +301,138 @@
 
   #log::-webkit-scrollbar { width: 6px; }
   #log::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  nav.tabs {
+    display: flex;
+    gap: 6px;
+    padding: 0 16px 12px;
+  }
+  nav.tabs button {
+    flex: 1;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text-dim);
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  nav.tabs button.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  #collection-view {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  #collection-view[hidden] { display: none; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: var(--shadow);
+  }
+  .card h3 {
+    margin: 0 0 10px;
+    font-size: 13.5px;
+    color: var(--text-dim);
+    font-weight: 600;
+  }
+  #log-form { display: flex; flex-direction: column; gap: 8px; }
+  #log-form input, #log-form textarea {
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 9px 11px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--bg-accent);
+    color: var(--text);
+  }
+  #log-form textarea { resize: none; min-height: 44px; }
+  .star-picker { display: flex; gap: 4px; }
+  .star-picker button {
+    border: none;
+    background: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--border);
+    padding: 0;
+    line-height: 1;
+  }
+  .star-picker button.filled { color: var(--accent); }
+  #log-form-submit {
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 9px;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #log-form-submit:disabled { opacity: 0.5; cursor: default; }
+
+  #summary-btn {
+    border: 1px solid var(--accent);
+    background: none;
+    color: var(--accent);
+    border-radius: 9px;
+    padding: 9px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    width: 100%;
+  }
+  #summary-text {
+    margin-top: 10px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  .log-entry {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 11px 13px;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .log-entry .name { font-weight: 600; font-size: 14px; }
+  .log-entry .store { color: var(--text-dim); font-size: 12px; margin-top: 1px; }
+  .log-entry .note { font-size: 12.5px; margin-top: 5px; color: var(--text); }
+  .log-entry .stars { color: var(--accent); font-size: 12px; margin-top: 4px; }
+  .log-entry .date { color: var(--text-dim); font-size: 10.5px; margin-top: 5px; }
+  .log-entry .del-btn {
+    border: none;
+    background: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0;
+    height: fit-content;
+  }
+  .log-entry .del-btn:hover { color: var(--accent); }
+  .collection-empty {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 13px;
+    padding: 20px;
+  }
 </style>
 </head>
 <body>
@@ -305,25 +445,59 @@
     </div>
   </header>
 
-  <div id="log">
-    <div class="empty-state" id="empty-state">
-      <div class="big">🧋🍫🍮</div>
-      <p>Ask about a dessert spot, upload a photo to identify a shop, or get real metro/bus directions.</p>
-      <p>问我关于上海甜品店的问题，也可以拍照识别、查路线。</p>
-      <div class="chips">
-        <button type="button" class="chip" data-q="Best chocolate shops near Jing'an?">Best chocolate near Jing'an?</button>
-        <button type="button" class="chip" data-q="南京西路附近有哪些甜品店？">南京西路附近的甜品店？</button>
-        <button type="button" class="chip" data-q="How do I get to Nunu Donut by metro?">Directions to Nunu Donut</button>
+  <nav class="tabs">
+    <button type="button" id="tab-chat" class="active">💬 Chat</button>
+    <button type="button" id="tab-collection">📓 My Desserts</button>
+  </nav>
+
+  <div id="chat-view">
+    <div id="log">
+      <div class="empty-state" id="empty-state">
+        <div class="big">🧋🍫🍮</div>
+        <p>Ask about a dessert spot, upload a photo to identify a shop, or get real metro/bus directions.</p>
+        <p>问我关于上海甜品店的问题，也可以拍照识别、查路线。</p>
+        <div class="chips">
+          <button type="button" class="chip" data-q="Best chocolate shops near Jing'an?">Best chocolate near Jing'an?</button>
+          <button type="button" class="chip" data-q="南京西路附近有哪些甜品店？">南京西路附近的甜品店？</button>
+          <button type="button" class="chip" data-q="How do I get to Nunu Donut by metro?">Directions to Nunu Donut</button>
+        </div>
       </div>
     </div>
+
+    <form id="chat-form">
+      <input type="file" id="photo-input" accept="image/*" hidden />
+      <button type="button" id="photo-btn" class="icon-btn" title="Identify a shop from a photo">📷</button>
+      <textarea id="message" rows="1" placeholder="Ask about a dessert spot, or 说中文也可以…" autocomplete="off"></textarea>
+      <button type="submit" id="send-btn" title="Send">➤</button>
+    </form>
   </div>
 
-  <form id="chat-form">
-    <input type="file" id="photo-input" accept="image/*" hidden />
-    <button type="button" id="photo-btn" class="icon-btn" title="Identify a shop from a photo">📷</button>
-    <textarea id="message" rows="1" placeholder="Ask about a dessert spot, or 说中文也可以…" autocomplete="off"></textarea>
-    <button type="submit" id="send-btn" title="Send">➤</button>
-  </form>
+  <div id="collection-view" hidden>
+    <div class="card">
+      <h3>Log a dessert</h3>
+      <form id="log-form">
+        <input type="text" id="log-dessert" placeholder="What did you eat? e.g. 抹茶#3" required />
+        <input type="text" id="log-store" placeholder="Where? (optional) e.g. 麻布屋 兴业太古汇店" />
+        <div class="star-picker" id="log-stars">
+          <button type="button" data-star="1">★</button>
+          <button type="button" data-star="2">★</button>
+          <button type="button" data-star="3">★</button>
+          <button type="button" data-star="4">★</button>
+          <button type="button" data-star="5">★</button>
+        </div>
+        <textarea id="log-note" placeholder="Any notes? (optional)"></textarea>
+        <button type="submit" id="log-form-submit">Add to my collection</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3>Taste summary</h3>
+      <button type="button" id="summary-btn">✨ Get my taste summary</button>
+      <div id="summary-text"></div>
+    </div>
+
+    <div id="log-list"></div>
+  </div>
 </div>
 
 <script>
@@ -503,6 +677,149 @@ photoInput.addEventListener('change', async () => {
 });
 
 sendBtn.disabled = true;
+
+// --- Tabs ---
+const tabChat = document.getElementById('tab-chat');
+const tabCollection = document.getElementById('tab-collection');
+const chatView = document.getElementById('chat-view');
+const collectionView = document.getElementById('collection-view');
+
+tabChat.addEventListener('click', () => {
+  tabChat.classList.add('active');
+  tabCollection.classList.remove('active');
+  chatView.hidden = false;
+  collectionView.hidden = true;
+});
+
+tabCollection.addEventListener('click', () => {
+  tabCollection.classList.add('active');
+  tabChat.classList.remove('active');
+  chatView.hidden = true;
+  collectionView.hidden = false;
+  loadLogs();
+});
+
+// --- Personal dessert collection ---
+function getUserId() {
+  try {
+    let id = localStorage.getItem('dessertUserId');
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem('dessertUserId', id);
+    }
+    return id;
+  } catch {
+    return sessionId; // localStorage unavailable (private window etc.) — fall back, won't persist
+  }
+}
+const userId = getUserId();
+
+const logForm = document.getElementById('log-form');
+const logDessert = document.getElementById('log-dessert');
+const logStore = document.getElementById('log-store');
+const logNote = document.getElementById('log-note');
+const logStars = document.getElementById('log-stars');
+const logFormSubmit = document.getElementById('log-form-submit');
+const logList = document.getElementById('log-list');
+const summaryBtn = document.getElementById('summary-btn');
+const summaryText = document.getElementById('summary-text');
+
+let selectedRating = 0;
+logStars.querySelectorAll('button').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    selectedRating = Number(btn.dataset.star);
+    logStars.querySelectorAll('button').forEach((b) => {
+      b.classList.toggle('filled', Number(b.dataset.star) <= selectedRating);
+    });
+  });
+});
+
+function renderStars(rating) {
+  if (!rating) return '';
+  return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+}
+
+function renderLogEntry(entry) {
+  const div = document.createElement('div');
+  div.className = 'log-entry';
+  const date = new Date(entry.created_at).toLocaleDateString();
+  div.innerHTML = `
+    <div>
+      <div class="name">${escapeHtml(entry.dessert_name)}</div>
+      ${entry.store_name ? `<div class="store">${escapeHtml(entry.store_name)}</div>` : ''}
+      ${entry.rating ? `<div class="stars">${renderStars(entry.rating)}</div>` : ''}
+      ${entry.note ? `<div class="note">${escapeHtml(entry.note)}</div>` : ''}
+      <div class="date">${date}</div>
+    </div>
+    <button type="button" class="del-btn" title="Delete">✕</button>
+  `;
+  div.querySelector('.del-btn').addEventListener('click', async () => {
+    await fetch(`/log/${entry.id}?user_id=${encodeURIComponent(userId)}`, { method: 'DELETE' });
+    summaryText.textContent = '';
+    loadLogs();
+  });
+  return div;
+}
+
+async function loadLogs() {
+  try {
+    const res = await fetch(`/log?user_id=${encodeURIComponent(userId)}`);
+    const entries = await res.json();
+    logList.innerHTML = '';
+    if (entries.length === 0) {
+      logList.innerHTML = '<div class="collection-empty">No desserts logged yet — add your first one above.</div>';
+      return;
+    }
+    entries.forEach((entry) => logList.appendChild(renderLogEntry(entry)));
+  } catch (err) {
+    logList.innerHTML = `<div class="collection-empty">Couldn't load your collection — ${escapeHtml(err.message)}.</div>`;
+  }
+}
+
+logForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const dessertName = logDessert.value.trim();
+  if (!dessertName) return;
+  logFormSubmit.disabled = true;
+
+  try {
+    const body = new FormData();
+    body.append('user_id', userId);
+    body.append('dessert_name', dessertName);
+    body.append('store_name', logStore.value.trim());
+    if (selectedRating) body.append('rating', String(selectedRating));
+    body.append('note', logNote.value.trim());
+    const res = await fetch('/log', { method: 'POST', body });
+    if (!res.ok) throw new Error(`Server returned ${res.status}`);
+
+    logDessert.value = '';
+    logStore.value = '';
+    logNote.value = '';
+    selectedRating = 0;
+    logStars.querySelectorAll('button').forEach((b) => b.classList.remove('filled'));
+    summaryText.textContent = '';
+    loadLogs();
+  } catch (err) {
+    alert(`Couldn't save that entry — ${err.message}`);
+  } finally {
+    logFormSubmit.disabled = false;
+  }
+});
+
+summaryBtn.addEventListener('click', async () => {
+  summaryBtn.disabled = true;
+  summaryText.textContent = 'Thinking…';
+  try {
+    const res = await fetch(`/log/summary?user_id=${encodeURIComponent(userId)}`);
+    if (!res.ok) throw new Error(`Server returned ${res.status}`);
+    const data = await res.json();
+    summaryText.textContent = data.summary;
+  } catch (err) {
+    summaryText.textContent = `Couldn't generate a summary — ${err.message}.`;
+  } finally {
+    summaryBtn.disabled = false;
+  }
+});
 </script>
 </body>
 </html>

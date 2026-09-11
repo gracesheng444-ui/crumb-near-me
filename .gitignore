@@ -5,3 +5,4 @@ __pycache__/
 venv/
 audio_output/
 .DS_Store
+backend/collection.db
