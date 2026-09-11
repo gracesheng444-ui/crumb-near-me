@@ -4,6 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Shanghai Dessert Guide</title>
+<link rel="icon" type="image/png" href="/icon.png" />
+<link rel="apple-touch-icon" href="/icon.png" />
 <style>
   :root {
     color-scheme: light;
@@ -72,14 +74,11 @@
     height: 44px;
     border-radius: 13px;
     background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
     flex-shrink: 0;
     box-shadow: var(--shadow-lg);
+    overflow: hidden;
   }
+  .logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
   header h1 {
     font-size: 17px;
     margin: 0;
@@ -646,7 +645,7 @@
 <div class="app">
   <header>
     <div class="logo">
-      <svg class="icon" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><circle cx="8" cy="15" r="5"/><circle cx="16" cy="15" r="5" opacity="0.65"/><circle cx="12" cy="7.5" r="4" opacity="0.85"/></svg>
+      <img src="/icon.png" alt="" />
     </div>
     <div>
       <h1>Shanghai Dessert Guide</h1>

@@ -31,6 +31,11 @@ def index():
     return FileResponse(Path(__file__).parent / "frontend" / "index.html")
 
 
+@app.get("/icon.png")
+def icon():
+    return FileResponse(Path(__file__).parent / "frontend" / "icon.png")
+
+
 @app.post("/chat")
 def chat(message: str = Form(...), session_id: str = Form("default")):
     history = _sessions.get(session_id, [])
