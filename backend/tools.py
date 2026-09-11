@@ -63,7 +63,7 @@ def _tokenize(text: str) -> set[str]:
     return tokens
 
 
-def retrieve_info(query: str, top_k: int = 3) -> list[dict]:
+def retrieve_info(query: str, top_k: int = 6) -> list[dict]:
     """Naive keyword-overlap retrieval across the knowledge base.
 
     Returns the top_k entries with the highest token overlap against the
