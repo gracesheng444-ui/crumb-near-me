@@ -4,5 +4,6 @@ __pycache__/
 .venv/
 venv/
 audio_output/
+dessert_photos/
 .DS_Store
 backend/collection.db

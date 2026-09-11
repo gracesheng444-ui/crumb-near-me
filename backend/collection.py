@@ -6,14 +6,30 @@ SQLite, not the in-memory session store — this has to survive a server
 restart, unlike chat history.
 """
 import sqlite3
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
 from tools import get_client
 
 DB_PATH = Path(__file__).parent / "collection.db"
+PHOTO_DIR = Path(__file__).parent.parent / "dessert_photos"
+PHOTO_DIR.mkdir(exist_ok=True)
 
 MODEL = "claude-sonnet-5"
+
+
+def save_photo(contents: bytes, suffix: str) -> str:
+    """Write an uploaded photo to disk and return its served URL."""
+    filename = f"{uuid.uuid4().hex}{suffix or '.jpg'}"
+    (PHOTO_DIR / filename).write_bytes(contents)
+    return f"/dessert-photos/{filename}"
+
+
+def _delete_photo(photo_url: str | None) -> None:
+    if not photo_url:
+        return
+    (PHOTO_DIR / photo_url.rsplit("/", 1)[-1]).unlink(missing_ok=True)
 
 
 def _connect() -> sqlite3.Connection:
@@ -33,10 +49,15 @@ def init_db() -> None:
                 store_name TEXT,
                 rating INTEGER,
                 note TEXT,
+                photo_url TEXT,
                 created_at TEXT NOT NULL
             )
             """
         )
+        # migration for DBs created before photo_url existed
+        cols = {row["name"] for row in conn.execute("PRAGMA table_info(dessert_logs)")}
+        if "photo_url" not in cols:
+            conn.execute("ALTER TABLE dessert_logs ADD COLUMN photo_url TEXT")
 
 
 init_db()
@@ -48,15 +69,16 @@ def add_log(
     store_name: str | None = None,
     rating: int | None = None,
     note: str | None = None,
+    photo_url: str | None = None,
 ) -> dict:
     created_at = datetime.now(timezone.utc).isoformat()
     with _connect() as conn:
         cur = conn.execute(
             """
-            INSERT INTO dessert_logs (user_id, dessert_name, store_name, rating, note, created_at)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO dessert_logs (user_id, dessert_name, store_name, rating, note, photo_url, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
-            (user_id, dessert_name, store_name, rating, note, created_at),
+            (user_id, dessert_name, store_name, rating, note, photo_url, created_at),
         )
         row_id = cur.lastrowid
     return {
@@ -66,6 +88,7 @@ def add_log(
         "store_name": store_name,
         "rating": rating,
         "note": note,
+        "photo_url": photo_url,
         "created_at": created_at,
     }
 
@@ -81,10 +104,16 @@ def list_logs(user_id: str) -> list[dict]:
 
 def delete_log(user_id: str, log_id: int) -> bool:
     with _connect() as conn:
+        row = conn.execute(
+            "SELECT photo_url FROM dessert_logs WHERE id = ? AND user_id = ?",
+            (log_id, user_id),
+        ).fetchone()
         cur = conn.execute(
             "DELETE FROM dessert_logs WHERE id = ? AND user_id = ?", (log_id, user_id)
         )
-        return cur.rowcount > 0
+    if row is not None:
+        _delete_photo(row["photo_url"])
+    return cur.rowcount > 0
 
 
 def summarize_taste(user_id: str) -> str:

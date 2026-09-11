@@ -418,6 +418,113 @@
     font-size: 13px;
     padding: 20px;
   }
+
+  #log-photo-row { display: flex; align-items: center; gap: 10px; }
+  #log-photo-btn {
+    border: 1px solid var(--border);
+    background: var(--bg-accent);
+    color: var(--text-dim);
+    border-radius: 9px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #log-photo-preview { position: relative; display: inline-block; }
+  #log-photo-preview[hidden] { display: none; }
+  #log-photo-preview img {
+    width: 44px; height: 44px; border-radius: 9px;
+    object-fit: cover; display: block; border: 1px solid var(--border);
+  }
+  #log-photo-remove {
+    position: absolute; top: -6px; right: -6px;
+    width: 18px; height: 18px; border-radius: 50%;
+    border: none; background: var(--accent); color: #fff;
+    font-size: 10px; line-height: 18px; text-align: center;
+    padding: 0; cursor: pointer;
+  }
+  .log-entry img.thumb {
+    width: 52px; height: 52px; border-radius: 10px;
+    object-fit: cover; border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .log-entry .entry-body { display: flex; gap: 10px; flex: 1; min-width: 0; }
+
+  #cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  #cal-header h3 { margin: 0; }
+  #cal-header button {
+    border: 1px solid var(--border);
+    background: var(--bg-accent);
+    color: var(--text);
+    border-radius: 8px;
+    width: 26px; height: 26px;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #cal-weekdays, #cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+  #cal-weekdays span {
+    text-align: center;
+    font-size: 10.5px;
+    color: var(--text-dim);
+    padding-bottom: 4px;
+  }
+  .cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--text);
+    background: var(--bg-accent);
+    cursor: default;
+    position: relative;
+    border: none;
+    font-family: inherit;
+  }
+  .cal-day.empty { visibility: hidden; }
+  .cal-day.has-entries {
+    background: var(--accent-dim);
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .cal-day.has-entries:hover { opacity: 0.85; }
+  .cal-day.selected { background: var(--accent); color: #fff; }
+  .cal-day .dot {
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--accent); margin-top: 2px;
+  }
+  .cal-day.selected .dot { background: #fff; }
+  #cal-filter {
+    margin-top: 10px;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #cal-filter[hidden] { display: none; }
+  #cal-filter-clear {
+    border: none;
+    background: none;
+    color: var(--accent);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0;
+  }
 </style>
 </head>
 <body>
@@ -471,6 +578,14 @@
           <button type="button" data-star="5">★</button>
         </div>
         <textarea id="log-note" placeholder="Any notes? (optional)"></textarea>
+        <input type="file" id="log-photo-input" accept="image/*" hidden />
+        <div id="log-photo-row">
+          <button type="button" id="log-photo-btn">📷 Add a photo</button>
+          <div id="log-photo-preview" hidden>
+            <img id="log-photo-preview-img" alt="preview" />
+            <button type="button" id="log-photo-remove">✕</button>
+          </div>
+        </div>
         <button type="submit" id="log-form-submit">Add to my collection</button>
       </form>
     </div>
@@ -479,6 +594,22 @@
       <h3>Taste summary</h3>
       <button type="button" id="summary-btn">✨ Get my taste summary</button>
       <div id="summary-text"></div>
+    </div>
+
+    <div class="card">
+      <div id="cal-header">
+        <button type="button" id="cal-prev">‹</button>
+        <h3 id="cal-title"></h3>
+        <button type="button" id="cal-next">›</button>
+      </div>
+      <div id="cal-weekdays">
+        <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+      </div>
+      <div id="cal-grid"></div>
+      <div id="cal-filter" hidden>
+        Showing: <span id="cal-filter-date"></span>
+        <button type="button" id="cal-filter-clear">Show all</button>
+      </div>
     </div>
 
     <div id="log-list"></div>
@@ -708,6 +839,11 @@ const logFormSubmit = document.getElementById('log-form-submit');
 const logList = document.getElementById('log-list');
 const summaryBtn = document.getElementById('summary-btn');
 const summaryText = document.getElementById('summary-text');
+const logPhotoInput = document.getElementById('log-photo-input');
+const logPhotoBtn = document.getElementById('log-photo-btn');
+const logPhotoPreview = document.getElementById('log-photo-preview');
+const logPhotoPreviewImg = document.getElementById('log-photo-preview-img');
+const logPhotoRemove = document.getElementById('log-photo-remove');
 
 let selectedRating = 0;
 logStars.querySelectorAll('button').forEach((btn) => {
@@ -719,6 +855,23 @@ logStars.querySelectorAll('button').forEach((btn) => {
   });
 });
 
+function clearPhotoPicker() {
+  logPhotoInput.value = '';
+  logPhotoPreview.hidden = true;
+  logPhotoBtn.hidden = false;
+  logPhotoPreviewImg.src = '';
+}
+
+logPhotoBtn.addEventListener('click', () => logPhotoInput.click());
+logPhotoInput.addEventListener('change', () => {
+  const file = logPhotoInput.files[0];
+  if (!file) return;
+  logPhotoPreviewImg.src = URL.createObjectURL(file);
+  logPhotoPreview.hidden = false;
+  logPhotoBtn.hidden = true;
+});
+logPhotoRemove.addEventListener('click', clearPhotoPicker);
+
 function renderStars(rating) {
   if (!rating) return '';
   return '★'.repeat(rating) + '☆'.repeat(5 - rating);
@@ -729,12 +882,15 @@ function renderLogEntry(entry) {
   div.className = 'log-entry';
   const date = new Date(entry.created_at).toLocaleDateString();
   div.innerHTML = `
-    <div>
-      <div class="name">${escapeHtml(entry.dessert_name)}</div>
-      ${entry.store_name ? `<div class="store">${escapeHtml(entry.store_name)}</div>` : ''}
-      ${entry.rating ? `<div class="stars">${renderStars(entry.rating)}</div>` : ''}
-      ${entry.note ? `<div class="note">${escapeHtml(entry.note)}</div>` : ''}
-      <div class="date">${date}</div>
+    <div class="entry-body">
+      ${entry.photo_url ? `<img class="thumb" src="${entry.photo_url}" alt="" />` : ''}
+      <div>
+        <div class="name">${escapeHtml(entry.dessert_name)}</div>
+        ${entry.store_name ? `<div class="store">${escapeHtml(entry.store_name)}</div>` : ''}
+        ${entry.rating ? `<div class="stars">${renderStars(entry.rating)}</div>` : ''}
+        ${entry.note ? `<div class="note">${escapeHtml(entry.note)}</div>` : ''}
+        <div class="date">${date}</div>
+      </div>
     </div>
     <button type="button" class="del-btn" title="Delete">✕</button>
   `;
@@ -746,16 +902,100 @@ function renderLogEntry(entry) {
   return div;
 }
 
+// --- Calendar + list ---
+let allEntries = [];
+let calMonth = new Date();
+calMonth.setDate(1);
+let selectedDate = null; // 'YYYY-MM-DD' or null for "show all"
+
+const calTitle = document.getElementById('cal-title');
+const calGrid = document.getElementById('cal-grid');
+const calPrev = document.getElementById('cal-prev');
+const calNext = document.getElementById('cal-next');
+const calFilter = document.getElementById('cal-filter');
+const calFilterDate = document.getElementById('cal-filter-date');
+const calFilterClear = document.getElementById('cal-filter-clear');
+
+function dateKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function renderCalendar() {
+  const year = calMonth.getFullYear();
+  const month = calMonth.getMonth();
+  calTitle.textContent = calMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+  const entriesByDay = {};
+  allEntries.forEach((entry) => {
+    const key = dateKey(new Date(entry.created_at));
+    (entriesByDay[key] = entriesByDay[key] || []).push(entry);
+  });
+
+  const firstWeekday = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  calGrid.innerHTML = '';
+  for (let i = 0; i < firstWeekday; i++) {
+    const filler = document.createElement('div');
+    filler.className = 'cal-day empty';
+    calGrid.appendChild(filler);
+  }
+  for (let day = 1; day <= daysInMonth; day++) {
+    const key = dateKey(new Date(year, month, day));
+    const hasEntries = !!entriesByDay[key];
+    const btn = document.createElement('button');
+    btn.className = 'cal-day' + (hasEntries ? ' has-entries' : '') + (key === selectedDate ? ' selected' : '');
+    btn.type = 'button';
+    btn.innerHTML = `${day}${hasEntries ? '<span class="dot"></span>' : ''}`;
+    if (hasEntries) {
+      btn.addEventListener('click', () => {
+        selectedDate = selectedDate === key ? null : key;
+        renderCalendar();
+        renderLogList();
+      });
+    }
+    calGrid.appendChild(btn);
+  }
+}
+
+calPrev.addEventListener('click', () => {
+  calMonth.setMonth(calMonth.getMonth() - 1);
+  renderCalendar();
+});
+calNext.addEventListener('click', () => {
+  calMonth.setMonth(calMonth.getMonth() + 1);
+  renderCalendar();
+});
+calFilterClear.addEventListener('click', () => {
+  selectedDate = null;
+  renderCalendar();
+  renderLogList();
+});
+
+function renderLogList() {
+  const entries = selectedDate
+    ? allEntries.filter((e) => dateKey(new Date(e.created_at)) === selectedDate)
+    : allEntries;
+
+  calFilter.hidden = !selectedDate;
+  if (selectedDate) calFilterDate.textContent = selectedDate;
+
+  logList.innerHTML = '';
+  if (entries.length === 0) {
+    logList.innerHTML = selectedDate
+      ? '<div class="collection-empty">Nothing logged on this day.</div>'
+      : '<div class="collection-empty">No desserts logged yet — add your first one above.</div>';
+    return;
+  }
+  entries.forEach((entry) => logList.appendChild(renderLogEntry(entry)));
+}
+
 async function loadLogs() {
   try {
     const res = await fetch(`/log?user_id=${encodeURIComponent(userId)}`);
-    const entries = await res.json();
-    logList.innerHTML = '';
-    if (entries.length === 0) {
-      logList.innerHTML = '<div class="collection-empty">No desserts logged yet — add your first one above.</div>';
-      return;
-    }
-    entries.forEach((entry) => logList.appendChild(renderLogEntry(entry)));
+    allEntries = await res.json();
+    renderCalendar();
+    renderLogList();
   } catch (err) {
     logList.innerHTML = `<div class="collection-empty">Couldn't load your collection — ${escapeHtml(err.message)}.</div>`;
   }
@@ -774,6 +1014,7 @@ logForm.addEventListener('submit', async (e) => {
     body.append('store_name', logStore.value.trim());
     if (selectedRating) body.append('rating', String(selectedRating));
     body.append('note', logNote.value.trim());
+    if (logPhotoInput.files[0]) body.append('photo', logPhotoInput.files[0]);
     const res = await fetch('/log', { method: 'POST', body });
     if (!res.ok) throw new Error(`Server returned ${res.status}`);
 
@@ -782,6 +1023,7 @@ logForm.addEventListener('submit', async (e) => {
     logNote.value = '';
     selectedRating = 0;
     logStars.querySelectorAll('button').forEach((b) => b.classList.remove('filled'));
+    clearPhotoPicker();
     summaryText.textContent = '';
     loadLogs();
   } catch (err) {

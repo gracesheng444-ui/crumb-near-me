@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from agent import run_agent
-from collection import add_log, delete_log, list_logs, summarize_taste
+from collection import PHOTO_DIR, add_log, delete_log, list_logs, save_photo, summarize_taste
 from tools import AUDIO_DIR, identify_exhibit
 
 app = FastAPI(title="Shanghai Dessert Guide Agent")
@@ -52,19 +52,25 @@ async def identify(image: UploadFile = File(...)):
 
 
 @app.post("/log")
-def create_log(
+async def create_log(
     user_id: str = Form(...),
     dessert_name: str = Form(...),
     store_name: str = Form(""),
     rating: int | None = Form(None),
     note: str = Form(""),
+    photo: UploadFile | None = File(None),
 ):
+    photo_url = None
+    if photo is not None and photo.filename:
+        contents = await photo.read()
+        photo_url = save_photo(contents, Path(photo.filename).suffix)
     return add_log(
         user_id=user_id,
         dessert_name=dessert_name,
         store_name=store_name or None,
         rating=rating,
         note=note or None,
+        photo_url=photo_url,
     )
 
 
@@ -85,3 +91,4 @@ def get_summary(user_id: str):
 
 
 app.mount("/audio", StaticFiles(directory=str(AUDIO_DIR)), name="audio")
+app.mount("/dessert-photos", StaticFiles(directory=str(PHOTO_DIR)), name="dessert-photos")
