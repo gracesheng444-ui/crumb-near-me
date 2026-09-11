@@ -15,12 +15,16 @@
     --border: #f0e0d6;
     --accent: #e2694d;
     --accent-dim: #f6d9ce;
+    --accent-2: #d9a441;
+    --accent-2-dim: #f5e4bd;
     --user-bubble: #e2694d;
     --user-text: #fff;
     --agent-bubble: #fff;
     --shadow: 0 2px 10px rgba(60, 30, 15, 0.06);
+    --shadow-lg: 0 6px 20px rgba(60, 30, 15, 0.1);
   }
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   html, body {
     height: 100%;
   }
@@ -29,11 +33,14 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
     background:
       radial-gradient(circle at 15% 0%, var(--accent-dim), transparent 45%),
+      radial-gradient(circle at 100% 15%, var(--accent-2-dim), transparent 40%),
       var(--bg);
     color: var(--text);
     display: flex;
     justify-content: center;
   }
+  svg.icon { width: 1em; height: 1em; display: inline-block; vertical-align: -0.15em; flex-shrink: 0; }
+
   .app {
     width: 100%;
     max-width: 640px;
@@ -43,27 +50,41 @@
   }
 
   header {
-    padding: 20px 20px 14px;
+    padding: 20px 20px 16px;
     display: flex;
     align-items: center;
     gap: 12px;
+    position: relative;
+  }
+  header::after {
+    content: "";
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    bottom: 0;
+    height: 3px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2), transparent);
+    opacity: 0.5;
   }
   .logo {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--accent), #ffb199);
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
+    font-size: 24px;
     flex-shrink: 0;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-lg);
   }
   header h1 {
     font-size: 17px;
     margin: 0;
     line-height: 1.25;
+    letter-spacing: -0.01em;
   }
   header p {
     margin: 2px 0 0;
@@ -71,13 +92,12 @@
     color: var(--text-dim);
   }
 
-  #chat-view {
+  #chat-view, #collection-view, #calendar-view {
     flex: 1;
     min-height: 0;
     display: flex;
     flex-direction: column;
   }
-  #chat-view[hidden] { display: none; }
 
   #log {
     flex: 1;
@@ -88,13 +108,26 @@
     gap: 4px;
   }
 
+  .icon-badge {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 14px;
+  }
+  .icon-badge.gold { background: var(--accent-2-dim); color: var(--accent-2); }
+
   .empty-state {
     margin: auto;
     text-align: center;
     color: var(--text-dim);
     padding: 20px;
   }
-  .empty-state .big { font-size: 34px; margin-bottom: 8px; }
   .empty-state p { font-size: 13.5px; max-width: 320px; margin: 4px auto 0; }
 
   .chips {
@@ -136,12 +169,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 15px;
+    font-size: 14px;
     flex-shrink: 0;
     margin-top: 2px;
     background: var(--accent-dim);
+    color: var(--accent);
   }
-  .row.user .avatar { background: var(--accent); }
+  .row.user .avatar { background: var(--accent); color: #fff; }
+  .avatar.pin { background: var(--accent-2-dim); color: var(--accent-2); }
 
   .bubble-col { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 
@@ -198,7 +233,7 @@
   }
   .id-card .thumb {
     width: 38px; height: 38px; border-radius: 9px;
-    object-fit: cover; flex-shrink: 0; background: var(--accent-dim);
+    object-fit: cover; flex-shrink: 0; background: var(--accent-2-dim);
   }
   .id-card .name { font-weight: 600; }
   .id-card .sub { color: var(--text-dim); font-size: 11.5px; }
@@ -229,7 +264,7 @@
     display: flex;
     align-items: flex-end;
     gap: 8px;
-    padding: 10px 16px calc(14px + env(safe-area-inset-bottom));
+    padding: 10px 16px 14px;
     border-top: 1px solid var(--border);
     background: var(--bg-accent);
   }
@@ -271,7 +306,7 @@
     height: 40px;
     border-radius: 50%;
     border: none;
-    background: var(--accent);
+    background: linear-gradient(135deg, var(--accent), #ff8a63);
     color: #fff;
     font-size: 16px;
     display: flex;
@@ -279,106 +314,122 @@
     justify-content: center;
     cursor: pointer;
     flex-shrink: 0;
+    box-shadow: var(--shadow);
     transition: opacity 0.15s ease, transform 0.1s ease;
   }
-  #send-btn:disabled { opacity: 0.4; cursor: default; }
+  #send-btn:disabled { opacity: 0.4; cursor: default; box-shadow: none; }
   #send-btn:not(:disabled):active { transform: scale(0.92); }
 
   #log::-webkit-scrollbar { width: 6px; }
   #log::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
-  nav.tabs {
+  #bottom-nav {
     display: flex;
-    gap: 6px;
-    padding: 0 16px 12px;
-  }
-  nav.tabs button {
-    flex: 1;
-    border: 1px solid var(--border);
+    border-top: 1px solid var(--border);
     background: var(--card);
+    box-shadow: 0 -2px 10px rgba(60, 30, 15, 0.05);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  #bottom-nav button {
+    flex: 1;
+    border: none;
+    background: none;
     color: var(--text-dim);
-    border-radius: 10px;
-    padding: 8px 10px;
-    font-size: 13px;
+    padding: 9px 4px 8px;
+    font-size: 10.5px;
     font-family: inherit;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
   }
-  nav.tabs button.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-    font-weight: 600;
-  }
+  #bottom-nav button svg.icon { width: 21px; height: 21px; }
+  #bottom-nav button.active { color: var(--accent); font-weight: 600; }
 
-  #collection-view {
-    flex: 1;
-    min-height: 0;
+  #collection-view, #calendar-view {
     overflow-y: auto;
-    padding: 0 16px 16px;
+    padding: 14px 16px 16px;
     display: flex;
     flex-direction: column;
     gap: 14px;
   }
-  #collection-view[hidden] { display: none; }
   .card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px;
+    border-radius: 16px;
+    padding: 15px;
     box-shadow: var(--shadow);
   }
-  .card h3 {
-    margin: 0 0 10px;
+  .card-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 11px;
+  }
+  .card-heading .icon-badge {
+    width: 28px; height: 28px; font-size: 14px; margin: 0;
+  }
+  .card-heading h3 {
+    margin: 0;
     font-size: 13.5px;
-    color: var(--text-dim);
-    font-weight: 600;
+    color: var(--text);
+    font-weight: 700;
   }
   #log-form { display: flex; flex-direction: column; gap: 8px; }
   #log-form input, #log-form textarea {
     border: 1px solid var(--border);
-    border-radius: 9px;
+    border-radius: 10px;
     padding: 9px 11px;
     font-size: 14px;
     font-family: inherit;
     background: var(--bg-accent);
     color: var(--text);
   }
+  #log-form input:focus, #log-form textarea:focus { outline: none; border-color: var(--accent); }
   #log-form textarea { resize: none; min-height: 44px; }
   .star-picker { display: flex; gap: 4px; }
   .star-picker button {
     border: none;
     background: none;
-    font-size: 22px;
     cursor: pointer;
     color: var(--border);
     padding: 0;
     line-height: 1;
+    font-size: 24px;
   }
-  .star-picker button.filled { color: var(--accent); }
+  .star-picker button svg.icon path { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
+  .star-picker button.filled { color: var(--accent-2); }
+  .star-picker button.filled svg.icon path { fill: currentColor; stroke: none; }
   #log-form-submit {
     border: none;
-    background: var(--accent);
+    background: linear-gradient(135deg, var(--accent), #ff8a63);
     color: #fff;
-    border-radius: 9px;
-    padding: 10px;
+    border-radius: 10px;
+    padding: 11px;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     font-family: inherit;
+    box-shadow: var(--shadow);
   }
-  #log-form-submit:disabled { opacity: 0.5; cursor: default; }
+  #log-form-submit:disabled { opacity: 0.5; cursor: default; box-shadow: none; }
 
   #summary-btn {
-    border: 1px solid var(--accent);
-    background: none;
-    color: var(--accent);
-    border-radius: 9px;
-    padding: 9px;
+    border: 1px solid var(--accent-2);
+    background: var(--accent-2-dim);
+    color: #8a6420;
+    border-radius: 10px;
+    padding: 10px;
     font-size: 13.5px;
     font-weight: 600;
     cursor: pointer;
     font-family: inherit;
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
   }
   #summary-text {
     margin-top: 10px;
@@ -390,24 +441,25 @@
   .log-entry {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 11px 13px;
+    border-radius: 14px;
+    padding: 12px 13px;
     box-shadow: var(--shadow);
     display: flex;
     justify-content: space-between;
     gap: 10px;
   }
-  .log-entry .name { font-weight: 600; font-size: 14px; }
+  .log-entry .name { font-weight: 700; font-size: 14px; }
   .log-entry .store { color: var(--text-dim); font-size: 12px; margin-top: 1px; }
   .log-entry .note { font-size: 12.5px; margin-top: 5px; color: var(--text); }
-  .log-entry .stars { color: var(--accent); font-size: 12px; margin-top: 4px; }
+  .log-entry .stars { color: var(--accent-2); margin-top: 5px; display: flex; gap: 1px; }
+  .log-entry .stars svg.icon { width: 12px; height: 12px; }
   .log-entry .date { color: var(--text-dim); font-size: 10.5px; margin-top: 5px; }
   .log-entry .del-btn {
     border: none;
     background: none;
     color: var(--text-dim);
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
     padding: 0;
     height: fit-content;
   }
@@ -424,27 +476,29 @@
     border: 1px solid var(--border);
     background: var(--bg-accent);
     color: var(--text-dim);
-    border-radius: 9px;
+    border-radius: 10px;
     padding: 9px 12px;
     font-size: 13px;
     font-family: inherit;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
   #log-photo-preview { position: relative; display: inline-block; }
-  #log-photo-preview[hidden] { display: none; }
   #log-photo-preview img {
-    width: 44px; height: 44px; border-radius: 9px;
+    width: 44px; height: 44px; border-radius: 10px;
     object-fit: cover; display: block; border: 1px solid var(--border);
   }
   #log-photo-remove {
     position: absolute; top: -6px; right: -6px;
     width: 18px; height: 18px; border-radius: 50%;
     border: none; background: var(--accent); color: #fff;
-    font-size: 10px; line-height: 18px; text-align: center;
+    font-size: 9px; display: flex; align-items: center; justify-content: center;
     padding: 0; cursor: pointer;
   }
   .log-entry img.thumb {
-    width: 52px; height: 52px; border-radius: 10px;
+    width: 52px; height: 52px; border-radius: 11px;
     object-fit: cover; border: 1px solid var(--border);
     flex-shrink: 0;
   }
@@ -454,19 +508,20 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
-  #cal-header h3 { margin: 0; }
+  #cal-header h3 { margin: 0; font-size: 14.5px; font-weight: 700; }
   #cal-header button {
     border: 1px solid var(--border);
     background: var(--bg-accent);
     color: var(--text);
-    border-radius: 8px;
-    width: 26px; height: 26px;
-    font-size: 14px;
+    border-radius: 9px;
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
     cursor: pointer;
     font-family: inherit;
   }
+  #cal-header button:hover { border-color: var(--accent); color: var(--accent); }
   #cal-weekdays, #cal-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -484,7 +539,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: 9px;
     font-size: 12px;
     color: var(--text);
     background: var(--bg-accent);
@@ -497,25 +552,27 @@
   .cal-day.has-entries {
     background: var(--accent-dim);
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 700;
   }
   .cal-day.has-entries:hover { opacity: 0.85; }
-  .cal-day.selected { background: var(--accent); color: #fff; }
+  .cal-day.selected { background: linear-gradient(135deg, var(--accent), #ff8a63); color: #fff; }
   .cal-day .dot {
     width: 4px; height: 4px; border-radius: 50%;
     background: var(--accent); margin-top: 2px;
   }
   .cal-day.selected .dot { background: #fff; }
-  #cal-filter {
-    margin-top: 10px;
-    font-size: 12.5px;
-    color: var(--text-dim);
+
+  #cal-day-detail { display: flex; flex-direction: column; gap: 10px; }
+  #cal-day-detail-header {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: space-between;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    padding: 0 2px;
   }
-  #cal-filter[hidden] { display: none; }
-  #cal-filter-clear {
+  #cal-day-detail-header.hide { display: none; }
+  #cal-clear {
     border: none;
     background: none;
     color: var(--accent);
@@ -530,22 +587,21 @@
 <body>
 <div class="app">
   <header>
-    <div class="logo">🍰</div>
+    <div class="logo">
+      <svg class="icon" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><circle cx="8" cy="15" r="5"/><circle cx="16" cy="15" r="5" opacity="0.65"/><circle cx="12" cy="7.5" r="4" opacity="0.85"/></svg>
+    </div>
     <div>
       <h1>Shanghai Dessert Guide</h1>
       <p>Bilingual · chocolate, cakes, gelato & more · 中英双语</p>
     </div>
   </header>
 
-  <nav class="tabs">
-    <button type="button" id="tab-chat" class="active">💬 Chat</button>
-    <button type="button" id="tab-collection">📓 My Desserts</button>
-  </nav>
-
   <div id="chat-view">
     <div id="log">
       <div class="empty-state" id="empty-state">
-        <div class="big">🧋🍫🍮</div>
+        <div class="icon-badge">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        </div>
         <p>Ask about a dessert spot, upload a photo to identify a shop, or get real metro/bus directions.</p>
         <p>问我关于上海甜品店的问题，也可以拍照识别、查路线。</p>
         <div class="chips">
@@ -558,32 +614,46 @@
 
     <form id="chat-form">
       <input type="file" id="photo-input" accept="image/*" hidden />
-      <button type="button" id="photo-btn" class="icon-btn" title="Identify a shop from a photo">📷</button>
+      <button type="button" id="photo-btn" class="icon-btn" title="Identify a shop from a photo">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      </button>
       <textarea id="message" rows="1" placeholder="Ask about a dessert spot, or 说中文也可以…" autocomplete="off"></textarea>
-      <button type="submit" id="send-btn" title="Send">➤</button>
+      <button type="submit" id="send-btn" title="Send">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
     </form>
   </div>
 
   <div id="collection-view" hidden>
     <div class="card">
-      <h3>Log a dessert</h3>
+      <div class="card-heading">
+        <div class="icon-badge">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        </div>
+        <h3>Log a dessert</h3>
+      </div>
       <form id="log-form">
         <input type="text" id="log-dessert" placeholder="What did you eat? e.g. 抹茶#3" required />
         <input type="text" id="log-store" placeholder="Where? (optional) e.g. 麻布屋 兴业太古汇店" />
         <div class="star-picker" id="log-stars">
-          <button type="button" data-star="1">★</button>
-          <button type="button" data-star="2">★</button>
-          <button type="button" data-star="3">★</button>
-          <button type="button" data-star="4">★</button>
-          <button type="button" data-star="5">★</button>
+          <button type="button" data-star="1"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
+          <button type="button" data-star="2"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
+          <button type="button" data-star="3"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
+          <button type="button" data-star="4"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
+          <button type="button" data-star="5"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
         </div>
         <textarea id="log-note" placeholder="Any notes? (optional)"></textarea>
         <input type="file" id="log-photo-input" accept="image/*" hidden />
         <div id="log-photo-row">
-          <button type="button" id="log-photo-btn">📷 Add a photo</button>
+          <button type="button" id="log-photo-btn">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Add a photo
+          </button>
           <div id="log-photo-preview" hidden>
             <img id="log-photo-preview-img" alt="preview" />
-            <button type="button" id="log-photo-remove">✕</button>
+            <button type="button" id="log-photo-remove">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="9" height="9"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
           </div>
         </div>
         <button type="submit" id="log-form-submit">Add to my collection</button>
@@ -591,29 +661,62 @@
     </div>
 
     <div class="card">
-      <h3>Taste summary</h3>
-      <button type="button" id="summary-btn">✨ Get my taste summary</button>
+      <div class="card-heading">
+        <div class="icon-badge gold">
+          <svg class="icon" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2.5l1.9 6.6 6.6 1.9-6.6 1.9-1.9 6.6-1.9-6.6-6.6-1.9 6.6-1.9z"/></svg>
+        </div>
+        <h3>Taste summary</h3>
+      </div>
+      <button type="button" id="summary-btn">
+        <svg class="icon" viewBox="0 0 24 24" fill="currentColor" width="13" height="13"><path d="M12 2.5l1.9 6.6 6.6 1.9-6.6 1.9-1.9 6.6-1.9-6.6-6.6-1.9 6.6-1.9z"/></svg>
+        Get my taste summary
+      </button>
       <div id="summary-text"></div>
     </div>
 
+    <div id="collection-log-list"></div>
+  </div>
+
+  <div id="calendar-view" hidden>
     <div class="card">
       <div id="cal-header">
-        <button type="button" id="cal-prev">‹</button>
+        <button type="button" id="cal-prev">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
         <h3 id="cal-title"></h3>
-        <button type="button" id="cal-next">›</button>
+        <button type="button" id="cal-next">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
       </div>
       <div id="cal-weekdays">
         <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
       </div>
       <div id="cal-grid"></div>
-      <div id="cal-filter" hidden>
-        Showing: <span id="cal-filter-date"></span>
-        <button type="button" id="cal-filter-clear">Show all</button>
-      </div>
     </div>
 
-    <div id="log-list"></div>
+    <div id="cal-day-detail">
+      <div id="cal-day-detail-header" class="hide">
+        <span id="cal-day-detail-label"></span>
+        <button type="button" id="cal-clear">Clear selection</button>
+      </div>
+      <div id="cal-day-entries"></div>
+    </div>
   </div>
+
+  <nav id="bottom-nav">
+    <button type="button" id="tab-chat" class="active" data-view="chat-view">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      <span>Chat</span>
+    </button>
+    <button type="button" id="tab-collection" data-view="collection-view">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <span>My Desserts</span>
+    </button>
+    <button type="button" id="tab-calendar" data-view="calendar-view">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Calendar</span>
+    </button>
+  </nav>
 </div>
 
 <script>
@@ -625,6 +728,14 @@ const sendBtn = document.getElementById('send-btn');
 const photoInput = document.getElementById('photo-input');
 const photoBtn = document.getElementById('photo-btn');
 const sessionId = crypto.randomUUID();
+
+const AGENT_AVATAR = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><circle cx="8" cy="15" r="5"/><circle cx="16" cy="15" r="5" opacity="0.65"/><circle cx="12" cy="7.5" r="4" opacity="0.85"/></svg>';
+const USER_AVATAR = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+const PIN_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+const SPEAKER_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+const CAMERA_TEXT = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';
+const STAR_PATH = 'M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z';
+const X_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
 
 function hideEmptyState() {
   if (emptyState) emptyState.remove();
@@ -641,7 +752,7 @@ function addRow(text, who, { isError = false } = {}) {
 
   const avatar = document.createElement('div');
   avatar.className = 'avatar';
-  avatar.textContent = who === 'user' ? '🙂' : '🍰';
+  avatar.innerHTML = who === 'user' ? USER_AVATAR : AGENT_AVATAR;
 
   const col = document.createElement('div');
   col.className = 'bubble-col';
@@ -662,7 +773,7 @@ function addTypingRow() {
   hideEmptyState();
   const row = document.createElement('div');
   row.className = 'row agent';
-  row.innerHTML = `<div class="avatar">🍰</div><div class="typing"><span></span><span></span><span></span></div>`;
+  row.innerHTML = `<div class="avatar">${AGENT_AVATAR}</div><div class="typing"><span></span><span></span><span></span></div>`;
   log.appendChild(row);
   scrollToBottom();
   return row;
@@ -672,7 +783,7 @@ function addReplayButton(col, audioUrl) {
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'replay-btn';
-  btn.innerHTML = '🔊 Play narration';
+  btn.innerHTML = `${SPEAKER_ICON} Play narration`;
   btn.addEventListener('click', () => new Audio(audioUrl).play());
   col.appendChild(btn);
 }
@@ -683,7 +794,7 @@ function addIdCard(entry) {
   row.className = 'row agent';
   const known = entry && entry.id && entry.id !== 'unknown';
   row.innerHTML = `
-    <div class="avatar">📍</div>
+    <div class="avatar pin">${PIN_ICON}</div>
     <div class="id-card">
       <div class="thumb"></div>
       <div>
@@ -769,7 +880,7 @@ photoInput.addEventListener('change', async () => {
   hideEmptyState();
   const row = document.createElement('div');
   row.className = 'row user';
-  row.innerHTML = `<div class="avatar">🙂</div><div class="bubble-col"><div class="bubble">📷 ${escapeHtml(file.name)}</div></div>`;
+  row.innerHTML = `<div class="avatar">${USER_AVATAR}</div><div class="bubble-col"><div class="bubble">${CAMERA_TEXT} ${escapeHtml(file.name)}</div></div>`;
   log.appendChild(row);
   scrollToBottom();
 
@@ -794,25 +905,18 @@ photoInput.addEventListener('change', async () => {
 
 sendBtn.disabled = true;
 
-// --- Tabs ---
-const tabChat = document.getElementById('tab-chat');
-const tabCollection = document.getElementById('tab-collection');
-const chatView = document.getElementById('chat-view');
-const collectionView = document.getElementById('collection-view');
-
-tabChat.addEventListener('click', () => {
-  tabChat.classList.add('active');
-  tabCollection.classList.remove('active');
-  chatView.hidden = false;
-  collectionView.hidden = true;
-});
-
-tabCollection.addEventListener('click', () => {
-  tabCollection.classList.add('active');
-  tabChat.classList.remove('active');
-  chatView.hidden = true;
-  collectionView.hidden = false;
-  loadLogs();
+// --- Bottom tab navigation ---
+const navButtons = document.querySelectorAll('#bottom-nav button');
+navButtons.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    navButtons.forEach((b) => b.classList.toggle('active', b === btn));
+    document.querySelectorAll('#chat-view, #collection-view, #calendar-view').forEach((view) => {
+      view.hidden = view.id !== btn.dataset.view;
+    });
+    if (btn.dataset.view === 'collection-view' || btn.dataset.view === 'calendar-view') {
+      loadEntries();
+    }
+  });
 });
 
 // --- Personal dessert collection ---
@@ -836,7 +940,7 @@ const logStore = document.getElementById('log-store');
 const logNote = document.getElementById('log-note');
 const logStars = document.getElementById('log-stars');
 const logFormSubmit = document.getElementById('log-form-submit');
-const logList = document.getElementById('log-list');
+const collectionLogList = document.getElementById('collection-log-list');
 const summaryBtn = document.getElementById('summary-btn');
 const summaryText = document.getElementById('summary-text');
 const logPhotoInput = document.getElementById('log-photo-input');
@@ -874,7 +978,12 @@ logPhotoRemove.addEventListener('click', clearPhotoPicker);
 
 function renderStars(rating) {
   if (!rating) return '';
-  return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+  let html = '<div class="stars">';
+  for (let i = 1; i <= 5; i++) {
+    const fill = i <= rating ? 'currentColor' : 'none';
+    html += `<svg class="icon" viewBox="0 0 24 24" fill="${fill}" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="${STAR_PATH}"/></svg>`;
+  }
+  return html + '</div>';
 }
 
 function renderLogEntry(entry) {
@@ -887,34 +996,44 @@ function renderLogEntry(entry) {
       <div>
         <div class="name">${escapeHtml(entry.dessert_name)}</div>
         ${entry.store_name ? `<div class="store">${escapeHtml(entry.store_name)}</div>` : ''}
-        ${entry.rating ? `<div class="stars">${renderStars(entry.rating)}</div>` : ''}
+        ${renderStars(entry.rating)}
         ${entry.note ? `<div class="note">${escapeHtml(entry.note)}</div>` : ''}
         <div class="date">${date}</div>
       </div>
     </div>
-    <button type="button" class="del-btn" title="Delete">✕</button>
+    <button type="button" class="del-btn" title="Delete">${X_ICON}</button>
   `;
   div.querySelector('.del-btn').addEventListener('click', async () => {
     await fetch(`/log/${entry.id}?user_id=${encodeURIComponent(userId)}`, { method: 'DELETE' });
     summaryText.textContent = '';
-    loadLogs();
+    loadEntries();
   });
   return div;
 }
 
-// --- Calendar + list ---
+function renderCollectionList() {
+  collectionLogList.innerHTML = '';
+  if (allEntries.length === 0) {
+    collectionLogList.innerHTML = '<div class="collection-empty">No desserts logged yet — add your first one above.</div>';
+    return;
+  }
+  allEntries.forEach((entry) => collectionLogList.appendChild(renderLogEntry(entry)));
+}
+
+// --- Calendar + day detail ---
 let allEntries = [];
 let calMonth = new Date();
 calMonth.setDate(1);
-let selectedDate = null; // 'YYYY-MM-DD' or null for "show all"
+let selectedDate = null; // 'YYYY-MM-DD' or null
 
 const calTitle = document.getElementById('cal-title');
 const calGrid = document.getElementById('cal-grid');
 const calPrev = document.getElementById('cal-prev');
 const calNext = document.getElementById('cal-next');
-const calFilter = document.getElementById('cal-filter');
-const calFilterDate = document.getElementById('cal-filter-date');
-const calFilterClear = document.getElementById('cal-filter-clear');
+const calDayDetailHeader = document.getElementById('cal-day-detail-header');
+const calDayDetailLabel = document.getElementById('cal-day-detail-label');
+const calDayEntries = document.getElementById('cal-day-entries');
+const calClear = document.getElementById('cal-clear');
 
 function dateKey(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -951,11 +1070,30 @@ function renderCalendar() {
       btn.addEventListener('click', () => {
         selectedDate = selectedDate === key ? null : key;
         renderCalendar();
-        renderLogList();
+        renderCalDayDetail();
       });
     }
     calGrid.appendChild(btn);
   }
+}
+
+function renderCalDayDetail() {
+  if (!selectedDate) {
+    calDayDetailHeader.classList.add('hide');
+    calDayEntries.innerHTML = `
+      <div class="empty-state" style="margin: 30px auto;">
+        <div class="icon-badge">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <p>Tap a highlighted day to see what you logged.</p>
+      </div>`;
+    return;
+  }
+  calDayDetailHeader.classList.remove('hide');
+  calDayDetailLabel.textContent = selectedDate;
+  const entries = allEntries.filter((e) => dateKey(new Date(e.created_at)) === selectedDate);
+  calDayEntries.innerHTML = '';
+  entries.forEach((entry) => calDayEntries.appendChild(renderLogEntry(entry)));
 }
 
 calPrev.addEventListener('click', () => {
@@ -966,38 +1104,21 @@ calNext.addEventListener('click', () => {
   calMonth.setMonth(calMonth.getMonth() + 1);
   renderCalendar();
 });
-calFilterClear.addEventListener('click', () => {
+calClear.addEventListener('click', () => {
   selectedDate = null;
   renderCalendar();
-  renderLogList();
+  renderCalDayDetail();
 });
 
-function renderLogList() {
-  const entries = selectedDate
-    ? allEntries.filter((e) => dateKey(new Date(e.created_at)) === selectedDate)
-    : allEntries;
-
-  calFilter.hidden = !selectedDate;
-  if (selectedDate) calFilterDate.textContent = selectedDate;
-
-  logList.innerHTML = '';
-  if (entries.length === 0) {
-    logList.innerHTML = selectedDate
-      ? '<div class="collection-empty">Nothing logged on this day.</div>'
-      : '<div class="collection-empty">No desserts logged yet — add your first one above.</div>';
-    return;
-  }
-  entries.forEach((entry) => logList.appendChild(renderLogEntry(entry)));
-}
-
-async function loadLogs() {
+async function loadEntries() {
   try {
     const res = await fetch(`/log?user_id=${encodeURIComponent(userId)}`);
     allEntries = await res.json();
+    renderCollectionList();
     renderCalendar();
-    renderLogList();
+    renderCalDayDetail();
   } catch (err) {
-    logList.innerHTML = `<div class="collection-empty">Couldn't load your collection — ${escapeHtml(err.message)}.</div>`;
+    collectionLogList.innerHTML = `<div class="collection-empty">Couldn't load your collection — ${escapeHtml(err.message)}.</div>`;
   }
 }
 
@@ -1025,7 +1146,7 @@ logForm.addEventListener('submit', async (e) => {
     logStars.querySelectorAll('button').forEach((b) => b.classList.remove('filled'));
     clearPhotoPicker();
     summaryText.textContent = '';
-    loadLogs();
+    loadEntries();
   } catch (err) {
     alert(`Couldn't save that entry — ${err.message}`);
   } finally {
