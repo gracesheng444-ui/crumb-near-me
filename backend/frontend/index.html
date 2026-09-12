@@ -674,11 +674,13 @@
     transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
   }
   .segmented .seg-btn.active {
-    background: #d6588f;
+    background: var(--seg-color, var(--accent-2));
     color: #fff;
     box-shadow: var(--shadow);
   }
-  #community-pane-browse, #community-pane-publish {
+  #community-view .segmented { --seg-color: #d6588f; }
+  #community-pane-browse, #community-pane-publish,
+  #collection-pane-log, #collection-pane-view {
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -790,63 +792,78 @@
   </div>
 
   <div id="collection-view" hidden>
-    <div class="card">
-      <div class="card-heading">
-        <div class="icon-badge">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="8"/><circle cx="9" cy="9.3" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.2" cy="10" r="1.1" fill="currentColor" stroke="none"/><circle cx="10.3" cy="14.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="14.8" cy="15" r="1.1" fill="currentColor" stroke="none"/></svg>
-        </div>
-        <h3>记录一份甜品</h3>
-      </div>
-      <form id="log-form">
-        <input type="text" id="log-dessert" placeholder="你吃了什么？例如 抹茶#3" required />
-        <input type="text" id="log-store" placeholder="在哪里吃的？（选填）例如 麻布屋 兴业太古汇店" />
-        <div class="star-picker" id="log-stars">
-          <button type="button" data-star="1"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
-          <button type="button" data-star="2"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
-          <button type="button" data-star="3"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
-          <button type="button" data-star="4"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
-          <button type="button" data-star="5"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
-        </div>
-        <textarea id="log-note" placeholder="有什么想法？（选填）"></textarea>
-        <input type="file" id="log-photo-input" accept="image/*" hidden />
-        <div id="log-photo-row">
-          <button type="button" id="log-photo-btn">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            添加照片
-          </button>
-          <div id="log-photo-preview" hidden>
-            <img id="log-photo-preview-img" alt="预览" />
-            <button type="button" id="log-photo-remove">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="9" height="9"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-          </div>
-        </div>
-        <button type="submit" id="log-form-submit">加入我的甜品记录</button>
-      </form>
-    </div>
-
-    <div class="card">
-      <div class="card-heading">
-        <div class="icon-badge gold">
-          <svg class="icon" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2.5l1.9 6.6 6.6 1.9-6.6 1.9-1.9 6.6-1.9-6.6-6.6-1.9 6.6-1.9z"/></svg>
-        </div>
-        <h3>口味总结</h3>
-      </div>
-      <button type="button" id="summary-btn">
-        <svg class="icon" viewBox="0 0 24 24" fill="currentColor" width="13" height="13"><path d="M12 2.5l1.9 6.6 6.6 1.9-6.6 1.9-1.9 6.6-1.9-6.6-6.6-1.9 6.6-1.9z"/></svg>
-        生成我的口味总结
+    <div class="segmented" id="collection-subnav">
+      <button type="button" class="seg-btn active" data-pane="log">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        记录新甜品
       </button>
-      <div id="summary-text"></div>
+      <button type="button" class="seg-btn" data-pane="view">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><circle cx="12" cy="12" r="8"/><circle cx="9" cy="9.3" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.2" cy="10" r="1.1" fill="currentColor" stroke="none"/><circle cx="10.3" cy="14.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="14.8" cy="15" r="1.1" fill="currentColor" stroke="none"/></svg>
+        我的记录
+      </button>
     </div>
 
-    <div class="card">
-      <div class="card-heading">
-        <div class="icon-badge gold">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="8"/><circle cx="9" cy="9.3" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.2" cy="10" r="1.1" fill="currentColor" stroke="none"/><circle cx="10.3" cy="14.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="14.8" cy="15" r="1.1" fill="currentColor" stroke="none"/></svg>
+    <div id="collection-pane-log">
+      <div class="card">
+        <div class="card-heading">
+          <div class="icon-badge">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="8"/><circle cx="9" cy="9.3" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.2" cy="10" r="1.1" fill="currentColor" stroke="none"/><circle cx="10.3" cy="14.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="14.8" cy="15" r="1.1" fill="currentColor" stroke="none"/></svg>
+          </div>
+          <h3>记录一份甜品</h3>
         </div>
-        <h3>我的甜品记录</h3>
+        <form id="log-form">
+          <input type="text" id="log-dessert" placeholder="你吃了什么？例如 抹茶#3" required />
+          <input type="text" id="log-store" placeholder="在哪里吃的？（选填）例如 麻布屋 兴业太古汇店" />
+          <div class="star-picker" id="log-stars">
+            <button type="button" data-star="1"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
+            <button type="button" data-star="2"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
+            <button type="button" data-star="3"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
+            <button type="button" data-star="4"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
+            <button type="button" data-star="5"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
+          </div>
+          <textarea id="log-note" placeholder="有什么想法？（选填）"></textarea>
+          <input type="file" id="log-photo-input" accept="image/*" hidden />
+          <div id="log-photo-row">
+            <button type="button" id="log-photo-btn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              添加照片
+            </button>
+            <div id="log-photo-preview" hidden>
+              <img id="log-photo-preview-img" alt="预览" />
+              <button type="button" id="log-photo-remove">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="9" height="9"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+          </div>
+          <button type="submit" id="log-form-submit">加入我的甜品记录</button>
+        </form>
       </div>
-      <div id="collection-log-list"></div>
+    </div>
+
+    <div id="collection-pane-view" hidden>
+      <div class="card">
+        <div class="card-heading">
+          <div class="icon-badge gold">
+            <svg class="icon" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2.5l1.9 6.6 6.6 1.9-6.6 1.9-1.9 6.6-1.9-6.6-6.6-1.9 6.6-1.9z"/></svg>
+          </div>
+          <h3>口味总结</h3>
+        </div>
+        <button type="button" id="summary-btn">
+          <svg class="icon" viewBox="0 0 24 24" fill="currentColor" width="13" height="13"><path d="M12 2.5l1.9 6.6 6.6 1.9-6.6 1.9-1.9 6.6-1.9-6.6-6.6-1.9 6.6-1.9z"/></svg>
+          生成我的口味总结
+        </button>
+        <div id="summary-text"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-heading">
+          <div class="icon-badge gold">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="8"/><circle cx="9" cy="9.3" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.2" cy="10" r="1.1" fill="currentColor" stroke="none"/><circle cx="10.3" cy="14.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="14.8" cy="15" r="1.1" fill="currentColor" stroke="none"/></svg>
+          </div>
+          <h3>我的甜品记录</h3>
+        </div>
+        <div id="collection-log-list"></div>
+      </div>
     </div>
   </div>
 
@@ -1155,7 +1172,10 @@ navButtons.forEach((btn) => {
     document.querySelectorAll('#chat-view, #collection-view, #calendar-view, #community-view').forEach((view) => {
       view.hidden = view.id !== btn.dataset.view;
     });
-    if (btn.dataset.view === 'collection-view' || btn.dataset.view === 'calendar-view') {
+    if (btn.dataset.view === 'collection-view') {
+      loadEntries();
+      setCollectionPane('log');
+    } else if (btn.dataset.view === 'calendar-view') {
       loadEntries();
     } else if (btn.dataset.view === 'community-view') {
       loadNotes();
@@ -1175,6 +1195,19 @@ function setCommunityPane(pane) {
 }
 communitySubnavBtns.forEach((btn) => {
   btn.addEventListener('click', () => setCommunityPane(btn.dataset.pane));
+});
+
+// --- Collection sub-tabs: log new vs view records ---
+const collectionSubnavBtns = document.querySelectorAll('#collection-subnav .seg-btn');
+const collectionPaneLog = document.getElementById('collection-pane-log');
+const collectionPaneView = document.getElementById('collection-pane-view');
+function setCollectionPane(pane) {
+  collectionSubnavBtns.forEach((b) => b.classList.toggle('active', b.dataset.pane === pane));
+  collectionPaneLog.hidden = pane !== 'log';
+  collectionPaneView.hidden = pane !== 'view';
+}
+collectionSubnavBtns.forEach((btn) => {
+  btn.addEventListener('click', () => setCollectionPane(btn.dataset.pane));
 });
 
 // --- Personal dessert collection ---
@@ -1272,7 +1305,7 @@ function renderLogEntry(entry) {
 function renderCollectionList() {
   collectionLogList.innerHTML = '';
   if (allEntries.length === 0) {
-    collectionLogList.innerHTML = '<div class="collection-empty">还没有记录任何甜品，先在上面添加一个吧。</div>';
+    collectionLogList.innerHTML = '<div class="collection-empty">还没有记录任何甜品，去"记录新甜品"添加一个吧。</div>';
     return;
   }
   allEntries.forEach((entry) => collectionLogList.appendChild(renderLogEntry(entry)));
@@ -1399,6 +1432,7 @@ logForm.addEventListener('submit', async (e) => {
     clearPhotoPicker();
     summaryText.textContent = '';
     loadEntries();
+    setCollectionPane('view');
   } catch (err) {
     alert(`保存失败 — ${err.message}`);
   } finally {
