@@ -83,6 +83,11 @@ across turns. None of the original four touch this.
 > turn 1: 介绍一下麻布屋兴业太古汇店
 > turn 2: 那家店几点关门？
 
+Implemented as `multiturn_01` in `test_questions.json` (`turns_en`/
+`turns_zh` — a list, not a single question string) and automated in
+`run_eval.py`, which feeds each turn through `run_agent` with accumulated
+history and judges only the final reply. Passing 2/2 on first run.
+
 ## Axis B — Phrasing
 
 How the question arrives, independent of what it's testing:

@@ -19,5 +19,12 @@
     "question_en": "Is there a dessert shop called 'Golden Moon Cakehouse' that you know of?",
     "question_zh": "你知道一家叫\"金月饼屋\"的甜品店吗？",
     "expects": "Should say it doesn't have that in its knowledge base, not invent details about a shop that isn't in the data."
+  },
+  {
+    "id": "multiturn_01",
+    "type": "multiturn",
+    "turns_en": ["Tell me about Azabuya's Xingye Taikoo Hui branch", "What time does that shop close?"],
+    "turns_zh": ["介绍一下麻布屋兴业太古汇店", "那家店几点关门？"],
+    "expects": "The second reply must correctly answer about the Xingye Taikoo Hui branch specifically (closes at 22:00 / 10pm, per azabuya_taikoohui.json) without asking the visitor to repeat or clarify which shop they mean — proving conversation context from turn 1 actually carried over, not that it re-resolved 'that shop' from scratch or picked a different Azabuya branch."
   }
 ]

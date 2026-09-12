@@ -63,8 +63,20 @@ def main():
 
     for q in questions:
         for lang in ("en", "zh"):
-            question_text = q[f"question_{lang}"]
-            outcome = run_agent(question_text)
+            if f"turns_{lang}" in q:
+                # Multi-turn case: run each turn with accumulated history so
+                # context (a pronoun, an omitted subject) actually carries
+                # over — only the final reply gets judged.
+                turns = q[f"turns_{lang}"]
+                history = []
+                outcome = None
+                for turn_text in turns:
+                    outcome = run_agent(turn_text, history)
+                    history = outcome["messages"]
+                question_text = " → ".join(turns)
+            else:
+                question_text = q[f"question_{lang}"]
+                outcome = run_agent(question_text)
             score = judge(question_text, q["expects"], outcome["reply"])
             results.append(
                 {

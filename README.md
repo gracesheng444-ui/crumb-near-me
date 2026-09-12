@@ -94,8 +94,8 @@ system prompt and retrieval logic, not just to run it once.
 
 ## Eval question design
 
-`backend/eval/test_questions.json` is intentionally small (3 questions,
-asked in both languages = 6 test cases) — it's a targeted regression check
+`backend/eval/test_questions.json` is intentionally small (4 questions,
+asked in both languages = 8 test cases) — it's a targeted regression check
 for specific known failure modes, not a broad benchmark. Each question has
 a `type`, and each type exists to catch one thing a dessert-guide agent can
 plausibly get wrong:
@@ -127,12 +127,21 @@ plausibly get wrong:
   believable-sounding address or menu. This is the classic
   hallucination-under-pressure test: an obviously fake question is easy to
   refuse, the hard case is a name that *sounds* like it could be real.
+- **`multiturn`** — a follow-up that only makes sense with the prior turn
+  in mind (a pronoun, an omitted subject: "介绍一下麻布屋兴业太古汇店" then
+  "那家店几点关门？"). Structurally different from the other three types —
+  its entries use `turns_en`/`turns_zh` (a list) instead of a single
+  `question_en`/`question_zh` string, and `run_eval.py` feeds each turn
+  through `run_agent` with accumulated history, judging only the final
+  reply. Tests whether context actually carries across turns, which none
+  of the single-turn types touch.
 
-Given more time, the natural next additions are one fact-check per newly
-added brand (Pie Bird, EAU Café, bebaked), a case for
-`get_transit_directions`' ambiguous-branch handling, and a case that checks
-community notes get disclosed/attributed rather than stated with
-knowledge-base-level confidence.
+This list of types, plus 7 more identified but not yet automated
+(disambiguation, source attribution, subjective recommendation, and
+others), is worked out in more detail in
+[`backend/eval/EVAL_TAXONOMY.md`](backend/eval/EVAL_TAXONOMY.md), along
+with a coverage map of which capability × phrasing-style combinations are
+written versus still open.
 
 ## Status
 
