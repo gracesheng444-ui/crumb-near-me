@@ -34,13 +34,27 @@ Off-topic small talk.
 **Multi-turn**
 Needs conversation history from a previous turn — a pronoun or omitted
 subject that only resolves if the agent remembers what the last turn was
-about, not just what's in the current message.
-1. Turn 1: 介绍一下麻布屋兴业太古汇店 → Turn 2: 那家店几点关门？
+about, not just what's in the current message. The thing that makes this
+its own Axis A row is a harness difference (it needs accumulated
+`history` across separate API calls), not a wording difference — so
+Axis B still applies to it. Turn 2 can be phrased any of the usual ways,
+same as a standalone question:
+1. (Short) Turn 1: 介绍一下麻布屋兴业太古汇店 → Turn 2: 那家店几点关门？
+   (`multiturn_01`)
+2. (Ambiguous) Turn 1: 介绍一下麻布屋兴业太古汇店 → Turn 2: 呃…就是它大概
+   几点，我是说打烊的时间...
+3. (Multi-intent) Turn 1: 介绍一下麻布屋兴业太古汇店 → Turn 2: 那家店几点
+   关门？除了抹茶还有其他口味吗？
+4. (Long) Turn 1: 介绍一下麻布屋兴业太古汇店 → Turn 2: 我朋友说想晚点去，
+   就怕到时候店已经打烊了，你知道具体几点关门吗，如果打烊比较早我们可能
+   要提前一点过去。
 
-Implemented as `multiturn_01` in `test_questions.json` (`turns_en`/
-`turns_zh` — a list, not a single question string) and automated in
-`run_eval.py`, which feeds each turn through `run_agent` with accumulated
-history and judges only the final reply. Passing 2/2 on first run.
+Implemented as `multiturn_01` (Short) in `test_questions.json`
+(`turns_en`/`turns_zh` — a list, not a single question string) and
+automated in `run_eval.py`, which feeds each turn through `run_agent`
+with accumulated history and judges only the final reply. Passing 2/2
+on first run. The Long/Multi-intent/Ambiguous turn-2 variants above are
+still open.
 
 **Knowledge base boundary**
 Tests admitting "I don't know" instead of inventing a believable answer.
@@ -84,10 +98,9 @@ of a name.
 Which capability × phrasing combinations already have a real example
 *implemented in `test_questions.json`* versus what's still open (a
 combination is only marked ✓ once it's an actual case the harness runs,
-not just prose in this document — see the note at the end of this
-section). Multi-turn doesn't vary by phrasing — it's a structural setup
-(a two-turn exchange), not a phrasing variant, so it's marked N/A rather
-than left as a gap.
+not just prose in this document). Multi-turn crosses with phrasing the
+same as every other row — see the Axis A section above for why it's
+not a special case.
 
 | Capability | Short | Long | Multi-intent | Ambiguous |
 |---|---|---|---|---|
@@ -97,7 +110,7 @@ than left as a gap.
 | Chit-chat | ✓ | open | open | open |
 | Knowledge base boundary | ✓ | open | open | ✓ |
 | Adversarial | ✓ | ✓ | ✓ | open |
-| Multi-turn | n/a | n/a | n/a | n/a |
+| Multi-turn | ✓ | open | open | open |
 
 **Superseded decision:** the paragraph above (and the 15/25 count below
 it) reflects an earlier strategy of skipping cells whose phrasing
@@ -127,6 +140,7 @@ Score ÷ 3, rounded up, gives 1–3 cases per cell:
 | Chit-chat | 1 | 1 | 1 | 1 |
 | Knowledge base boundary | 3 | 1 | 2 | 3 |
 | Adversarial | 3 | 3 | 3 | 2 |
+| Multi-turn | 3 | 1 | 2 | 3 |
 
 Two cells carry the highest weight, for different reasons:
 
@@ -144,40 +158,37 @@ Two cells carry the highest weight, for different reasons:
 Chit-chat stays flat at 1 everywhere: it's genuinely low-stakes and the
 phrasing variants don't meaningfully change what's being tested.
 
-Multi-turn doesn't get a phrasing weight (it isn't phrasing-variant),
-but it does get more than one case, because different context-carryover
-mechanisms are worth testing separately rather than as one setup:
-1. Pronoun/omitted-subject resolution across turns (the current
-   `multiturn_01`: "that shop" → the branch named in turn 1).
-2. Topic switch mid-conversation (does a new turn's unrelated question
-   wrongly drag in context from the previous one).
-3. Multi-turn + disambiguation (turn 1 names a brand with several
-   branches, turn 2's follow-up must resolve to the specific branch
-   established in turn 1, not just the brand).
+Multi-turn is weighted the same shape as Knowledge base boundary (3 on
+Short and Ambiguous, 2 on Multi-intent, 1 on Long) because Short and
+Ambiguous are the natural ways a real follow-up gets phrased — "that
+shop" or a vague half-sentence relying on what was just said — while a
+long, constraint-heavy paragraph as a *follow-up* is comparatively rare.
+Risk is high across the board: a context-carryover bug is subtle and
+easy to miss in a single-turn-only eval suite.
 
 ## How many questions is that
 
 Combining the two axes at the grain used above:
 
-- 6 capabilities vary by phrasing (everything except Multi-turn) × 4
-  phrasing tags = **24 cells**, unweighted design space
-- Multi-turn doesn't vary by phrasing — 3 scenarios instead = **+3**
-- **Unweighted total: 27** if every cell/scenario got exactly 1 case
-- **Weighted total: 47** once the rubric above is applied (grid cells
-  sum to 44 — 7 Factual + 7 Synthesis + 6 Amap + 4 Chit-chat + 9
-  Knowledge base boundary + 11 Adversarial — plus 3 Multi-turn scenarios)
+- All 7 capabilities now cross with phrasing × 4 phrasing tags =
+  **28 cells**, unweighted design space
+- **Unweighted total: 28** if every cell got exactly 1 case
+- **Weighted total: 53** once the rubric above is applied (7 Factual +
+  7 Synthesis + 6 Amap + 4 Chit-chat + 9 Knowledge base boundary + 11
+  Adversarial + 9 Multi-turn)
 - **Written and implemented so far: 15** — `test_questions.json` has 15
-  entries; the remaining ~32 are the next round of writing, prioritized
-  by weight (Adversarial and Knowledge base boundary cells first, since
-  they're both under-weighted relative to target and highest-stakes)
+  entries covering 15 of the 28 cells; the remaining ~38 (to reach the
+  weighted target) are the next round of writing, prioritized by weight
+  (Adversarial, Knowledge base boundary, and Multi-turn cells first,
+  since all three are under-weighted relative to target and
+  highest-stakes)
 
 This treats the four phrasing tags as one shared label per cell rather
 than fully crossing three independent traits (length × intent-count ×
 clarity, which would be 2×2×2 = 8 phrasing variants instead of 4). The
-fully-crossed version would be 6 × 8 = 48 raw cells, adjusted to 49 once
-Multi-turn is added back as its own set of scenarios — technically more
+fully-crossed version would be 7 × 8 = 56 raw cells — technically more
 exhaustive, but most of those extra cells aren't meaningfully different
-tests. 47, weighted, is the number worth actually writing toward.
+tests. 53, weighted, is the number worth actually writing toward.
 
 ---
 This taxonomy supersedes an earlier, more granular 11-capability draft
