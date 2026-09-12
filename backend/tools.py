@@ -86,7 +86,15 @@ def retrieve_info(query: str, top_k: int = 6) -> list[dict]:
         if score > 0:
             scored.append((score, entry))
     scored.sort(key=lambda x: x[0], reverse=True)
-    return [entry for _, entry in scored[:top_k]]
+    # "canary" and the "canary"/"example" tags are internal bookkeeping (see
+    # knowledge/README.md) — leaking them into the tool result lets the model
+    # see its own test data flagged as fake and refuse to state it confidently.
+    results = []
+    for _, entry in scored[:top_k]:
+        clean = {k: v for k, v in entry.items() if k != "canary"}
+        clean["tags"] = [t for t in clean.get("tags", []) if t not in ("canary", "example")]
+        results.append(clean)
+    return results
 
 
 def identify_exhibit(image_base64: str, media_type: str = "image/jpeg") -> dict:

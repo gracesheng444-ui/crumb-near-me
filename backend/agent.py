@@ -70,9 +70,9 @@ TOOLS = [
     {
         "name": "retrieve_info",
         "description": (
-            "Search the Grand Gateway 66 knowledge base for stores, dining "
-            "spots, or facilities matching a query. Always call this before "
-            "stating any specific fact."
+            "Search the Shanghai dessert guide's knowledge base for dessert "
+            "shops, dishes, or branches matching a query. Always call this "
+            "before stating any specific fact."
         ),
         "input_schema": {
             "type": "object",
@@ -148,7 +148,8 @@ def run_agent(user_message: str, history: list[dict] | None = None) -> dict:
     for _ in range(6):  # hard cap so a bad loop can't run forever
         response = get_client().messages.create(
             model=MODEL,
-            max_tokens=1024,
+            max_tokens=4096,  # extended-thinking tokens count against this cap — 1024 let the
+            # model burn its whole budget deliberating and hit max_tokens before any reply text
             system=SYSTEM_PROMPT,
             tools=TOOLS,
             messages=messages,
@@ -159,6 +160,8 @@ def run_agent(user_message: str, history: list[dict] | None = None) -> dict:
                 block.text for block in response.content if block.type == "text"
             )
             messages.append({"role": "assistant", "content": response.content})
+            if not final_text:
+                final_text = "Sorry, I got cut off there — could you ask that again?"
             return {"reply": final_text, "audio_path": audio_path, "messages": messages}
 
         messages.append({"role": "assistant", "content": response.content})
