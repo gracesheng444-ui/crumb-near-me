@@ -371,7 +371,6 @@
     color: var(--text);
     font-weight: 700;
   }
-  .card-heading.loose { margin: 2px 2px 12px; }
   #log-form { display: flex; flex-direction: column; gap: 8px; }
   #log-form input, #log-form textarea {
     border: 1px solid var(--border);
@@ -389,13 +388,16 @@
     border: none;
     background: none;
     cursor: pointer;
-    color: var(--border);
+    color: var(--text-dim);
     padding: 0;
     line-height: 1;
     font-size: 24px;
+    opacity: 0.55;
+    transition: opacity 0.15s ease, transform 0.1s ease;
   }
+  .star-picker button:hover { opacity: 0.85; transform: scale(1.08); }
   .star-picker button svg.icon path { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
-  .star-picker button.filled { color: var(--accent-2); }
+  .star-picker button.filled { color: var(--accent-2); opacity: 1; }
   .star-picker button.filled svg.icon path { fill: currentColor; stroke: none; }
   #log-form-submit {
     border: none;
@@ -727,13 +729,15 @@
       <div id="summary-text"></div>
     </div>
 
-    <div class="card-heading loose">
-      <div class="icon-badge gold">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    <div class="card">
+      <div class="card-heading">
+        <div class="icon-badge gold">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        </div>
+        <h3>我的甜品记录</h3>
       </div>
-      <h3>我的甜品记录</h3>
+      <div id="collection-log-list"></div>
     </div>
-    <div id="collection-log-list"></div>
   </div>
 
   <div id="calendar-view" hidden>
@@ -802,13 +806,15 @@
       </form>
     </div>
 
-    <div class="card-heading loose">
-      <div class="icon-badge gold">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <div class="card">
+      <div class="card-heading">
+        <div class="icon-badge gold">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3>社区分享</h3>
       </div>
-      <h3>社区分享</h3>
+      <div id="community-feed"></div>
     </div>
-    <div id="community-feed"></div>
   </div>
 
   <nav id="bottom-nav">
@@ -1194,13 +1200,7 @@ function renderCalendar() {
 function renderCalDayDetail() {
   if (!selectedDate) {
     calDayDetailHeader.classList.add('hide');
-    calDayEntries.innerHTML = `
-      <div class="empty-state" style="margin: 30px auto;">
-        <div class="icon-badge">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        </div>
-        <p>点击有记录的日期查看详情。</p>
-      </div>`;
+    calDayEntries.innerHTML = `<div class="collection-empty">点击上方有记录的日期查看详情。</div>`;
     return;
   }
   calDayDetailHeader.classList.remove('hide');
