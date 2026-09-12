@@ -99,33 +99,85 @@ than left as a gap.
 | Adversarial | ✓ | ✓ | ✓ | open |
 | Multi-turn | n/a | n/a | n/a | n/a |
 
-Cells left open on purpose, not by oversight — the phrasing variant
-wouldn't stress the capability differently from what's already covered,
-or the combination is contrived enough that real visitors are unlikely
-to produce it: Factual lookup×Long, Synthesis×Ambiguous, Amap×Long,
-Amap×Ambiguous, Chit-chat×Long/Multi-intent/Ambiguous, Knowledge base
-boundary×Long/Multi-intent, Adversarial×Ambiguous.
+**Superseded decision:** the paragraph above (and the 15/25 count below
+it) reflects an earlier strategy of skipping cells whose phrasing
+variant seemed low-value. The current strategy instead computes every
+cell — nothing is skipped — but weights how many cases each cell gets,
+so effort still goes where it matters instead of spreading flat across
+all 25. See the weighting rubric below.
+
+## Weighting — how many cases per cell
+
+Every cell gets at least one case; cells that are more likely to occur
+*and* more costly to get wrong get more. Score each cell on two 1–3
+scales and multiply:
+
+- **Frequency** — how often a real visitor would actually phrase a
+  question this way for this capability (1 = contrived, 3 = common).
+- **Risk** — how costly a wrong answer is (1 = a stilted reply nobody
+  minds, 3 = a confidently wrong or unsafe answer).
+
+Score ÷ 3, rounded up, gives 1–3 cases per cell:
+
+| Capability | Short | Long | Multi-intent | Ambiguous |
+|---|---|---|---|---|
+| Factual lookup | 2 | 1 | 2 | 2 |
+| Synthesis | 2 | 2 | 2 | 1 |
+| Amap API | 2 | 1 | 2 | 1 |
+| Chit-chat | 1 | 1 | 1 | 1 |
+| Knowledge base boundary | 3 | 1 | 2 | 3 |
+| Adversarial | 3 | 3 | 3 | 2 |
+
+Two cells carry the highest weight, for different reasons:
+
+- **Adversarial** is weighted 2–3 across every phrasing because each
+  phrasing shape is a genuinely different attack surface (blunt
+  override, authority-claim social engineering, injection riding a
+  legitimate question) and a failure here is a security/trust problem,
+  not a UX nit — so even the least-likely phrasing (Ambiguous) still
+  gets 2, not 1.
+- **Knowledge base boundary** is weighted 3 on Short and Ambiguous
+  because a confident hallucination under vagueness is the single
+  costliest failure mode for a RAG-shaped agent — worse than any other
+  cell being merely imperfect.
+
+Chit-chat stays flat at 1 everywhere: it's genuinely low-stakes and the
+phrasing variants don't meaningfully change what's being tested.
+
+Multi-turn doesn't get a phrasing weight (it isn't phrasing-variant),
+but it does get more than one case, because different context-carryover
+mechanisms are worth testing separately rather than as one setup:
+1. Pronoun/omitted-subject resolution across turns (the current
+   `multiturn_01`: "that shop" → the branch named in turn 1).
+2. Topic switch mid-conversation (does a new turn's unrelated question
+   wrongly drag in context from the previous one).
+3. Multi-turn + disambiguation (turn 1 names a brand with several
+   branches, turn 2's follow-up must resolve to the specific branch
+   established in turn 1, not just the brand).
 
 ## How many questions is that
 
 Combining the two axes at the grain used above:
 
 - 6 capabilities vary by phrasing (everything except Multi-turn) × 4
-  phrasing tags = **24 cells**
-- Multi-turn doesn't vary by phrasing — one canonical setup instead of a
-  4-way spread = **1 more**
-- **Total design space: 25 questions** for full coverage of this map
-- **Written and implemented: 15** (14 in the grid + Multi-turn's single
-  case) — `test_questions.json` has 15 entries total
-- **Left open on purpose: 10** (see the list above)
+  phrasing tags = **24 cells**, unweighted design space
+- Multi-turn doesn't vary by phrasing — 3 scenarios instead = **+3**
+- **Unweighted total: 27** if every cell/scenario got exactly 1 case
+- **Weighted total: 47** once the rubric above is applied (grid cells
+  sum to 44 — 7 Factual + 7 Synthesis + 6 Amap + 4 Chit-chat + 9
+  Knowledge base boundary + 11 Adversarial — plus 3 Multi-turn scenarios)
+- **Written and implemented so far: 15** — `test_questions.json` has 15
+  entries; the remaining ~32 are the next round of writing, prioritized
+  by weight (Adversarial and Knowledge base boundary cells first, since
+  they're both under-weighted relative to target and highest-stakes)
 
 This treats the four phrasing tags as one shared label per cell rather
 than fully crossing three independent traits (length × intent-count ×
 clarity, which would be 2×2×2 = 8 phrasing variants instead of 4). The
 fully-crossed version would be 6 × 8 = 48 raw cells, adjusted to 49 once
-Multi-turn is added back as its own single case — technically more
+Multi-turn is added back as its own set of scenarios — technically more
 exhaustive, but most of those extra cells aren't meaningfully different
-tests. 25 is the number worth actually writing toward.
+tests. 47, weighted, is the number worth actually writing toward.
 
 ---
 This taxonomy supersedes an earlier, more granular 11-capability draft
