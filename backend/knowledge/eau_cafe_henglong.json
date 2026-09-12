@@ -1,0 +1,11 @@
+{
+  "id": "eau_cafe_henglong",
+  "category": "cake / afternoon tea",
+  "address": "静安区南京西路1266号恒隆广场L4楼401A, 上海市（距地铁12号线南京西路站14号口步行790米）",
+  "name_en": "EAU Café (Plaza 66)",
+  "name_zh": "EAU Café（恒隆广场店）",
+  "description_en": "A cake-focused café that's a good spot for afternoon tea — comfortable, photogenic interior. WeChat mini-program: EAU Café (order-ahead pickup and cake reservations). This location is at Plaza 66 (恒隆广场), a 790m walk from Exit 14 of Nanjing West Road station on metro Line 12. Hours 10:00-22:00. Menu: fruit mille-feuille, matcha shaved ice, pistachio Basque cheesecake, matcha guava dessert, chocolate strawberry brûlée layer cake. A single slice runs about 40-60rmb; a whole cake is about 250-280rmb. EAU Café has 3 locations in Shanghai (Yongkang Road, Plaza 66, Wuyi Road).",
+  "description_zh": "以蛋糕为主的甜品店，适合喝下午茶，环境舒适、拍照好看。微信小程序：EAU Café（提供点单自取和蛋糕预订的服务）。本店位于恒隆广场，距地铁12号线南京西路站14号口步行790米，营业时间10:00-22:00。菜单：水果千层、抹茶刨冰、开心果巴斯克、抹茶番石榴气疯、巧克力草莓布蕾夹心蛋糕。一块蛋糕大概是40-60rmb，购买整个蛋糕大约是250-280rmb。EAU Café在上海共有3家门店（永康路店、恒隆广场店、武夷路店）。",
+  "tags": ["cake", "afternoon tea", "dessert", "eau cafe", "恒隆广场", "南京西路"],
+  "canary": false
+}

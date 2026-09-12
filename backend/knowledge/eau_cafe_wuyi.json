@@ -1,0 +1,11 @@
+{
+  "id": "eau_cafe_wuyi",
+  "category": "cake / afternoon tea",
+  "address": "长宁区武夷路320号武夷mixB区107室, 上海市（距地铁延安西路站1号口步行1.0千米）",
+  "name_en": "EAU Café (Wuyi Road)",
+  "name_zh": "EAU Café（武夷路店）",
+  "description_en": "A cake-focused café that's a good spot for afternoon tea — comfortable, photogenic interior. WeChat mini-program: EAU Café (order-ahead pickup and cake reservations). This location is on Wuyi Road (Wuyi Mix), a 1.0km walk from Exit 1 of Yan'an West Road station. Hours 11:00-19:00. Menu: fruit mille-feuille, matcha shaved ice, pistachio Basque cheesecake, matcha guava dessert, chocolate strawberry brûlée layer cake. A single slice runs about 40-60rmb; a whole cake is about 250-280rmb. EAU Café has 3 locations in Shanghai (Yongkang Road, Plaza 66, Wuyi Road).",
+  "description_zh": "以蛋糕为主的甜品店，适合喝下午茶，环境舒适、拍照好看。微信小程序：EAU Café（提供点单自取和蛋糕预订的服务）。本店位于武夷路（武夷mix），距地铁延安西路站1号口步行1.0千米，营业时间11:00-19:00。菜单：水果千层、抹茶刨冰、开心果巴斯克、抹茶番石榴气疯、巧克力草莓布蕾夹心蛋糕。一块蛋糕大概是40-60rmb，购买整个蛋糕大约是250-280rmb。EAU Café在上海共有3家门店（永康路店、恒隆广场店、武夷路店）。",
+  "tags": ["cake", "afternoon tea", "dessert", "eau cafe", "武夷路"],
+  "canary": false
+}
