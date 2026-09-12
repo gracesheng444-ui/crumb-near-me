@@ -625,6 +625,42 @@
   }
 
   #community-view { overflow-y: auto; padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 14px; }
+  .segmented {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-accent);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px;
+    flex-shrink: 0;
+  }
+  .segmented .seg-btn {
+    flex: 1;
+    border: none;
+    background: none;
+    color: var(--text-dim);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 13px;
+    padding: 9px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+  }
+  .segmented .seg-btn.active {
+    background: #d6588f;
+    color: #fff;
+    box-shadow: var(--shadow);
+  }
+  #community-pane-browse, #community-pane-publish {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
   .disclaimer {
     display: flex;
     align-items: center;
@@ -825,47 +861,61 @@
   </div>
 
   <div id="community-view" hidden>
-    <div class="disclaimer">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-      来自其他访客的分享 — 未经本指南核实。
+    <div class="segmented" id="community-subnav">
+      <button type="button" class="seg-btn active" data-pane="browse">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><circle cx="8.3" cy="6.3" r="0.9" fill="currentColor" stroke="none"/><circle cx="12.2" cy="4.4" r="0.9" fill="currentColor" stroke="none"/><circle cx="15.9" cy="6.4" r="0.9" fill="currentColor" stroke="none"/></svg>
+        浏览分享
+      </button>
+      <button type="button" class="seg-btn" data-pane="publish">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        我要分享
+      </button>
     </div>
 
-    <div class="card">
-      <div class="card-heading">
-        <div class="icon-badge">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><circle cx="8.3" cy="6.3" r="0.9" fill="currentColor" stroke="none"/><circle cx="12.2" cy="4.4" r="0.9" fill="currentColor" stroke="none"/><circle cx="15.9" cy="6.4" r="0.9" fill="currentColor" stroke="none"/></svg>
-        </div>
-        <h3>留下一条分享</h3>
+    <div id="community-pane-browse">
+      <div class="disclaimer">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        来自其他访客的分享 — 未经本指南核实。
       </div>
-      <form id="note-form">
-        <input type="text" id="note-place" placeholder="哪家店？例如 麻布屋 兴业太古汇店" required />
-        <textarea id="note-text" placeholder="想让其他访客知道什么？比如打烊、菜单变化、小贴士…" required></textarea>
-        <input type="text" id="note-author" placeholder="你的称呼（选填）" />
-        <input type="file" id="note-photo-input" accept="image/*" hidden />
-        <div id="note-photo-row">
-          <button type="button" id="note-photo-btn">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            添加照片
-          </button>
-          <div id="note-photo-preview" hidden>
-            <img id="note-photo-preview-img" alt="预览" />
-            <button type="button" id="note-photo-remove">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="9" height="9"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
+      <div class="card">
+        <div class="card-heading">
+          <div class="icon-badge gold">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><circle cx="8.3" cy="6.3" r="0.9" fill="currentColor" stroke="none"/><circle cx="12.2" cy="4.4" r="0.9" fill="currentColor" stroke="none"/><circle cx="15.9" cy="6.4" r="0.9" fill="currentColor" stroke="none"/></svg>
           </div>
+          <h3>社区分享</h3>
         </div>
-        <button type="submit" id="note-form-submit">发布分享</button>
-      </form>
+        <div id="community-feed"></div>
+      </div>
     </div>
 
-    <div class="card">
-      <div class="card-heading">
-        <div class="icon-badge gold">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><circle cx="8.3" cy="6.3" r="0.9" fill="currentColor" stroke="none"/><circle cx="12.2" cy="4.4" r="0.9" fill="currentColor" stroke="none"/><circle cx="15.9" cy="6.4" r="0.9" fill="currentColor" stroke="none"/></svg>
+    <div id="community-pane-publish" hidden>
+      <div class="card">
+        <div class="card-heading">
+          <div class="icon-badge">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><circle cx="8.3" cy="6.3" r="0.9" fill="currentColor" stroke="none"/><circle cx="12.2" cy="4.4" r="0.9" fill="currentColor" stroke="none"/><circle cx="15.9" cy="6.4" r="0.9" fill="currentColor" stroke="none"/></svg>
+          </div>
+          <h3>留下一条分享</h3>
         </div>
-        <h3>社区分享</h3>
+        <form id="note-form">
+          <input type="text" id="note-place" placeholder="哪家店？例如 麻布屋 兴业太古汇店" required />
+          <textarea id="note-text" placeholder="想让其他访客知道什么？比如打烊、菜单变化、小贴士…" required></textarea>
+          <input type="text" id="note-author" placeholder="你的称呼（选填）" />
+          <input type="file" id="note-photo-input" accept="image/*" hidden />
+          <div id="note-photo-row">
+            <button type="button" id="note-photo-btn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              添加照片
+            </button>
+            <div id="note-photo-preview" hidden>
+              <img id="note-photo-preview-img" alt="预览" />
+              <button type="button" id="note-photo-remove">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="9" height="9"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+          </div>
+          <button type="submit" id="note-form-submit">发布分享</button>
+        </form>
       </div>
-      <div id="community-feed"></div>
     </div>
   </div>
 
@@ -1087,8 +1137,22 @@ navButtons.forEach((btn) => {
       loadEntries();
     } else if (btn.dataset.view === 'community-view') {
       loadNotes();
+      setCommunityPane('browse');
     }
   });
+});
+
+// --- Community sub-tabs: browse vs publish ---
+const communitySubnavBtns = document.querySelectorAll('#community-subnav .seg-btn');
+const communityPaneBrowse = document.getElementById('community-pane-browse');
+const communityPanePublish = document.getElementById('community-pane-publish');
+function setCommunityPane(pane) {
+  communitySubnavBtns.forEach((b) => b.classList.toggle('active', b.dataset.pane === pane));
+  communityPaneBrowse.hidden = pane !== 'browse';
+  communityPanePublish.hidden = pane !== 'publish';
+}
+communitySubnavBtns.forEach((btn) => {
+  btn.addEventListener('click', () => setCommunityPane(btn.dataset.pane));
 });
 
 // --- Personal dessert collection ---
@@ -1428,6 +1492,7 @@ noteForm.addEventListener('submit', async (e) => {
     noteAuthor.value = '';
     clearNotePhotoPicker();
     loadNotes();
+    setCommunityPane('browse');
   } catch (err) {
     alert(`发布失败 — ${err.message}`);
   } finally {
