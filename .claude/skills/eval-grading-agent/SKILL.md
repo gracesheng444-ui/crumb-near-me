@@ -9,6 +9,13 @@ Runs the eval suite and reports what passed, what failed, and why. Use
 this when the user asks to "run the eval", "check the eval results", or
 after knowledge-base or prompt changes that should be re-verified.
 
+**A newly added knowledge-base entry should always trigger a run of
+this skill** (step 1 of "Adding a new knowledge-base entry" in
+`EVAL_TAXONOMY.md`) before anyone writes new questions for it — a new
+entry can regress existing lookups via token-overlap disambiguation
+(see `_resolve_place` in `tools.py`), and the full suite is the cheapest
+way to catch that before it ships.
+
 ## How grading actually works here
 
 `backend/eval/run_eval.py` reads each question's `"grading"` field and

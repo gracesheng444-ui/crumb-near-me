@@ -10,6 +10,16 @@ Use this when a taxonomy cell is under its target weight, when a new
 knowledge-base entry needs coverage, or when the user asks to "add more
 eval questions" / "fill out the eval set" / "generate questions for X".
 
+**A new knowledge-base entry is not a reason to run this whole skill.**
+This skill fills the abstract capability × phrasing grid, which has
+nothing to do with any one store. See "Adding a new knowledge-base
+entry" in `EVAL_TAXONOMY.md` for what a new store actually needs —
+this skill only covers its step 3 (a couple of targeted new questions
+for that store) and step 4 (a new Synthesis question, only if the
+addition creates a genuinely new cross-entry pattern). Steps 1
+(regression) and 2 (re-validating existing Synthesis `expects`) are not
+this skill's job.
+
 ## Inputs to read first, every time
 
 1. `backend/eval/EVAL_TAXONOMY.md` — the "Weighting" table is the target

@@ -169,6 +169,44 @@ clarity, which would be 2×2×2 = 8 phrasing variants instead of 4) —
 technically more exhaustive, but most of those extra cells aren't
 meaningfully different tests.
 
+## Adding a new knowledge-base entry
+
+Adding a store to `backend/knowledge/*.json` is not "run the
+question-generator again" — that skill fills the abstract
+capability × phrasing grid above, which has nothing to do with any one
+store. What a new entry actually needs depends on which kind of
+question it touches:
+
+1. **Run the existing suite as a regression check first** (the grading
+   agent, `python -m eval.run_eval`), before writing anything new. A new
+   entry sharing brand/name tokens with an existing one is a known risk
+   — `_resolve_place` (`tools.py`) has already shown it can flag a place
+   ambiguous just from token overlap between sibling entries, and every
+   new entry adds more tokens to collide with.
+2. **Re-validate every existing Synthesis question's `expects`.**
+   Synthesis's ground truth is a function of the *whole* knowledge
+   base, not the new entry alone — by definition it "needs several
+   knowledge-base entries pulled together." A fact like "Azabuya has 5
+   branches" or "brands with more than 3 branches" can go stale the
+   moment *any* entry changes, even one for an unrelated brand. This is
+   the one step that doesn't fit either skill cleanly yet: it's a
+   manual audit until the ground truth is computed from the knowledge
+   files at eval time instead of hand-typed into `expects` — the same
+   kind of scaling question flagged elsewhere and still open.
+3. **Add targeted new questions for the new entry** — diff-based
+   categories only (Factual lookup, Adversarial, Knowledge base
+   boundary, Amap). At minimum one Factual lookup question about the
+   new store; add an Ambiguous or Amap question specifically probing
+   disambiguation if the new store shares a name/brand with an existing
+   entry, since that's the failure mode most likely to actually appear.
+4. **Add a new Synthesis question only if the addition creates a new
+   cross-entry pattern worth testing** (a category now has enough
+   members to aggregate meaningfully, a count crosses a threshold) —
+   not reflexively just because a store was added.
+
+Step 1 is the grading agent's job. Steps 3–4 are the question
+generator's job. Step 2 is unowned by either skill today.
+
 ---
 This taxonomy supersedes an earlier, more granular 11-capability draft
 (disambiguation, source attribution, subjective recommendation, and
