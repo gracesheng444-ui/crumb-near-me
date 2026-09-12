@@ -5,12 +5,20 @@ from dotenv import load_dotenv
 
 load_dotenv()  # must run before agent/tools read env vars at import time
 
-from fastapi import FastAPI, File, Form, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from agent import run_agent
-from collection import PHOTO_DIR, add_log, delete_log, list_logs, save_photo, summarize_taste
+from collection import (
+    PHOTO_DIR,
+    add_log,
+    delete_log,
+    list_logs,
+    mark_log_eaten,
+    save_photo,
+    summarize_taste,
+)
 from community import add_note, delete_note, list_notes
 from tools import AUDIO_DIR, identify_exhibit
 
@@ -65,6 +73,8 @@ async def create_log(
     rating: int | None = Form(None),
     note: str = Form(""),
     photo: UploadFile | None = File(None),
+    status: str = Form("eaten"),
+    planned_date: str = Form(""),
 ):
     photo_url = None
     if photo is not None and photo.filename:
@@ -77,6 +87,8 @@ async def create_log(
         rating=rating,
         note=note or None,
         photo_url=photo_url,
+        status=status,
+        planned_date=planned_date or None,
     )
 
 
@@ -89,6 +101,31 @@ def get_logs(user_id: str):
 def remove_log(log_id: int, user_id: str):
     deleted = delete_log(user_id, log_id)
     return {"deleted": deleted}
+
+
+@app.post("/log/{log_id}/complete")
+async def complete_log(
+    log_id: int,
+    user_id: str = Form(...),
+    rating: int | None = Form(None),
+    note: str = Form(""),
+    photo: UploadFile | None = File(None),
+):
+    """Graduate a planned reminder into a real eaten log."""
+    photo_url = None
+    if photo is not None and photo.filename:
+        contents = await photo.read()
+        photo_url = save_photo(contents, Path(photo.filename).suffix)
+    updated = mark_log_eaten(
+        user_id=user_id,
+        log_id=log_id,
+        rating=rating,
+        note=note or None,
+        photo_url=photo_url,
+    )
+    if updated is None:
+        raise HTTPException(status_code=404, detail="log entry not found")
+    return updated
 
 
 @app.get("/log/summary")

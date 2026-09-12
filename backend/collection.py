@@ -50,14 +50,20 @@ def init_db() -> None:
                 rating INTEGER,
                 note TEXT,
                 photo_url TEXT,
-                created_at TEXT NOT NULL
+                created_at TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'eaten',
+                planned_date TEXT
             )
             """
         )
-        # migration for DBs created before photo_url existed
+        # migrations for DBs created before these columns existed
         cols = {row["name"] for row in conn.execute("PRAGMA table_info(dessert_logs)")}
         if "photo_url" not in cols:
             conn.execute("ALTER TABLE dessert_logs ADD COLUMN photo_url TEXT")
+        if "status" not in cols:
+            conn.execute("ALTER TABLE dessert_logs ADD COLUMN status TEXT NOT NULL DEFAULT 'eaten'")
+        if "planned_date" not in cols:
+            conn.execute("ALTER TABLE dessert_logs ADD COLUMN planned_date TEXT")
 
 
 init_db()
@@ -70,15 +76,18 @@ def add_log(
     rating: int | None = None,
     note: str | None = None,
     photo_url: str | None = None,
+    status: str = "eaten",
+    planned_date: str | None = None,
 ) -> dict:
     created_at = datetime.now(timezone.utc).isoformat()
     with _connect() as conn:
         cur = conn.execute(
             """
-            INSERT INTO dessert_logs (user_id, dessert_name, store_name, rating, note, photo_url, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO dessert_logs
+                (user_id, dessert_name, store_name, rating, note, photo_url, created_at, status, planned_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (user_id, dessert_name, store_name, rating, note, photo_url, created_at),
+            (user_id, dessert_name, store_name, rating, note, photo_url, created_at, status, planned_date),
         )
         row_id = cur.lastrowid
     return {
@@ -90,7 +99,37 @@ def add_log(
         "note": note,
         "photo_url": photo_url,
         "created_at": created_at,
+        "status": status,
+        "planned_date": planned_date,
     }
+
+
+def mark_log_eaten(
+    user_id: str,
+    log_id: int,
+    rating: int | None = None,
+    note: str | None = None,
+    photo_url: str | None = None,
+) -> dict | None:
+    """Graduate a planned reminder into a real eaten log, timestamped now."""
+    created_at = datetime.now(timezone.utc).isoformat()
+    with _connect() as conn:
+        cur = conn.execute(
+            """
+            UPDATE dessert_logs
+            SET status = 'eaten',
+                created_at = ?,
+                rating = COALESCE(?, rating),
+                note = COALESCE(?, note),
+                photo_url = COALESCE(?, photo_url)
+            WHERE id = ? AND user_id = ?
+            """,
+            (created_at, rating, note, photo_url, log_id, user_id),
+        )
+        if cur.rowcount == 0:
+            return None
+        row = conn.execute("SELECT * FROM dessert_logs WHERE id = ?", (log_id,)).fetchone()
+    return dict(row)
 
 
 def list_logs(user_id: str) -> list[dict]:
@@ -117,7 +156,7 @@ def delete_log(user_id: str, log_id: int) -> bool:
 
 
 def summarize_taste(user_id: str) -> str:
-    logs = list_logs(user_id)
+    logs = [log for log in list_logs(user_id) if log["status"] != "planned"]
     if not logs:
         return "You haven't logged any desserts yet — add a few and I'll spot the patterns."
 
