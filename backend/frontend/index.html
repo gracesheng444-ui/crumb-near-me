@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Shanghai Dessert Guide</title>
+<title>上海甜品指南</title>
 <link rel="icon" type="image/png" href="/icon.png" />
 <link rel="apple-touch-icon" href="/icon.png" />
 <style>
@@ -645,8 +645,8 @@
       <img src="/icon.png" alt="" />
     </div>
     <div>
-      <h1>Shanghai Dessert Guide</h1>
-      <p>Bilingual · chocolate, cakes, gelato & more · 中英双语</p>
+      <h1>上海甜品指南</h1>
+      <p>巧克力・蛋糕・意式冰淇淋・更多甜品</p>
     </div>
   </header>
 
@@ -656,23 +656,22 @@
         <div class="icon-badge">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
         </div>
-        <p>Ask about a dessert spot, upload a photo to identify a shop, or get real metro/bus directions.</p>
         <p>问我关于上海甜品店的问题，也可以拍照识别、查路线。</p>
         <div class="chips">
-          <button type="button" class="chip" data-q="Best chocolate shops near Jing'an?">Best chocolate near Jing'an?</button>
-          <button type="button" class="chip" data-q="南京西路附近有哪些甜品店？">南京西路附近的甜品店？</button>
-          <button type="button" class="chip" data-q="How do I get to Nunu Donut by metro?">Directions to Nunu Donut</button>
+          <button type="button" class="chip" data-q="麻布屋有哪些口味的gelato？">麻布屋有哪些口味？</button>
+          <button type="button" class="chip" data-q="Drunk Baker的招牌蛋糕是什么？">Drunk Baker的招牌蛋糕</button>
+          <button type="button" class="chip" data-q="从静安寺地铁站怎么去麻布屋？">怎么去麻布屋？</button>
         </div>
       </div>
     </div>
 
     <form id="chat-form">
       <input type="file" id="photo-input" accept="image/*" hidden />
-      <button type="button" id="photo-btn" class="icon-btn" title="Identify a shop from a photo">
+      <button type="button" id="photo-btn" class="icon-btn" title="拍照识别甜品店">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
       </button>
-      <textarea id="message" rows="1" placeholder="Ask about a dessert spot, or 说中文也可以…" autocomplete="off"></textarea>
-      <button type="submit" id="send-btn" title="Send">
+      <textarea id="message" rows="1" placeholder="想问点什么甜品店的事？" autocomplete="off"></textarea>
+      <button type="submit" id="send-btn" title="发送">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
     </form>
@@ -684,11 +683,11 @@
         <div class="icon-badge">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
         </div>
-        <h3>Log a dessert</h3>
+        <h3>记录一份甜品</h3>
       </div>
       <form id="log-form">
-        <input type="text" id="log-dessert" placeholder="What did you eat? e.g. 抹茶#3" required />
-        <input type="text" id="log-store" placeholder="Where? (optional) e.g. 麻布屋 兴业太古汇店" />
+        <input type="text" id="log-dessert" placeholder="你吃了什么？例如 抹茶#3" required />
+        <input type="text" id="log-store" placeholder="在哪里吃的？（选填）例如 麻布屋 兴业太古汇店" />
         <div class="star-picker" id="log-stars">
           <button type="button" data-star="1"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
           <button type="button" data-star="2"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
@@ -696,21 +695,21 @@
           <button type="button" data-star="4"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
           <button type="button" data-star="5"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
         </div>
-        <textarea id="log-note" placeholder="Any notes? (optional)"></textarea>
+        <textarea id="log-note" placeholder="有什么想法？（选填）"></textarea>
         <input type="file" id="log-photo-input" accept="image/*" hidden />
         <div id="log-photo-row">
           <button type="button" id="log-photo-btn">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            Add a photo
+            添加照片
           </button>
           <div id="log-photo-preview" hidden>
-            <img id="log-photo-preview-img" alt="preview" />
+            <img id="log-photo-preview-img" alt="预览" />
             <button type="button" id="log-photo-remove">
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="9" height="9"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
         </div>
-        <button type="submit" id="log-form-submit">Add to my collection</button>
+        <button type="submit" id="log-form-submit">加入我的甜品记录</button>
       </form>
     </div>
 
@@ -719,11 +718,11 @@
         <div class="icon-badge gold">
           <svg class="icon" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2.5l1.9 6.6 6.6 1.9-6.6 1.9-1.9 6.6-1.9-6.6-6.6-1.9 6.6-1.9z"/></svg>
         </div>
-        <h3>Taste summary</h3>
+        <h3>口味总结</h3>
       </div>
       <button type="button" id="summary-btn">
         <svg class="icon" viewBox="0 0 24 24" fill="currentColor" width="13" height="13"><path d="M12 2.5l1.9 6.6 6.6 1.9-6.6 1.9-1.9 6.6-1.9-6.6-6.6-1.9 6.6-1.9z"/></svg>
-        Get my taste summary
+        生成我的口味总结
       </button>
       <div id="summary-text"></div>
     </div>
@@ -732,7 +731,7 @@
       <div class="icon-badge gold">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
       </div>
-      <h3>Your desserts</h3>
+      <h3>我的甜品记录</h3>
     </div>
     <div id="collection-log-list"></div>
   </div>
@@ -743,7 +742,7 @@
         <div class="icon-badge gold">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         </div>
-        <h3>This month</h3>
+        <h3>本月</h3>
       </div>
       <div id="cal-header">
         <button type="button" id="cal-prev">
@@ -755,7 +754,7 @@
         </button>
       </div>
       <div id="cal-weekdays">
-        <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+        <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
       </div>
       <div id="cal-grid"></div>
     </div>
@@ -763,7 +762,7 @@
     <div id="cal-day-detail" class="card">
       <div id="cal-day-detail-header" class="hide">
         <span id="cal-day-detail-label"></span>
-        <button type="button" id="cal-clear">Clear selection</button>
+        <button type="button" id="cal-clear">取消选择</button>
       </div>
       <div id="cal-day-entries"></div>
     </div>
@@ -772,7 +771,7 @@
   <div id="community-view" hidden>
     <div class="disclaimer">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-      Unverified tips from other visitors — not fact-checked by this guide.
+      来自其他访客的分享 — 未经本指南核实。
     </div>
 
     <div class="card">
@@ -780,26 +779,26 @@
         <div class="icon-badge">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
-        <h3>Leave a note</h3>
+        <h3>留下一条分享</h3>
       </div>
       <form id="note-form">
-        <input type="text" id="note-place" placeholder="Which place? e.g. 麻布屋 兴业太古汇店" required />
-        <textarea id="note-text" placeholder="What should other visitors know? Closures, menu changes, tips…" required></textarea>
-        <input type="text" id="note-author" placeholder="Your name (optional)" />
+        <input type="text" id="note-place" placeholder="哪家店？例如 麻布屋 兴业太古汇店" required />
+        <textarea id="note-text" placeholder="想让其他访客知道什么？比如打烊、菜单变化、小贴士…" required></textarea>
+        <input type="text" id="note-author" placeholder="你的称呼（选填）" />
         <input type="file" id="note-photo-input" accept="image/*" hidden />
         <div id="note-photo-row">
           <button type="button" id="note-photo-btn">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            Add a photo
+            添加照片
           </button>
           <div id="note-photo-preview" hidden>
-            <img id="note-photo-preview-img" alt="preview" />
+            <img id="note-photo-preview-img" alt="预览" />
             <button type="button" id="note-photo-remove">
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="9" height="9"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
         </div>
-        <button type="submit" id="note-form-submit">Post to community</button>
+        <button type="submit" id="note-form-submit">发布分享</button>
       </form>
     </div>
 
@@ -807,7 +806,7 @@
       <div class="icon-badge gold">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       </div>
-      <h3>Community feed</h3>
+      <h3>社区分享</h3>
     </div>
     <div id="community-feed"></div>
   </div>
@@ -815,19 +814,19 @@
   <nav id="bottom-nav">
     <button type="button" id="tab-chat" class="active" data-view="chat-view">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-      <span>Chat</span>
+      <span>聊天</span>
     </button>
     <button type="button" id="tab-collection" data-view="collection-view">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-      <span>My Desserts</span>
+      <span>我的甜品</span>
     </button>
     <button type="button" id="tab-calendar" data-view="calendar-view">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      <span>Calendar</span>
+      <span>日历</span>
     </button>
     <button type="button" id="tab-community" data-view="community-view">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      <span>Community</span>
+      <span>社区</span>
     </button>
   </nav>
 </div>
@@ -896,7 +895,7 @@ function addReplayButton(col, audioUrl) {
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'replay-btn';
-  btn.innerHTML = `${SPEAKER_ICON} Play narration`;
+  btn.innerHTML = `${SPEAKER_ICON} 播放讲解`;
   btn.addEventListener('click', () => new Audio(audioUrl).play());
   col.appendChild(btn);
 }
@@ -911,8 +910,8 @@ function addIdCard(entry) {
     <div class="id-card">
       <div class="thumb"></div>
       <div>
-        <div class="name">${known ? escapeHtml(entry.name_en || entry.name_zh) : "Couldn't identify that shop"}</div>
-        <div class="sub">${known ? escapeHtml(entry.name_zh || '') : 'Try a clearer photo of the storefront or packaging'}</div>
+        <div class="name">${known ? escapeHtml(entry.name_zh || entry.name_en) : '无法识别这家店'}</div>
+        <div class="sub">${known ? escapeHtml(entry.name_en || '') : '试试拍一张更清晰的门头或包装照片'}</div>
       </div>
     </div>`;
   log.appendChild(row);
@@ -936,7 +935,7 @@ async function sendMessage(message) {
     body.append('message', message);
     body.append('session_id', sessionId);
     const res = await fetch('/chat', { method: 'POST', body });
-    if (!res.ok) throw new Error(`Server returned ${res.status}`);
+    if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
     const data = await res.json();
     typingRow.remove();
     const col = addRow(data.reply, 'agent');
@@ -946,7 +945,7 @@ async function sendMessage(message) {
     }
   } catch (err) {
     typingRow.remove();
-    addRow(`Something went wrong reaching the guide — ${err.message}. Please try again.`, 'agent', { isError: true });
+    addRow(`连接向导时出了点问题 — ${err.message}。请再试一次。`, 'agent', { isError: true });
   } finally {
     sendBtn.disabled = input.value.trim().length === 0;
   }
@@ -1002,17 +1001,17 @@ photoInput.addEventListener('change', async () => {
     const body = new FormData();
     body.append('image', file);
     const res = await fetch('/identify', { method: 'POST', body });
-    if (!res.ok) throw new Error(`Server returned ${res.status}`);
+    if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
     const entry = await res.json();
     typingRow.remove();
     const known = addIdCard(entry);
     if (known) {
-      const name = entry.name_en || entry.name_zh;
-      sendMessage(`Tell me about ${name}`);
+      const name = entry.name_zh || entry.name_en;
+      sendMessage(`介绍一下${name}`);
     }
   } catch (err) {
     typingRow.remove();
-    addRow(`Couldn't identify that photo — ${err.message}.`, 'agent', { isError: true });
+    addRow(`无法识别这张照片 — ${err.message}。`, 'agent', { isError: true });
   }
 });
 
@@ -1104,7 +1103,7 @@ function renderStars(rating) {
 function renderLogEntry(entry) {
   const div = document.createElement('div');
   div.className = 'log-entry';
-  const date = new Date(entry.created_at).toLocaleDateString();
+  const date = new Date(entry.created_at).toLocaleDateString('zh-CN');
   div.innerHTML = `
     <div class="entry-body">
       ${entry.photo_url ? `<img class="thumb" src="${entry.photo_url}" alt="" />` : ''}
@@ -1116,7 +1115,7 @@ function renderLogEntry(entry) {
         <div class="date">${date}</div>
       </div>
     </div>
-    <button type="button" class="del-btn" title="Delete">${X_ICON}</button>
+    <button type="button" class="del-btn" title="删除">${X_ICON}</button>
   `;
   div.querySelector('.del-btn').addEventListener('click', async () => {
     await fetch(`/log/${entry.id}?user_id=${encodeURIComponent(userId)}`, { method: 'DELETE' });
@@ -1129,7 +1128,7 @@ function renderLogEntry(entry) {
 function renderCollectionList() {
   collectionLogList.innerHTML = '';
   if (allEntries.length === 0) {
-    collectionLogList.innerHTML = '<div class="collection-empty">No desserts logged yet — add your first one above.</div>';
+    collectionLogList.innerHTML = '<div class="collection-empty">还没有记录任何甜品，先在上面添加一个吧。</div>';
     return;
   }
   allEntries.forEach((entry) => collectionLogList.appendChild(renderLogEntry(entry)));
@@ -1157,7 +1156,7 @@ function dateKey(d) {
 function renderCalendar() {
   const year = calMonth.getFullYear();
   const month = calMonth.getMonth();
-  calTitle.textContent = calMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  calTitle.textContent = calMonth.toLocaleDateString('zh-CN', { month: 'long', year: 'numeric' });
 
   const entriesByDay = {};
   allEntries.forEach((entry) => {
@@ -1200,7 +1199,7 @@ function renderCalDayDetail() {
         <div class="icon-badge">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         </div>
-        <p>Tap a highlighted day to see what you logged.</p>
+        <p>点击有记录的日期查看详情。</p>
       </div>`;
     return;
   }
@@ -1233,7 +1232,7 @@ async function loadEntries() {
     renderCalendar();
     renderCalDayDetail();
   } catch (err) {
-    collectionLogList.innerHTML = `<div class="collection-empty">Couldn't load your collection — ${escapeHtml(err.message)}.</div>`;
+    collectionLogList.innerHTML = `<div class="collection-empty">无法加载你的甜品记录 — ${escapeHtml(err.message)}。</div>`;
   }
 }
 
@@ -1252,7 +1251,7 @@ logForm.addEventListener('submit', async (e) => {
     body.append('note', logNote.value.trim());
     if (logPhotoInput.files[0]) body.append('photo', logPhotoInput.files[0]);
     const res = await fetch('/log', { method: 'POST', body });
-    if (!res.ok) throw new Error(`Server returned ${res.status}`);
+    if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
 
     logDessert.value = '';
     logStore.value = '';
@@ -1263,7 +1262,7 @@ logForm.addEventListener('submit', async (e) => {
     summaryText.textContent = '';
     loadEntries();
   } catch (err) {
-    alert(`Couldn't save that entry — ${err.message}`);
+    alert(`保存失败 — ${err.message}`);
   } finally {
     logFormSubmit.disabled = false;
   }
@@ -1271,14 +1270,14 @@ logForm.addEventListener('submit', async (e) => {
 
 summaryBtn.addEventListener('click', async () => {
   summaryBtn.disabled = true;
-  summaryText.textContent = 'Thinking…';
+  summaryText.textContent = '思考中…';
   try {
     const res = await fetch(`/log/summary?user_id=${encodeURIComponent(userId)}`);
-    if (!res.ok) throw new Error(`Server returned ${res.status}`);
+    if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
     const data = await res.json();
     summaryText.textContent = data.summary;
   } catch (err) {
-    summaryText.textContent = `Couldn't generate a summary — ${err.message}.`;
+    summaryText.textContent = `无法生成总结 — ${err.message}。`;
   } finally {
     summaryBtn.disabled = false;
   }
@@ -1317,8 +1316,8 @@ notePhotoRemove.addEventListener('click', clearNotePhotoPicker);
 function renderNoteEntry(entry) {
   const div = document.createElement('div');
   div.className = 'note-entry';
-  const date = new Date(entry.created_at).toLocaleDateString();
-  const author = entry.author_name ? escapeHtml(entry.author_name) : 'Anonymous';
+  const date = new Date(entry.created_at).toLocaleDateString('zh-CN');
+  const author = entry.author_name ? escapeHtml(entry.author_name) : '匿名';
   div.innerHTML = `
     <div class="entry-body">
       ${entry.photo_url ? `<img class="thumb" src="${entry.photo_url}" alt="" />` : ''}
@@ -1328,7 +1327,7 @@ function renderNoteEntry(entry) {
         <div class="meta">${author} · ${date}</div>
       </div>
     </div>
-    ${entry.user_id === userId ? `<button type="button" class="del-btn" title="Delete">${X_ICON}</button>` : ''}
+    ${entry.user_id === userId ? `<button type="button" class="del-btn" title="删除">${X_ICON}</button>` : ''}
   `;
   const delBtn = div.querySelector('.del-btn');
   if (delBtn) {
@@ -1346,12 +1345,12 @@ async function loadNotes() {
     const notes = await res.json();
     communityFeed.innerHTML = '';
     if (notes.length === 0) {
-      communityFeed.innerHTML = '<div class="collection-empty">No notes yet — be the first to leave one.</div>';
+      communityFeed.innerHTML = '<div class="collection-empty">还没有人分享，来做第一个吧。</div>';
       return;
     }
     notes.forEach((entry) => communityFeed.appendChild(renderNoteEntry(entry)));
   } catch (err) {
-    communityFeed.innerHTML = `<div class="collection-empty">Couldn't load community notes — ${escapeHtml(err.message)}.</div>`;
+    communityFeed.innerHTML = `<div class="collection-empty">无法加载社区分享 — ${escapeHtml(err.message)}。</div>`;
   }
 }
 
@@ -1370,7 +1369,7 @@ noteForm.addEventListener('submit', async (e) => {
     body.append('user_id', userId);
     if (notePhotoInput.files[0]) body.append('photo', notePhotoInput.files[0]);
     const res = await fetch('/notes', { method: 'POST', body });
-    if (!res.ok) throw new Error(`Server returned ${res.status}`);
+    if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
 
     notePlace.value = '';
     noteText.value = '';
@@ -1378,7 +1377,7 @@ noteForm.addEventListener('submit', async (e) => {
     clearNotePhotoPicker();
     loadNotes();
   } catch (err) {
-    alert(`Couldn't post that note — ${err.message}`);
+    alert(`发布失败 — ${err.message}`);
   } finally {
     noteFormSubmit.disabled = false;
   }

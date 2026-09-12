@@ -7,12 +7,15 @@ billing to be active — falls back to text-only if not, rather than erroring.
 city-wide dessert guide — the live demo above still reflects the old
 single-mall version until redeployed.)
 
-A bilingual (Chinese/English) conversational guide to dessert spots across
-Shanghai — chocolate, cakes, gelato, Chinese sweet soups, bubble tea, and
-more. Given a photo or a typed question, it identifies a shop, narrates a
-grounded introduction aloud, gives real metro/bus directions, and answers
-visitor follow-up questions — refusing to guess when it doesn't actually
-know.
+A Chinese-language conversational guide to dessert spots across Shanghai —
+chocolate, cakes, gelato, Chinese sweet soups, bubble tea, and more. Given a
+photo or a typed question, it identifies a shop, narrates a grounded
+introduction aloud, gives real metro/bus directions, and answers visitor
+follow-up questions — refusing to guess when it doesn't actually know. It
+understands a question typed in any language but always replies in
+Chinese, matching its actual audience (Shanghai dessert-goers); an earlier
+bilingual (Chinese/English) version was simplified to just Chinese once
+mixing both languages in the same UI started feeling inconsistent.
 
 This project started scoped to a single mall (Grand Gateway 66, 港汇恒隆广场)
 and was later broadened into a general Shanghai dessert guide once the core
@@ -133,7 +136,7 @@ knowledge-base-level confidence.
 
 ## Status
 
-- [x] Project scaffold, bilingual agent loop, keyword-based retrieval, TTS/vision tools wired
+- [x] Project scaffold, Chinese-language agent loop, keyword-based retrieval, TTS/vision tools wired
 - [x] Repurposed from a single-mall guide to a city-wide Shanghai dessert guide
 - [x] Real knowledge base content — 5 brands (~16 branch entries) hand-verified so far, growing as more are added
 - [x] Live transit directions via Amap — verified working end-to-end (metro/bus routing)

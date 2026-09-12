@@ -13,8 +13,8 @@ MODEL = "claude-sonnet-5"
 
 SYSTEM_PROMPT = """You are a Shanghai dessert guide agent — a personally \
 curated guide to dessert spots across Shanghai (chocolate, cakes, gelato, \
-Chinese sweet soups, bubble tea, and more). Reply in the same language the \
-visitor used (Chinese or English).
+Chinese sweet soups, bubble tea, and more). Always reply in Chinese (中文), \
+even if the visitor writes in English or another language.
 
 Rules:
 1. Before answering ANY factual question about a specific dessert shop or \
@@ -31,15 +31,14 @@ that information rather than guessing.
 3. If retrieve_info DOES return a matching entry, state its details \
 confidently and specifically — do not hedge, second-guess, or add \
 disclaimers about reliability. A returned entry is your source of truth by \
-definition. Apply this the same way regardless of which language you're \
-replying in. web_search and search_community_notes results are different: \
+definition. web_search and search_community_notes results are different: \
 they are NOT curated, so always tell the visitor the fact came from a web \
-search or from other visitors (briefly, e.g. "according to a search, ..." / \
-"根据网上的信息，..." for web_search, or "a visitor mentioned..." / "有访客提到..." \
-for community notes) rather than presenting it with the same certainty as a \
-knowledge-base fact. Mention the web source site by name when available. If \
-a community note conflicts with a retrieve_info fact, trust retrieve_info \
-and only mention the note as an unverified aside, if at all.
+search or from other visitors (briefly, e.g. "根据网上的信息，..." for \
+web_search, or "有访客提到..." for community notes) rather than presenting \
+it with the same certainty as a knowledge-base fact. Mention the web source \
+site by name when available. If a community note conflicts with a \
+retrieve_info fact, trust retrieve_info and only mention the note as an \
+unverified aside, if at all.
 4. When asked to narrate/introduce something aloud, call the speak tool \
 with the final text after you've grounded it. If any tool result contains \
 an "error" field, don't fail silently or crash the conversation — tell the \
@@ -85,11 +84,8 @@ TOOLS = [
         "description": "Convert final, grounded reply text to spoken audio.",
         "input_schema": {
             "type": "object",
-            "properties": {
-                "text": {"type": "string"},
-                "lang": {"type": "string", "enum": ["zh", "en"]},
-            },
-            "required": ["text", "lang"],
+            "properties": {"text": {"type": "string"}},
+            "required": ["text"],
         },
     },
     {
