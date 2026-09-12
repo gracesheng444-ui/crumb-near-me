@@ -198,28 +198,50 @@
   .bubble-col { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 
   .bubble {
-    padding: 10px 13px;
-    border-radius: 15px;
+    position: relative;
+    padding: 11px 15px;
+    border-radius: 20px;
     font-size: 14.5px;
     line-height: 1.45;
     white-space: pre-wrap;
     word-wrap: break-word;
-    box-shadow: var(--shadow);
+  }
+  .bubble::after {
+    content: "";
+    position: absolute;
+    bottom: -3px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
   }
   .row.user .bubble {
     background: var(--user-bubble);
     color: var(--user-text);
-    border-bottom-right-radius: 4px;
+    border-radius: 20px 20px 6px 20px;
+    box-shadow: 0 3px 0 color-mix(in srgb, var(--user-bubble) 75%, black), var(--shadow);
+  }
+  .row.user .bubble::after {
+    right: 9px;
+    background: var(--accent-2);
   }
   .row.agent .bubble {
     background: var(--agent-bubble);
     border: 1px solid var(--border);
-    border-bottom-left-radius: 4px;
+    border-radius: 20px 20px 20px 6px;
+    box-shadow: 0 3px 0 var(--border), var(--shadow);
+  }
+  .row.agent .bubble::after {
+    left: 9px;
+    background: #8fb87a;
   }
   .row.agent .bubble.error {
     background: #fdeceb;
     border-color: #f3b8b0;
     color: #a63a2b;
+    box-shadow: 0 3px 0 #f3b8b0, var(--shadow);
+  }
+  .row.agent .bubble.error::after {
+    background: #e28277;
   }
 
   .replay-btn {
