@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from agent import run_agent
+from grade_auto import grade_auto
 from tools import get_client
 
 HERE = Path(__file__).parent
@@ -77,17 +78,21 @@ def main():
             else:
                 question_text = q[f"question_{lang}"]
                 outcome = run_agent(question_text)
-            score = judge(question_text, q["expects"], outcome["reply"])
+            if q.get("grading") == "auto":
+                score = grade_auto(q, outcome)
+            else:
+                score = judge(question_text, q["expects"], outcome["reply"])
             results.append(
                 {
                     "id": q["id"],
                     "lang": lang,
+                    "grading": q.get("grading", "judge"),
                     "question": question_text,
                     "reply": outcome["reply"],
                     **score,
                 }
             )
-            print(f"[{q['id']}/{lang}] grounded={score.get('grounded')} on_task={score.get('on_task')} - {score.get('note')}")
+            print(f"[{q['id']}/{lang}/{q.get('grading', 'judge')}] grounded={score.get('grounded')} on_task={score.get('on_task')} - {score.get('note')}")
 
     scored = [r for r in results if r["grounded"] is not None]
     if scored:

@@ -3,6 +3,13 @@
 Two independent axes for writing eval questions: what capability a
 question exercises, and how it's phrased.
 
+The examples under each capability below are illustrative, not
+exhaustive — `test_questions.json` is the authoritative, fully
+implemented set (42 questions as of this writing). See "How many
+questions is that" near the end for the full weighted breakdown, and
+"Grading — auto vs. judge" for how each capability actually gets
+scored.
+
 ## Axis A — Capability
 
 What the agent has to do: retrieve, synthesize, call a live API, refuse,
@@ -93,102 +100,74 @@ Hedging, false starts, filler words, or an indirect description instead
 of a name.
 1. 那个，就是那个卖抹，呃呃茶的冰淇淋，在上海，那个乌鲁木齐路附近的，叫什么名字啊？
 
-## Coverage map
+## Grading — auto vs. judge
 
-Which capability × phrasing combinations already have a real example
-*implemented in `test_questions.json`* versus what's still open (a
-combination is only marked ✓ once it's an actual case the harness runs,
-not just prose in this document). Multi-turn crosses with phrasing the
-same as every other row — see the Axis A section above for why it's
-not a special case.
+Not every capability can be graded the same way. Four of the seven have
+a checkable ground truth (a fact that's either right or wrong, a tool
+call that either happened or didn't, a refusal that either happened or
+didn't) — those get **automatic, rule-based grading**: `grade_auto.py`
+checks the reply against a structured `auto_grade` spec on the question
+(`keywords_all`/`keywords_any`/`keywords_forbidden` regex checks, plus
+`requires_tool_call` for Amap) — no LLM call, no judge prompt, fully
+reproducible. The other three are open-ended enough that "did it do
+this well" isn't a keyword match, so they stay on the existing
+LLM-as-judge path (`judge()` in `run_eval.py`, scored against the
+question's prose `expects` field):
 
-| Capability | Short | Long | Multi-intent | Ambiguous |
-|---|---|---|---|---|
-| Factual lookup | ✓ | open | ✓ | ✓ |
-| Synthesis | ✓ | ✓ | ✓ | open |
-| Amap API | ✓ | open | ✓ | open |
-| Chit-chat | ✓ | open | open | open |
-| Knowledge base boundary | ✓ | open | open | ✓ |
-| Adversarial | ✓ | ✓ | ✓ | open |
-| Multi-turn | ✓ | open | open | open |
+| Capability | Grading |
+|---|---|
+| Factual lookup | auto |
+| Amap API | auto |
+| Knowledge base boundary | auto | 
+| Adversarial | auto |
+| Synthesis | judge |
+| Chit-chat | judge |
+| Multi-turn | judge |
 
-**Superseded decision:** the paragraph above (and the 15/25 count below
-it) reflects an earlier strategy of skipping cells whose phrasing
-variant seemed low-value. The current strategy instead computes every
-cell — nothing is skipped — but weights how many cases each cell gets,
-so effort still goes where it matters instead of spreading flat across
-all 25. See the weighting rubric below.
+`run_eval.py` branches on each question's `"grading"` field and calls
+the right one; `grade_auto()` also hard-fails any question whose reply
+is the agent loop's own fallback string (a blank-reply or hit-the-cap
+message from `agent.py`) regardless of what else it does — a reply that
+never actually said anything shouldn't be gradeable as a pass just
+because a tool got called along the way.
 
 ## Weighting — how many cases per cell
 
 Every cell gets at least one case; cells that are more likely to occur
-*and* more costly to get wrong get more. Score each cell on two 1–3
-scales and multiply:
-
-- **Frequency** — how often a real visitor would actually phrase a
-  question this way for this capability (1 = contrived, 3 = common).
-- **Risk** — how costly a wrong answer is (1 = a stilted reply nobody
-  minds, 3 = a confidently wrong or unsafe answer).
-
-Score ÷ 3, rounded up, gives 1–3 cases per cell:
+*and* more costly to get wrong get more:
 
 | Capability | Short | Long | Multi-intent | Ambiguous |
 |---|---|---|---|---|
 | Factual lookup | 2 | 1 | 2 | 2 |
 | Synthesis | 2 | 2 | 2 | 1 |
-| Amap API | 2 | 1 | 2 | 1 |
-| Chit-chat | 1 | 1 | 1 | 1 |
-| Knowledge base boundary | 3 | 1 | 2 | 3 |
-| Adversarial | 3 | 3 | 3 | 2 |
-| Multi-turn | 3 | 1 | 2 | 3 |
+| Amap API | 2 | 1 | 2 | 2 |
+| Chit-chat | 1 | 1 | 1 | 2 |
+| Multi-turn | 1 | 1 | 1 | 1 |
+| Knowledge base boundary | 3 | 1 | 1 | 1 |
+| Adversarial | 2 | 1 | 2 | 1 |
 
-Two cells carry the highest weight, for different reasons:
-
-- **Adversarial** is weighted 2–3 across every phrasing because each
-  phrasing shape is a genuinely different attack surface (blunt
-  override, authority-claim social engineering, injection riding a
-  legitimate question) and a failure here is a security/trust problem,
-  not a UX nit — so even the least-likely phrasing (Ambiguous) still
-  gets 2, not 1.
-- **Knowledge base boundary** is weighted 3 on Short and Ambiguous
-  because a confident hallucination under vagueness is the single
-  costliest failure mode for a RAG-shaped agent — worse than any other
-  cell being merely imperfect.
-
-Chit-chat stays flat at 1 everywhere: it's genuinely low-stakes and the
-phrasing variants don't meaningfully change what's being tested.
-
-Multi-turn is weighted the same shape as Knowledge base boundary (3 on
-Short and Ambiguous, 2 on Multi-intent, 1 on Long) because Short and
-Ambiguous are the natural ways a real follow-up gets phrased — "that
-shop" or a vague half-sentence relying on what was just said — while a
-long, constraint-heavy paragraph as a *follow-up* is comparatively rare.
-Risk is high across the board: a context-carryover bug is subtle and
-easy to miss in a single-turn-only eval suite.
+Knowledge base boundary is weighted highest on Short (3) because a
+confident hallucination under a plain, direct question is the single
+costliest failure mode for a RAG-shaped agent. Adversarial and Amap
+stay elevated across Short/Multi-intent since both are realistic,
+frequently-occurring shapes with a clear-cut pass/fail. Chit-chat and
+Multi-turn stay low and flat — genuinely lower-stakes, and the phrasing
+variant doesn't change what's actually being tested.
 
 ## How many questions is that
 
-Combining the two axes at the grain used above:
-
-- All 7 capabilities now cross with phrasing × 4 phrasing tags =
-  **28 cells**, unweighted design space
-- **Unweighted total: 28** if every cell got exactly 1 case
-- **Weighted total: 53** once the rubric above is applied (7 Factual +
-  7 Synthesis + 6 Amap + 4 Chit-chat + 9 Knowledge base boundary + 11
-  Adversarial + 9 Multi-turn)
-- **Written and implemented so far: 15** — `test_questions.json` has 15
-  entries covering 15 of the 28 cells; the remaining ~38 (to reach the
-  weighted target) are the next round of writing, prioritized by weight
-  (Adversarial, Knowledge base boundary, and Multi-turn cells first,
-  since all three are under-weighted relative to target and
-  highest-stakes)
+- 7 capabilities × 4 phrasing tags = **28 cells**
+- **Weighted total: 42** (7 Factual + 7 Synthesis + 7 Amap + 5
+  Chit-chat + 4 Multi-turn + 6 Knowledge base boundary + 6 Adversarial)
+- **Written and implemented: 42/42** — `test_questions.json` has all 42
+  entries, matching the weight table exactly (26 auto-graded, 16
+  judge-graded)
 
 This treats the four phrasing tags as one shared label per cell rather
 than fully crossing three independent traits (length × intent-count ×
-clarity, which would be 2×2×2 = 8 phrasing variants instead of 4). The
-fully-crossed version would be 7 × 8 = 56 raw cells — technically more
-exhaustive, but most of those extra cells aren't meaningfully different
-tests. 53, weighted, is the number worth actually writing toward.
+clarity, which would be 2×2×2 = 8 phrasing variants instead of 4) —
+technically more exhaustive, but most of those extra cells aren't
+meaningfully different tests.
 
 ---
 This taxonomy supersedes an earlier, more granular 11-capability draft
