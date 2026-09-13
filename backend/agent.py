@@ -5,12 +5,19 @@ first. This is the core "agentic" piece — a plain prompt-and-respond call
 would skip the tool loop entirely.
 """
 import json
+import re
 
 import dashscope
 
 from collection import get_taste_history
 from community import search_notes as search_community_notes
-from tools import DASHSCOPE_API_KEY, get_transit_directions, retrieve_info, speak
+from tools import (
+    DASHSCOPE_API_KEY,
+    get_real_brand_names,
+    get_transit_directions,
+    retrieve_info,
+    speak,
+)
 
 MODEL = "qwen-plus"
 
@@ -192,6 +199,50 @@ DISPATCH = {
     "search_community_notes": search_community_notes,
 }
 
+# Prompt-only fixes for the recommendation-hallucination gap (rule 8) plateaued
+# in eval testing — repeated sampling of an identical prompt still
+# occasionally invented a shop despite the rule. This is a cheap, bounded
+# post-hoc check instead: does the reply make concrete, specific-sounding
+# claims about a shop (a price/address/distance, OR a highlighted proper
+# noun — every fabricated example seen in testing bolded or quoted the fake
+# shop name, e.g. "**Maison Tati**", even without a stated price/address),
+# without either naming a real knowledge-base brand or attributing the
+# claim to a web search/community note (both legitimate non-KB sources per
+# rules 2/3)? If so, it's very likely inventing a shop — force one
+# corrective retry rather than trusting the prompt alone.
+_CONCRETE_CLAIM_RE = re.compile(
+    r"[¥$]|\d+\s*(rmb|元|块钱)|地址|营业时间|步行\s*\d|\d+\s*(m|米|km|分钟)\b"
+    r"|\*\*[^\n*]{2,40}\*\*|「[^」\n]{2,20}」",
+    re.IGNORECASE,
+)
+_WEB_ATTRIBUTION_RE = re.compile(
+    r"根据网上|网上信息|网上查到|有访客提到|访客反馈|community note|according to (a )?web",
+    re.IGNORECASE,
+)
+
+# A second, related pattern found while testing the fix above: even a
+# reply correctly naming a REAL entry sometimes wraps it in an invented
+# "many customers say..."-style testimonial that isn't from an actual
+# search_community_notes result — a fabricated quote dressed up as social
+# proof, distinct from the sanctioned attribution phrasings above (rule 3's
+# "有访客提到"/"访客反馈"), which stay legitimate and are deliberately not
+# in this list.
+_FABRICATED_TESTIMONIAL_RE = re.compile(
+    r"很多访客说|许多顾客反馈|顾客都说|网友都说|大家都说|不少顾客反馈"
+    r"|customers (say|report)|visitors (say|report)|many (people )?(say|report)",
+    re.IGNORECASE,
+)
+
+
+def _looks_like_unverified_shop_claim(reply: str) -> bool:
+    if _FABRICATED_TESTIMONIAL_RE.search(reply):
+        return True
+    if not _CONCRETE_CLAIM_RE.search(reply):
+        return False
+    if _WEB_ATTRIBUTION_RE.search(reply):
+        return False
+    return not any(name in reply for name in get_real_brand_names())
+
 
 def run_agent(
     user_message: str, history: list[dict] | None = None, user_id: str = ""
@@ -204,13 +255,18 @@ def run_agent(
     dispatch = {**DISPATCH, "get_my_dessert_history": lambda: get_taste_history(user_id)}
 
     audio_path = None
+    correction_notice = None  # set once if a draft reply fails the grounding check below
 
     for _ in range(6):  # hard cap so a bad loop can't run forever
+        api_messages = [{"role": "system", "content": SYSTEM_PROMPT}] + messages
+        if correction_notice:
+            api_messages = api_messages + [{"role": "user", "content": correction_notice}]
+
         response = dashscope.Generation.call(
             api_key=DASHSCOPE_API_KEY,
             model=MODEL,
             result_format="message",
-            messages=[{"role": "system", "content": SYSTEM_PROMPT}] + messages,
+            messages=api_messages,
             tools=TOOLS,
             enable_search=True,
             search_options={"enable_source": True},
@@ -229,6 +285,27 @@ def run_agent(
 
         if not tool_calls:
             final_text = message.get("content") or ""
+            if correction_notice is None and _looks_like_unverified_shop_claim(final_text):
+                # Prompt-only fixes plateaued in eval testing (see agent.py's
+                # module docstring context / first_refinement.md) — this is
+                # deliberately not returned yet. One bounded retry, forcing
+                # the model to see its own draft flagged before it can finish.
+                correction_notice = (
+                    "[Automated grounding check — not the visitor] Your draft "
+                    "reply either (a) makes a specific claim (a price, "
+                    "address, distance, or hours) about a shop without naming "
+                    "any real knowledge-base brand and without attributing it "
+                    "to a web search or community note — usually meaning a "
+                    "shop was invented instead of grounded — or (b) includes "
+                    "an unattributed 'many customers/visitors say...' style "
+                    "testimonial, which is fabricated unless it came from an "
+                    "actual search_community_notes result. Revise your reply: "
+                    "call retrieve_info if you haven't, only state specifics "
+                    "for a real entry it returns, drop any invented "
+                    "testimonial, and say plainly if you don't have a "
+                    "specific pick rather than inventing one."
+                )
+                continue
             messages.append({"role": "assistant", "content": final_text})
             if not final_text:
                 final_text = "Sorry, I got cut off there — could you ask that again?"

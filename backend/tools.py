@@ -45,6 +45,29 @@ def load_knowledge_base(include_canary: bool = True) -> list[dict]:
     return entries
 
 
+_BRANCH_SUFFIX_RE = re.compile(r"[（(].*$")
+_real_brand_names_cache: list[str] | None = None
+
+
+def get_real_brand_names() -> list[str]:
+    """Brand-root names (branch suffix stripped) for every real knowledge-base
+    entry, e.g. "麻布屋 Azabuya（乌鲁木齐中路店）" -> "麻布屋 Azabuya". Used to
+    verify a reply that names a specific shop isn't naming one that doesn't
+    exist — see agent.py's post-reply grounding check. Cached: the knowledge
+    base is static per process, loaded from disk once."""
+    global _real_brand_names_cache
+    if _real_brand_names_cache is None:
+        names = set()
+        for entry in load_knowledge_base(include_canary=False):
+            for field in ("name_zh", "name_en"):
+                raw = entry.get(field, "")
+                stripped = _BRANCH_SUFFIX_RE.sub("", raw).strip()
+                if stripped:
+                    names.add(stripped)
+        _real_brand_names_cache = sorted(names)
+    return _real_brand_names_cache
+
+
 _WORD_RE = re.compile(r"[a-z0-9]+")
 _CJK_RE = re.compile(r"[一-鿿]+")
 
