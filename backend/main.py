@@ -1,3 +1,4 @@
+import asyncio
 import base64
 from pathlib import Path
 
@@ -17,6 +18,7 @@ from collection import (
     list_logs,
     mark_log_eaten,
     save_photo,
+    save_photo_cutout,
     summarize_taste,
 )
 from community import add_note, delete_note, list_notes
@@ -77,9 +79,11 @@ async def create_log(
     planned_date: str = Form(""),
 ):
     photo_url = None
+    photo_cutout_url = None
     if photo is not None and photo.filename:
         contents = await photo.read()
         photo_url = save_photo(contents, Path(photo.filename).suffix)
+        photo_cutout_url = await asyncio.to_thread(save_photo_cutout, contents)
     return add_log(
         user_id=user_id,
         dessert_name=dessert_name,
@@ -89,6 +93,7 @@ async def create_log(
         photo_url=photo_url,
         status=status,
         planned_date=planned_date or None,
+        photo_cutout_url=photo_cutout_url,
     )
 
 
@@ -113,15 +118,18 @@ async def complete_log(
 ):
     """Graduate a planned reminder into a real eaten log."""
     photo_url = None
+    photo_cutout_url = None
     if photo is not None and photo.filename:
         contents = await photo.read()
         photo_url = save_photo(contents, Path(photo.filename).suffix)
+        photo_cutout_url = await asyncio.to_thread(save_photo_cutout, contents)
     updated = mark_log_eaten(
         user_id=user_id,
         log_id=log_id,
         rating=rating,
         note=note or None,
         photo_url=photo_url,
+        photo_cutout_url=photo_cutout_url,
     )
     if updated is None:
         raise HTTPException(status_code=404, detail="log entry not found")
