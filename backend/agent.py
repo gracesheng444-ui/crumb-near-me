@@ -107,6 +107,16 @@ to sound helpful or interesting. If retrieve_info has nothing matching, \
 say plainly you don't have a specific pick for that right now (you may \
 still describe the general flavor direction, or use web results with the \
 same attribution rules as rule 3) rather than inventing a place.
+9. For casual chit-chat (small talk, a mood/feeling remark, a question \
+about you rather than a dessert) that isn't asking for a fact or a \
+recommendation: keep it to 1-2 short sentences and stay light — this is \
+not the moment to pivot into a shop recommendation unless asked. Never \
+invent a personal history, routine, or preference as if it were real \
+autobiography (you don't have one). Never invent a supporting "fact" of \
+any kind — a study, a statistic, a citation, a scientific mechanism — to \
+back up a casual remark; if you don't know something, that's fine to just \
+not mention, rather than manufacturing evidence for it. A short honest \
+reply beats a long fabricated one.
 """
 
 TOOLS = [
@@ -199,17 +209,22 @@ DISPATCH = {
     "search_community_notes": search_community_notes,
 }
 
-# Prompt-only fixes for the recommendation-hallucination gap (rule 8) plateaued
-# in eval testing — repeated sampling of an identical prompt still
-# occasionally invented a shop despite the rule. This is a cheap, bounded
-# post-hoc check instead: does the reply make concrete, specific-sounding
-# claims about a shop (a price/address/distance, OR a highlighted proper
-# noun — every fabricated example seen in testing bolded or quoted the fake
-# shop name, e.g. "**Maison Tati**", even without a stated price/address),
-# without either naming a real knowledge-base brand or attributing the
-# claim to a web search/community note (both legitimate non-KB sources per
-# rules 2/3)? If so, it's very likely inventing a shop — force one
-# corrective retry rather than trusting the prompt alone.
+# Prompt-only fixes for two hallucination gaps (rule 8's recommendation
+# grounding, rule 9's chit-chat brevity) plateaued in eval testing —
+# repeated sampling of an identical prompt still occasionally fabricated
+# something despite the rule. This is a cheap, bounded post-hoc check
+# instead, covering three observed patterns:
+#  (a) a concrete, specific-sounding claim about a shop (a price/address/
+#      distance, OR a highlighted proper noun — every fabricated shop seen
+#      in testing was bolded or quoted, e.g. "**Maison Tati**", even
+#      without a stated price/address) that names no real knowledge-base
+#      brand and isn't attributed to a web search/community note;
+#  (b) an unattributed "many customers/visitors say..." testimonial —
+#      found stretching a REAL entry with fake social proof; and
+#  (c) an unattributed study/citation/biochemistry term — found on plain
+#      chit-chat turns inventing "evidence" for a casual remark.
+# Any of the three is very likely fabrication — force one corrective
+# retry rather than trusting the prompt alone.
 _CONCRETE_CLAIM_RE = re.compile(
     r"[¥$]|\d+\s*(rmb|元|块钱)|地址|营业时间|步行\s*\d|\d+\s*(m|米|km|分钟)\b"
     r"|\*\*[^\n*]{2,40}\*\*|「[^」\n]{2,20}」",
@@ -233,9 +248,24 @@ _FABRICATED_TESTIMONIAL_RE = re.compile(
     re.IGNORECASE,
 )
 
+# A third pattern, unrelated to shop-grounding: casual chit-chat questions
+# (rule 9) invented supporting "evidence" for an offhand remark — a fake
+# study, citation, or biochemistry term. The knowledge base has no
+# nutrition/psychology content at all, so any of this appearing without web
+# attribution is essentially always fabricated, regardless of how brief or
+# unrelated to shops the turn is.
+_FABRICATED_CITATION_RE = re.compile(
+    r"研究(表明|发现|显示)|据.{0,6}研究|一项研究|《[^》]{2,30}》|study (titled|found|shows)"
+    r"|according to a \d{4} study|血清素|多巴胺|内啡肽|苯乙胺|可可碱"
+    r"|serotonin|dopamine|endorphin|phenylethylamine|theobromine",
+    re.IGNORECASE,
+)
+
 
 def _looks_like_unverified_shop_claim(reply: str) -> bool:
     if _FABRICATED_TESTIMONIAL_RE.search(reply):
+        return True
+    if _FABRICATED_CITATION_RE.search(reply) and not _WEB_ATTRIBUTION_RE.search(reply):
         return True
     if not _CONCRETE_CLAIM_RE.search(reply):
         return False
@@ -296,14 +326,16 @@ def run_agent(
                     "address, distance, or hours) about a shop without naming "
                     "any real knowledge-base brand and without attributing it "
                     "to a web search or community note — usually meaning a "
-                    "shop was invented instead of grounded — or (b) includes "
-                    "an unattributed 'many customers/visitors say...' style "
+                    "shop was invented instead of grounded — (b) includes an "
+                    "unattributed 'many customers/visitors say...' style "
                     "testimonial, which is fabricated unless it came from an "
-                    "actual search_community_notes result. Revise your reply: "
-                    "call retrieve_info if you haven't, only state specifics "
-                    "for a real entry it returns, drop any invented "
-                    "testimonial, and say plainly if you don't have a "
-                    "specific pick rather than inventing one."
+                    "actual search_community_notes result, or (c) cites a "
+                    "study/statistic/biochemistry term with no web-search "
+                    "attribution, which this app has no real source for. "
+                    "Revise your reply: call retrieve_info if you haven't, "
+                    "only state specifics for a real entry it returns, drop "
+                    "any invented testimonial or citation, and say plainly if "
+                    "you don't have something rather than inventing it."
                 )
                 continue
             messages.append({"role": "assistant", "content": final_text})
