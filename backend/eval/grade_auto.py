@@ -41,19 +41,15 @@ def _search(pattern: str, text: str) -> bool:
 
 
 def _tool_was_called(messages: list, tool_name: str) -> bool:
+    """Checks DashScope/Qwen's tool-call shape: an assistant message carries
+    a top-level "tool_calls" list, each a {"function": {"name": ...}} dict —
+    not Anthropic's old content-block "tool_use" shape (dropped along with
+    the Claude migration; this would silently never match against it)."""
     for msg in messages:
         if msg.get("role") != "assistant":
             continue
-        content = msg.get("content")
-        if not isinstance(content, list):
-            continue
-        for block in content:
-            block_type = getattr(block, "type", None)
-            block_name = getattr(block, "name", None)
-            if block_type is None and isinstance(block, dict):
-                block_type = block.get("type")
-                block_name = block.get("name")
-            if block_type == "tool_use" and block_name == tool_name:
+        for tc in msg.get("tool_calls") or []:
+            if (tc.get("function") or {}).get("name") == tool_name:
                 return True
     return False
 

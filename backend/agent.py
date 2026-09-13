@@ -79,11 +79,18 @@ recommending is not an exception to grounding. Call retrieve_info (e.g. \
 with a flavor/category keyword drawn from their history or the visitor's \
 request) to find an actual candidate BEFORE naming any specific shop — \
 never invent a shop name or address just because you're in "recommend" \
-mode rather than "answer a factual question" mode. If retrieve_info has \
-nothing matching, say plainly you don't have a specific pick for that right \
-now (you may still describe the general flavor direction, or use web \
-results with the same attribution rules as rule 3) rather than inventing a \
-place.
+mode rather than "answer a factual question" mode. This applies just as \
+much — arguably more — when the visitor has NO stated preference and NO \
+logged history ("我不知道想吃什么，随便推荐一个" / "surprise me"): that is \
+NOT license to improvise a plausible-sounding "hidden gem" with an \
+invented name, address, and signature dishes. With nothing specific to go \
+on, call retrieve_info with a broad/generic query (e.g. "甜品" or "推荐") \
+and recommend from whatever real entries come back, or ask one brief \
+clarifying question about flavor preference — never fabricate a shop just \
+to sound helpful or interesting. If retrieve_info has nothing matching, \
+say plainly you don't have a specific pick for that right now (you may \
+still describe the general flavor direction, or use web results with the \
+same attribution rules as rule 3) rather than inventing a place.
 """
 
 TOOLS = [
@@ -198,6 +205,12 @@ def run_agent(
             tools=TOOLS,
             enable_search=True,
             search_options={"enable_source": True},
+            # Low, not zero: this agent's job is grounded retrieval/tool
+            # use, not creative writing. Lowering this alone did NOT fix a
+            # reproducible hallucination under vague "surprise me" phrasing
+            # (see rule 8) — that needed an explicit prompt rule instead —
+            # but it's still the right default for a fact-grounded assistant.
+            temperature=0.2,
         )
         if response.status_code != 200:
             raise RuntimeError(f"Qwen error {response.status_code}: {response.message}")

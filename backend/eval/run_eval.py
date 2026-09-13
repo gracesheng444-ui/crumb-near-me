@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from agent import run_agent
+from collection import add_log, delete_log, list_logs
 from grade_auto import grade_auto
 from tools import get_client
 
@@ -58,11 +59,30 @@ def judge(question: str, expects: str, reply: str) -> dict:
         return {"grounded": None, "on_task": None, "note": f"unparseable judge output: {text}"}
 
 
+def _seed_history(user_id: str, entries: list) -> None:
+    """Seed a synthetic visitor's dessert-log history before asking a
+    personalization question. Idempotent across repeated eval runs: clears
+    whatever this eval user id already has first, so re-running the suite
+    doesn't accumulate duplicate rows."""
+    for existing in list_logs(user_id):
+        delete_log(user_id, existing["id"])
+    for entry in entries:
+        add_log(user_id=user_id, **entry)
+
+
 def main():
     questions = json.loads((HERE / "test_questions.json").read_text(encoding="utf-8"))
     results = []
 
     for q in questions:
+        # A personalization question that needs get_my_dessert_history to
+        # see something specific — seeded once per question (not per lang),
+        # under a deterministic per-question id so reruns stay reproducible.
+        user_id = ""
+        if "seed_history" in q:
+            user_id = f"eval-{q['id']}"
+            _seed_history(user_id, q["seed_history"])
+
         for lang in ("en", "zh"):
             if f"turns_{lang}" in q:
                 # Multi-turn case: run each turn with accumulated history so
@@ -72,12 +92,12 @@ def main():
                 history = []
                 outcome = None
                 for turn_text in turns:
-                    outcome = run_agent(turn_text, history)
+                    outcome = run_agent(turn_text, history, user_id=user_id)
                     history = outcome["messages"]
                 question_text = " → ".join(turns)
             else:
                 question_text = q[f"question_{lang}"]
-                outcome = run_agent(question_text)
+                outcome = run_agent(question_text, user_id=user_id)
             if q.get("grading") == "auto":
                 score = grade_auto(q, outcome)
             else:

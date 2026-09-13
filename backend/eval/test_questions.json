@@ -843,5 +843,163 @@
       "呃…就是它大概几点，我是说打烊的时间..."
     ],
     "expects": "The second reply must correctly state 22:00 for the Xingye Taikoo Hui branch specifically, resolving the vague/hedging 'it...closing time' reference to the branch named in turn 1, not asking the visitor to clarify which shop, and not picking a different Azabuya branch."
+  },
+  {
+    "id": "recommendation_short_01",
+    "type": "recommendation",
+    "capability": "recommendation",
+    "phrasing": "short",
+    "grading": "judge",
+    "entities": [],
+    "question_en": "Any dessert shop recommendations?",
+    "question_zh": "有什么甜品店推荐吗？",
+    "expects": "A brand-new visitor with no logged history should either get a recommendation grounded in a real knowledge-base entry, or (if a broad/generic retrieve_info query comes back empty) a brief clarifying question about flavor preference. Either is acceptable. What's NOT acceptable, under any framing: inventing a plausible-sounding shop name, address, or signature dish that isn't a real knowledge-base entry — empirically, this happens often enough on this exact question (real hallucinations seen in testing: 糖舍/Tang She) that it needs judgment, not a keyword check."
+  },
+  {
+    "id": "recommendation_short_02",
+    "type": "recommendation",
+    "capability": "recommendation",
+    "phrasing": "short",
+    "grading": "auto",
+    "entities": [
+      "azabuya_taikoohui",
+      "azabuya_wanxiangcheng",
+      "azabuya_wulumuqi",
+      "azabuya_yanping",
+      "azabuya_yongkang",
+      "eau_cafe_henglong",
+      "eau_cafe_wuyi",
+      "eau_cafe_yongkang",
+      "bebaked_yuyuan",
+      "bebaked_zhenru",
+      "drunk_baker"
+    ],
+    "seed_history": [
+      {
+        "dessert_name": "超浓抹茶芭菲",
+        "store_name": "测试抹茶专卖店",
+        "rating": 5,
+        "note": "非常喜欢，浓郁不甜腻，想再吃"
+      },
+      {
+        "dessert_name": "超甜什锦甜甜圈",
+        "store_name": "测试甜甜圈店",
+        "rating": 2,
+        "note": "太甜腻了，不会再点"
+      }
+    ],
+    "question_en": "Any dessert recommendations? I feel like having something sweet today",
+    "question_zh": "有什么甜品推荐吗？我今天想吃点甜品",
+    "expects": "Regression test for a real hallucination caught live: with this exact seeded history and this exact phrasing, the agent once invented two fake shops (一兰堂, 糖年糕) with fake addresses instead of grounding the recommendation in retrieve_info. Should reason from the seeded history (loved an intense, not-too-sweet matcha dessert; disliked an overly sweet donut) and recommend a REAL matcha-forward knowledge-base entry (e.g. an Azabuya branch's matcha gelato, EAU Café's matcha items, bebaked's matcha items, or Drunk Baker's matcha jasmine cake) — never an invented shop name or address.",
+    "auto_grade": {
+      "keywords_any": [
+        "麻布屋|Azabuya",
+        "bebaked",
+        "Drunk Baker|醉师傅",
+        "EAU Caf(é|e)",
+        "Pie Bird",
+        "金桂豆腐花馆|Golden Osmanthus"
+      ],
+      "keywords_forbidden": [
+        "一兰堂",
+        "糖年糕"
+      ]
+    }
+  },
+  {
+    "id": "recommendation_long_01",
+    "type": "recommendation",
+    "capability": "recommendation",
+    "phrasing": "long",
+    "grading": "judge",
+    "entities": [
+      "azabuya_taikoohui",
+      "azabuya_wanxiangcheng",
+      "azabuya_wulumuqi",
+      "azabuya_yanping",
+      "azabuya_yongkang",
+      "eau_cafe_henglong",
+      "eau_cafe_wuyi",
+      "eau_cafe_yongkang",
+      "bebaked_yuyuan",
+      "bebaked_zhenru",
+      "drunk_baker"
+    ],
+    "seed_history": [
+      {
+        "dessert_name": "麻布屋抹茶#3 gelato",
+        "store_name": "麻布屋",
+        "rating": 5,
+        "note": "浓郁但不苦，甜度刚好"
+      }
+    ],
+    "question_en": "I usually love matcha-flavored desserts — the more intense the better — but I really can't handle anything too sweet, it gets cloying fast. Thinking of meeting a friend for afternoon tea today, any good spots?",
+    "question_zh": "我平时特别爱吃抹茶口味的甜品，越浓越好，但真的吃不了太甜的东西，一甜就腻。今天想约朋友下午茶，有没有什么好去处？",
+    "expects": "Should recommend a real grounded matcha-forward pick (an Azabuya branch's matcha gelato, EAU Café's matcha shaved ice/matcha guava dessert, bebaked's matcha items, or Drunk Baker's matcha jasmine cake), reasoning about intensity vs. sweetness using details actually in the data (e.g. Azabuya's own matcha #5 is noted as intensely bitter rather than sweet, which fits 'intense' but should be weighed against being called out as harder to enjoy for newcomers) rather than assuming sweetness levels not stated in the data. Must not invent a shop or a dish not in the knowledge base."
+  },
+  {
+    "id": "recommendation_multiintent_01",
+    "type": "recommendation",
+    "capability": "recommendation",
+    "phrasing": "multiintent",
+    "grading": "auto",
+    "entities": [
+      "azabuya_taikoohui",
+      "azabuya_wanxiangcheng",
+      "azabuya_wulumuqi",
+      "azabuya_yanping",
+      "azabuya_yongkang",
+      "eau_cafe_henglong",
+      "eau_cafe_wuyi",
+      "eau_cafe_yongkang",
+      "bebaked_yuyuan",
+      "bebaked_zhenru",
+      "drunk_baker"
+    ],
+    "seed_history": [
+      {
+        "dessert_name": "超浓抹茶芭菲",
+        "store_name": "测试抹茶专卖店",
+        "rating": 5,
+        "note": "非常喜欢，浓郁不甜腻，想再吃"
+      },
+      {
+        "dessert_name": "超甜什锦甜甜圈",
+        "store_name": "测试甜甜圈店",
+        "rating": 2,
+        "note": "太甜腻了，不会再点"
+      }
+    ],
+    "question_en": "What was that donut shop I tried last time again? Also, any dessert recommendations for today?",
+    "question_zh": "我上次吃的那家甜甜圈店叫什么来着？另外今天有什么甜品推荐吗？",
+    "expects": "Should answer both parts: correctly recall '测试甜甜圈店' from the seeded history, AND recommend a real grounded matcha-forward entry for the second part — never an invented shop.",
+    "auto_grade": {
+      "keywords_all": [
+        "测试甜甜圈店"
+      ],
+      "keywords_any": [
+        "麻布屋|Azabuya",
+        "bebaked",
+        "Drunk Baker|醉师傅",
+        "EAU Caf(é|e)",
+        "Pie Bird",
+        "金桂豆腐花馆|Golden Osmanthus"
+      ],
+      "keywords_forbidden": [
+        "一兰堂",
+        "糖年糕"
+      ]
+    }
+  },
+  {
+    "id": "recommendation_ambiguous_01",
+    "type": "recommendation",
+    "capability": "recommendation",
+    "phrasing": "ambiguous",
+    "grading": "judge",
+    "entities": [],
+    "question_en": "Um so... I don't really know what dessert I'm in the mood for today, uh, do you have any, um, recommendations?",
+    "question_zh": "呃就是...我今天，呃，不知道想吃点什么甜品诶，你有什么，呃，推荐的吗？",
+    "expects": "Hedging/disfluent phrasing with no stated preference and no logged history should not be treated as license to invent a 'hidden gem' shop with a fabricated name, address, or dishes. A correct reply either recommends a real grounded knowledge-base entry, or asks a brief clarifying question about flavor preference when a broad retrieve_info query comes back empty — never a fabricated shop. Empirically, this exact question caused fabricated shops in every run before the grounding rule was strengthened (fake names seen: 一兰堂, 糖年糕, 云朵糖水铺, 糖藕小馆, 糖年静安寺店), so treat any invented-sounding shop name as an automatic fail regardless of how polished or specific it sounds."
   }
 ]
