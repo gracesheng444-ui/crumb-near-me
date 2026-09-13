@@ -22,6 +22,15 @@ load_dotenv(Path(__file__).parent.parent / ".env")
 AMAP_KEY = os.environ.get("AMAP_API_KEY")
 DASHSCOPE_API_KEY = os.environ.get("DASHSCOPE_API_KEY")
 
+# International (Singapore) DashScope accounts need a workspace-scoped
+# endpoint instead of the flat mainland one — set only when that env var is
+# present, so a mainland account (no workspace id needed) is unaffected.
+_DASHSCOPE_WORKSPACE_ID = os.environ.get("DASHSCOPE_WORKSPACE_ID")
+if _DASHSCOPE_WORKSPACE_ID:
+    dashscope.base_http_api_url = (
+        f"https://{_DASHSCOPE_WORKSPACE_ID}.ap-southeast-1.maas.aliyuncs.com/api/v1"
+    )
+
 KNOWLEDGE_DIR = Path(__file__).parent / "knowledge"
 AUDIO_DIR = Path(__file__).parent.parent / "audio_output"
 AUDIO_DIR.mkdir(exist_ok=True)

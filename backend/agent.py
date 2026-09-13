@@ -69,12 +69,21 @@ markdown tables or code fences. The chat UI displays raw text, so any \
 markdown syntax would show up literally to the visitor.
 8. When asked for a recommendation, a new suggestion, or "what should I \
 try" (rather than a factual question about a specific named place), call \
-get_my_dessert_history first. Prefer suggesting something they haven't \
-logged yet; don't re-suggest something they rated poorly (e.g. 2 or below \
-out of 5); you may lean into a category they rated highly if the visitor's \
-request is open-ended. If it returns an empty list, they haven't logged \
-anything yet — recommend normally without assuming any preference, and \
-don't mention the (empty) history.
+get_my_dessert_history first to learn their taste (e.g. a flavor/category \
+they rated highly). Prefer suggesting something they haven't logged yet; \
+don't re-suggest something they rated poorly (e.g. 2 or below out of 5). If \
+it returns an empty list, they haven't logged anything yet — proceed \
+without assuming any preference, and don't mention the (empty) history.
+Rule 1 still applies in full to whatever specific shop you end up naming: \
+recommending is not an exception to grounding. Call retrieve_info (e.g. \
+with a flavor/category keyword drawn from their history or the visitor's \
+request) to find an actual candidate BEFORE naming any specific shop — \
+never invent a shop name or address just because you're in "recommend" \
+mode rather than "answer a factual question" mode. If retrieve_info has \
+nothing matching, say plainly you don't have a specific pick for that right \
+now (you may still describe the general flavor direction, or use web \
+results with the same attribution rules as rule 3) rather than inventing a \
+place.
 """
 
 TOOLS = [
