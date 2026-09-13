@@ -12,6 +12,7 @@ import os
 import re
 from pathlib import Path
 
+import dashscope
 import requests
 from anthropic import Anthropic
 from dotenv import load_dotenv
@@ -19,6 +20,7 @@ from dotenv import load_dotenv
 load_dotenv(Path(__file__).parent.parent / ".env")
 
 AMAP_KEY = os.environ.get("AMAP_API_KEY")
+DASHSCOPE_API_KEY = os.environ.get("DASHSCOPE_API_KEY")
 
 KNOWLEDGE_DIR = Path(__file__).parent / "knowledge"
 AUDIO_DIR = Path(__file__).parent.parent / "audio_output"
@@ -28,6 +30,8 @@ _client = None
 
 
 def get_client() -> Anthropic:
+    """Claude client — used only by eval/run_eval.py's judge (an independent
+    model grading Qwen's replies), not by the running app anymore."""
     global _client
     if _client is None:
         _client = Anthropic()  # reads ANTHROPIC_API_KEY from env
@@ -98,43 +102,35 @@ def retrieve_info(query: str, top_k: int = 6) -> list[dict]:
 
 
 def identify_exhibit(image_base64: str, media_type: str = "image/jpeg") -> dict:
-    """Ask Claude to match a photo against the knowledge base entries."""
+    """Ask Qwen-VL to match a photo against the knowledge base entries."""
     entries = load_knowledge_base(include_canary=False)
     catalogue = "\n".join(
         f"- {e['id']}: {e['name_en']} / {e['name_zh']} ({e['category']}, {e.get('address', '')})"
         for e in entries
     )
-    response = get_client().messages.create(
-        model="claude-sonnet-5",
-        max_tokens=200,
+    response = dashscope.MultiModalConversation.call(
+        api_key=DASHSCOPE_API_KEY,
+        model="qwen-vl-max",
         messages=[
             {
                 "role": "user",
                 "content": [
+                    {"image": f"data:{media_type};base64,{image_base64}"},
                     {
-                        "type": "image",
-                        "source": {
-                            "type": "base64",
-                            "media_type": media_type,
-                            "data": image_base64,
-                        },
-                    },
-                    {
-                        "type": "text",
                         "text": (
                             "Here is the current catalogue of known stores/"
                             f"facilities:\n{catalogue}\n\n"
                             "Which entry id does this photo most likely show? "
                             "Reply with ONLY the id, or 'unknown' if none match."
-                        ),
+                        )
                     },
                 ],
             }
         ],
     )
-    match_id = "".join(
-        block.text for block in response.content if block.type == "text"
-    ).strip()
+    if response.status_code != 200:
+        raise RuntimeError(f"Qwen-VL error {response.status_code}: {response.message}")
+    match_id = response.output.choices[0].message.content[0]["text"].strip()
     match = next((e for e in entries if e["id"] == match_id), None)
     return match or {"id": "unknown"}
 

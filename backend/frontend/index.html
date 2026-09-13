@@ -1045,6 +1045,7 @@ async function sendMessage(message) {
     const body = new FormData();
     body.append('message', message);
     body.append('session_id', sessionId);
+    body.append('user_id', userId);
     const res = await fetch('/chat', { method: 'POST', body });
     if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
     const data = await res.json();

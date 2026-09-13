@@ -10,13 +10,15 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-from tools import get_client
+import dashscope
+
+from tools import DASHSCOPE_API_KEY
 
 DB_PATH = Path(__file__).parent / "collection.db"
 PHOTO_DIR = Path(__file__).parent.parent / "dessert_photos"
 PHOTO_DIR.mkdir(exist_ok=True)
 
-MODEL = "claude-sonnet-5"
+MODEL = "qwen-plus"
 
 
 def save_photo(contents: bytes, suffix: str) -> str:
@@ -160,6 +162,22 @@ def delete_log(user_id: str, log_id: int) -> bool:
     return cur.rowcount > 0
 
 
+def get_taste_history(user_id: str) -> list[dict]:
+    """This user's own eaten-log entries, trimmed to what's useful for the
+    chat agent to personalize recommendations with (no ids, photo paths, or
+    other internal bookkeeping)."""
+    logs = [log for log in list_logs(user_id) if log["status"] != "planned"]
+    return [
+        {
+            "dessert_name": log["dessert_name"],
+            "store_name": log["store_name"],
+            "rating": log["rating"],
+            "note": log["note"],
+        }
+        for log in logs
+    ]
+
+
 def summarize_taste(user_id: str) -> str:
     logs = [log for log in list_logs(user_id) if log["status"] != "planned"]
     if not logs:
@@ -177,23 +195,29 @@ def summarize_taste(user_id: str) -> str:
         lines.append(" — ".join(parts))
     log_text = "\n".join(lines)
 
-    response = get_client().messages.create(
+    response = dashscope.Generation.call(
+        api_key=DASHSCOPE_API_KEY,
         model=MODEL,
-        max_tokens=300,
-        system=(
-            "You summarize someone's dessert taste from their own logged entries. "
-            "Be specific and concrete — call out actual flavors/patterns you see in "
-            "the data (e.g. concentration preferences, sweetness tolerance, favorite "
-            "categories), not generic praise. Only state patterns the data actually "
-            "supports — with few entries, say so rather than overgeneralizing. Plain "
-            "conversational text, no markdown, 2-4 sentences, reply in the same "
-            "language as the entries (Chinese or English)."
-        ),
+        result_format="message",
         messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You summarize someone's dessert taste from their own logged entries. "
+                    "Be specific and concrete — call out actual flavors/patterns you see in "
+                    "the data (e.g. concentration preferences, sweetness tolerance, favorite "
+                    "categories), not generic praise. Only state patterns the data actually "
+                    "supports — with few entries, say so rather than overgeneralizing. Plain "
+                    "conversational text, no markdown, 2-4 sentences, reply in the same "
+                    "language as the entries (Chinese or English)."
+                ),
+            },
             {
                 "role": "user",
                 "content": f"Here are the desserts I've logged:\n{log_text}\n\nWhat's my taste profile?",
-            }
+            },
         ],
     )
-    return "".join(block.text for block in response.content if block.type == "text")
+    if response.status_code != 200:
+        raise RuntimeError(f"Qwen error {response.status_code}: {response.message}")
+    return response.output.choices[0].message.content

@@ -45,9 +45,13 @@ def icon():
 
 
 @app.post("/chat")
-def chat(message: str = Form(...), session_id: str = Form("default")):
+def chat(
+    message: str = Form(...),
+    session_id: str = Form("default"),
+    user_id: str = Form(""),
+):
     history = _sessions.get(session_id, [])
-    result = run_agent(message, history)
+    result = run_agent(message, history, user_id=user_id)
     _sessions[session_id] = result["messages"]
     return {
         "reply": result["reply"],
