@@ -500,87 +500,12 @@
     color: var(--text);
   }
 
-  .log-entry {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 12px 13px;
-    box-shadow: var(--shadow);
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-  }
-  .log-entry .name { font-weight: 700; font-size: 14px; }
-  .log-entry .store { color: var(--text-dim); font-size: 12px; margin-top: 1px; }
-  .log-entry .note { font-size: 12.5px; margin-top: 5px; color: var(--text); }
-  .log-entry .stars { color: var(--accent-2); margin-top: 5px; display: flex; gap: 1px; }
-  .log-entry .stars svg.icon { width: 12px; height: 12px; }
-  .log-entry .date { color: var(--text-dim); font-size: 10.5px; margin-top: 5px; }
-  .log-entry .del-btn {
-    border: none;
-    background: none;
-    color: var(--text-dim);
-    cursor: pointer;
-    font-size: 14px;
-    padding: 0;
-    height: fit-content;
-  }
-  .log-entry .del-btn:hover { color: var(--accent); }
   .collection-empty {
     text-align: center;
     color: var(--text-dim);
     font-size: 13px;
     padding: 20px;
   }
-
-  .complete-btn {
-    border: 1px solid var(--accent-2);
-    background: var(--card);
-    color: var(--accent-2);
-    border-radius: 999px;
-    padding: 4px 10px;
-    font-size: 11px;
-    cursor: pointer;
-    font-family: inherit;
-    white-space: nowrap;
-  }
-  .complete-btn:hover { background: var(--accent-2); color: #fff; }
-  .complete-form { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; width: 100%; }
-  .complete-form textarea {
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 9px 11px;
-    font-size: 13.5px;
-    font-family: inherit;
-    background: var(--card);
-    color: var(--text);
-    resize: none;
-    min-height: 40px;
-  }
-  .complete-form textarea:focus { outline: none; border-color: var(--accent-2); }
-  .complete-confirm-btn {
-    border: none;
-    background: linear-gradient(135deg, var(--accent-2), #f0ab6e);
-    color: #fff;
-    border-radius: 10px;
-    padding: 9px;
-    font-size: 13.5px;
-    cursor: pointer;
-    font-family: var(--font-display);
-  }
-  .complete-confirm-btn:disabled { opacity: 0.5; cursor: default; }
-
-  .reminder-submit {
-    border: none;
-    background: linear-gradient(135deg, var(--accent-2), #f0ab6e);
-    color: #fff;
-    border-radius: 10px;
-    padding: 9px;
-    font-size: 13.5px;
-    cursor: pointer;
-    font-family: var(--font-display);
-  }
-  .reminder-submit:disabled { opacity: 0.5; cursor: default; }
 
   #log-photo-row, #note-photo-row { display: flex; align-items: center; gap: 10px; }
   #log-photo-btn, #note-photo-btn {
@@ -608,13 +533,6 @@
     font-size: 9px; display: flex; align-items: center; justify-content: center;
     padding: 0; cursor: pointer;
   }
-  .log-entry img.thumb {
-    width: 52px; height: 52px; border-radius: 11px;
-    object-fit: cover; border: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .log-entry .entry-body { display: flex; gap: 10px; flex: 1; min-width: 0; }
-
   #notebook {
     background: var(--card);
     border: 1px solid var(--border);
@@ -698,15 +616,6 @@
     color: var(--text);
     margin: 0 6px;
   }
-  .notebook-badge {
-    align-self: center;
-    font-size: 10.5px;
-    color: var(--accent-2);
-    background: var(--card);
-    border: 1px solid var(--accent-2);
-    border-radius: 999px;
-    padding: 1px 10px;
-  }
   .notebook-actions { display: flex; justify-content: center; align-items: center; gap: 14px; margin-top: auto; padding-top: 8px; }
   .notebook-del-btn {
     border: none; background: none; color: var(--text-dim);
@@ -715,20 +624,8 @@
   .notebook-del-btn:hover { color: var(--accent); }
   .notebook-heading {
     text-align: center; color: var(--text-dim); font-size: 13px;
-    padding-left: 16px;
+    padding: 0 10px; margin-top: 4px;
   }
-  .notebook-add-form { display: flex; flex-direction: column; gap: 9px; padding: 4px 6px 0 16px; }
-  .notebook-add-form input {
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 9px 11px;
-    font-size: 13.5px;
-    font-family: inherit;
-    background: var(--bg-accent);
-    color: var(--text);
-  }
-  .notebook-add-form input:focus { outline: none; border-color: var(--accent-2); }
-  .notebook-add-form .reminder-submit { margin-top: 2px; }
 
   #notebook-nav {
     display: flex;
@@ -785,7 +682,7 @@
   }
   #community-view .segmented { --seg-color: #d6588f; }
   #community-pane-browse, #community-pane-publish,
-  #collection-pane-log, #collection-pane-view, #collection-pane-calendar {
+  #collection-pane-log, #collection-pane-view {
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -903,12 +800,8 @@
         记录新甜品
       </button>
       <button type="button" class="seg-btn" data-pane="view">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><circle cx="12" cy="12" r="8"/><circle cx="9" cy="9.3" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.2" cy="10" r="1.1" fill="currentColor" stroke="none"/><circle cx="10.3" cy="14.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="14.8" cy="15" r="1.1" fill="currentColor" stroke="none"/></svg>
-        我的记录
-      </button>
-      <button type="button" class="seg-btn" data-pane="calendar">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M2 5.5c3-1.6 6.5-1.6 9.5 0v14c-3-1.6-6.5-1.6-9.5 0z"/><path d="M22 5.5c-3-1.6-6.5-1.6-9.5 0v14c3-1.6 6.5-1.6 9.5 0z"/></svg>
-        小甜品本
+        我的记录
       </button>
     </div>
 
@@ -964,18 +857,6 @@
         <div id="summary-text"></div>
       </div>
 
-      <div class="card">
-        <div class="card-heading">
-          <div class="icon-badge gold">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="8"/><circle cx="9" cy="9.3" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.2" cy="10" r="1.1" fill="currentColor" stroke="none"/><circle cx="10.3" cy="14.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="14.8" cy="15" r="1.1" fill="currentColor" stroke="none"/></svg>
-          </div>
-          <h3>我的甜品记录</h3>
-        </div>
-        <div id="collection-log-list"></div>
-      </div>
-    </div>
-
-    <div id="collection-pane-calendar" hidden>
       <div id="notebook">
         <div id="notebook-page"></div>
         <div id="notebook-nav">
@@ -1287,12 +1168,10 @@ communitySubnavBtns.forEach((btn) => {
 const collectionSubnavBtns = document.querySelectorAll('#collection-subnav .seg-btn');
 const collectionPaneLog = document.getElementById('collection-pane-log');
 const collectionPaneView = document.getElementById('collection-pane-view');
-const collectionPaneCalendar = document.getElementById('collection-pane-calendar');
 function setCollectionPane(pane) {
   collectionSubnavBtns.forEach((b) => b.classList.toggle('active', b.dataset.pane === pane));
   collectionPaneLog.hidden = pane !== 'log';
   collectionPaneView.hidden = pane !== 'view';
-  collectionPaneCalendar.hidden = pane !== 'calendar';
 }
 collectionSubnavBtns.forEach((btn) => {
   btn.addEventListener('click', () => setCollectionPane(btn.dataset.pane));
@@ -1319,7 +1198,6 @@ const logStore = document.getElementById('log-store');
 const logNote = document.getElementById('log-note');
 const logStars = document.getElementById('log-stars');
 const logFormSubmit = document.getElementById('log-form-submit');
-const collectionLogList = document.getElementById('collection-log-list');
 const summaryBtn = document.getElementById('summary-btn');
 const summaryText = document.getElementById('summary-text');
 const logPhotoInput = document.getElementById('log-photo-input');
@@ -1355,41 +1233,6 @@ logPhotoInput.addEventListener('change', () => {
 });
 logPhotoRemove.addEventListener('click', clearPhotoPicker);
 
-function renderStars(rating) {
-  if (!rating) return '';
-  let html = '<div class="stars">';
-  for (let i = 1; i <= 5; i++) {
-    const fill = i <= rating ? 'currentColor' : 'none';
-    html += `<svg class="icon" viewBox="0 0 24 24" fill="${fill}" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="${STAR_PATH}"/></svg>`;
-  }
-  return html + '</div>';
-}
-
-function renderLogEntry(entry) {
-  const div = document.createElement('div');
-  div.className = 'log-entry';
-  const date = new Date(entry.created_at).toLocaleDateString('zh-CN');
-  div.innerHTML = `
-    <div class="entry-body">
-      ${entry.photo_url ? `<img class="thumb" src="${entry.photo_url}" alt="" />` : ''}
-      <div>
-        <div class="name">${escapeHtml(entry.dessert_name)}</div>
-        ${entry.store_name ? `<div class="store">${escapeHtml(entry.store_name)}</div>` : ''}
-        ${renderStars(entry.rating)}
-        ${entry.note ? `<div class="note">${escapeHtml(entry.note)}</div>` : ''}
-        <div class="date">${date}</div>
-      </div>
-    </div>
-    <button type="button" class="del-btn" title="删除">${X_ICON}</button>
-  `;
-  div.querySelector('.del-btn').addEventListener('click', async () => {
-    await fetch(`/log/${entry.id}?user_id=${encodeURIComponent(userId)}`, { method: 'DELETE' });
-    summaryText.textContent = '';
-    loadEntries();
-  });
-  return div;
-}
-
 const DESSERT_PLACEHOLDER_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="9" cy="9.3" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.2" cy="10" r="1.1" fill="currentColor" stroke="none"/><circle cx="10.3" cy="14.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="14.8" cy="15" r="1.1" fill="currentColor" stroke="none"/></svg>';
 
 function renderNotebookStars(rating) {
@@ -1404,9 +1247,8 @@ function renderNotebookStars(rating) {
 
 function buildNotebookEntryPage(entry) {
   const page = document.createElement('div');
-  const isPlanned = entry.status === 'planned';
   const photoSrc = entry.photo_cutout_url || entry.photo_url;
-  const dateLabel = isPlanned ? entry.planned_date : new Date(entry.created_at).toLocaleDateString('zh-CN');
+  const dateLabel = new Date(entry.created_at).toLocaleDateString('zh-CN');
 
   page.innerHTML = `
     ${photoSrc
@@ -1415,10 +1257,9 @@ function buildNotebookEntryPage(entry) {
     <div class="notebook-title">${escapeHtml(entry.dessert_name)}</div>
     ${entry.store_name ? `<div class="notebook-store">${escapeHtml(entry.store_name)}</div>` : ''}
     <div class="notebook-date">${dateLabel}</div>
-    ${isPlanned ? '<div class="notebook-badge">计划中</div>' : renderNotebookStars(entry.rating)}
+    ${renderNotebookStars(entry.rating)}
     ${entry.note ? `<div class="notebook-note">${escapeHtml(entry.note)}</div>` : ''}
     <div class="notebook-actions">
-      ${isPlanned ? '<button type="button" class="complete-btn">标记为已吃</button>' : ''}
       <button type="button" class="notebook-del-btn" title="删除">${X_ICON}</button>
     </div>
   `;
@@ -1427,109 +1268,19 @@ function buildNotebookEntryPage(entry) {
     summaryText.textContent = '';
     loadEntries();
   });
-  const completeBtn = page.querySelector('.complete-btn');
-  if (completeBtn) {
-    completeBtn.addEventListener('click', () => showNotebookCompleteForm(page, entry));
-  }
   return page;
 }
 
-function showNotebookCompleteForm(page, entry) {
-  const actions = page.querySelector('.notebook-actions');
-  const form = document.createElement('div');
-  form.className = 'complete-form';
-  form.innerHTML = `
-    <div class="star-picker">
-      ${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-star="${n}"><svg class="icon" viewBox="0 0 24 24"><path d="${STAR_PATH}"/></svg></button>`).join('')}
-    </div>
-    <textarea placeholder="味道怎么样？（选填）"></textarea>
-    <button type="button" class="complete-confirm-btn">确认已吃</button>
-  `;
-  let rating = 0;
-  const stars = form.querySelectorAll('.star-picker button');
-  stars.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      rating = Number(btn.dataset.star);
-      stars.forEach((b) => b.classList.toggle('filled', Number(b.dataset.star) <= rating));
-    });
-  });
-  const noteInput = form.querySelector('textarea');
-  const confirmBtn = form.querySelector('.complete-confirm-btn');
-  confirmBtn.addEventListener('click', async () => {
-    confirmBtn.disabled = true;
-    try {
-      const body = new FormData();
-      body.append('user_id', userId);
-      if (rating) body.append('rating', String(rating));
-      body.append('note', noteInput.value.trim());
-      const res = await fetch(`/log/${entry.id}/complete`, { method: 'POST', body });
-      if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
-      summaryText.textContent = '';
-      loadEntries();
-    } catch (err) {
-      alert(`保存失败 — ${err.message}`);
-      confirmBtn.disabled = false;
-    }
-  });
-  actions.replaceWith(form);
-}
-
-function buildNotebookNewPlanPage() {
+function buildNotebookEmptyPage() {
   const page = document.createElement('div');
   page.innerHTML = `
-    <div class="notebook-heading">在这里写下你想吃的甜品～</div>
-    <div class="notebook-add-form">
-      <input type="date" class="reminder-date" min="${todayKey()}" value="${todayKey()}" required />
-      <input type="text" class="reminder-dessert" placeholder="想吃点什么？例如 抹茶新品" required />
-      <input type="text" class="reminder-store" placeholder="在哪家店？（选填）" />
-      <button type="button" class="reminder-submit">+ 添加到本子里</button>
-    </div>
+    <div class="notebook-placeholder">${DESSERT_PLACEHOLDER_ICON}</div>
+    <div class="notebook-heading">还没有记录任何甜品，去"记录新甜品"添加一个吧。</div>
   `;
-  const dateInput = page.querySelector('.reminder-date');
-  const dessertInput = page.querySelector('.reminder-dessert');
-  const storeInput = page.querySelector('.reminder-store');
-  const submitBtn = page.querySelector('.reminder-submit');
-  submitBtn.addEventListener('click', async () => {
-    const dessertName = dessertInput.value.trim();
-    if (!dessertName) {
-      dessertInput.focus();
-      return;
-    }
-    if (!dateInput.value) {
-      dateInput.focus();
-      return;
-    }
-    submitBtn.disabled = true;
-    try {
-      const body = new FormData();
-      body.append('user_id', userId);
-      body.append('dessert_name', dessertName);
-      body.append('store_name', storeInput.value.trim());
-      body.append('status', 'planned');
-      body.append('planned_date', dateInput.value);
-      const res = await fetch('/log', { method: 'POST', body });
-      if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
-      notebookIndex = 1;
-      loadEntries();
-    } catch (err) {
-      alert(`保存失败 — ${err.message}`);
-      submitBtn.disabled = false;
-    }
-  });
   return page;
 }
 
-function renderCollectionList() {
-  collectionLogList.innerHTML = '';
-  const eatenEntries = allEntries.filter((e) => e.status !== 'planned');
-  if (eatenEntries.length === 0) {
-    collectionLogList.innerHTML = '<div class="collection-empty">还没有记录任何甜品，去"记录新甜品"添加一个吧。</div>';
-    return;
-  }
-  eatenEntries.forEach((entry) => collectionLogList.appendChild(renderLogEntry(entry)));
-}
-
-// --- Notebook (flip-through pages: one per entry, plus an "add a plan" page) ---
+// --- Notebook (flip-through pages: one per logged dessert) ---
 let allEntries = [];
 let notebookIndex = 0;
 
@@ -1538,36 +1289,22 @@ const notebookPrevBtn = document.getElementById('notebook-prev');
 const notebookNextBtn = document.getElementById('notebook-next');
 const notebookIndicator = document.getElementById('notebook-page-indicator');
 
-function dateKey(d) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-function todayKey() {
-  return dateKey(new Date());
-}
-
 function getNotebookEntries() {
-  const planned = allEntries
-    .filter((e) => e.status === 'planned')
-    .sort((a, b) => (a.planned_date || '').localeCompare(b.planned_date || ''));
-  const eaten = allEntries.filter((e) => e.status !== 'planned'); // already newest-first from the API
-  return [...planned, ...eaten];
+  return allEntries.filter((e) => e.status !== 'planned'); // already newest-first from the API
 }
 
 function renderNotebook() {
   const entries = getNotebookEntries();
-  const pageCount = entries.length + 1; // +1 for the "add a plan" page
-  notebookIndex = Math.max(0, Math.min(notebookIndex, pageCount - 1));
+  notebookIndex = Math.max(0, Math.min(notebookIndex, Math.max(entries.length - 1, 0)));
 
   notebookPageEl.innerHTML = '';
-  if (notebookIndex === 0) {
-    notebookPageEl.appendChild(buildNotebookNewPlanPage());
-  } else {
-    notebookPageEl.appendChild(buildNotebookEntryPage(entries[notebookIndex - 1]));
-  }
+  notebookPageEl.appendChild(
+    entries.length === 0 ? buildNotebookEmptyPage() : buildNotebookEntryPage(entries[notebookIndex])
+  );
 
-  notebookIndicator.textContent = `${notebookIndex + 1} / ${pageCount}`;
-  notebookPrevBtn.disabled = notebookIndex === 0;
-  notebookNextBtn.disabled = notebookIndex === pageCount - 1;
+  notebookIndicator.textContent = entries.length === 0 ? '' : `${notebookIndex + 1} / ${entries.length}`;
+  notebookPrevBtn.disabled = notebookIndex === 0 || entries.length === 0;
+  notebookNextBtn.disabled = entries.length === 0 || notebookIndex === entries.length - 1;
 }
 
 function flipNotebook(direction) {
@@ -1583,17 +1320,16 @@ notebookPrevBtn.addEventListener('click', () => {
   if (notebookIndex > 0) flipNotebook(-1);
 });
 notebookNextBtn.addEventListener('click', () => {
-  if (notebookIndex < getNotebookEntries().length) flipNotebook(1);
+  if (notebookIndex < getNotebookEntries().length - 1) flipNotebook(1);
 });
 
 async function loadEntries() {
   try {
     const res = await fetch(`/log?user_id=${encodeURIComponent(userId)}`);
     allEntries = await res.json();
-    renderCollectionList();
     renderNotebook();
   } catch (err) {
-    collectionLogList.innerHTML = `<div class="collection-empty">无法加载你的甜品记录 — ${escapeHtml(err.message)}。</div>`;
+    notebookPageEl.innerHTML = `<div class="notebook-heading">无法加载你的甜品记录 — ${escapeHtml(err.message)}。</div>`;
   }
 }
 
@@ -1621,6 +1357,7 @@ logForm.addEventListener('submit', async (e) => {
     logStars.querySelectorAll('button').forEach((b) => b.classList.remove('filled'));
     clearPhotoPicker();
     summaryText.textContent = '';
+    notebookIndex = 0;
     loadEntries();
     setCollectionPane('view');
   } catch (err) {
