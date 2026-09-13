@@ -10,11 +10,19 @@ to its own kind of answer than a genuinely independent judge would be),
 accepted here to avoid a second paid provider for a personal project.
 Worth keeping in mind when reading scores, not just the number itself.
 
-Usage: python -m eval.run_eval
+Usage: python -m eval.run_eval (from backend/), or python run_eval.py
+(from backend/eval/) — either works, since this file puts both directories
+on sys.path itself rather than relying on the caller's working directory.
 """
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
+
+HERE = Path(__file__).parent
+for _p in (HERE, HERE.parent):  # eval/ (for grade_auto) and backend/ (for agent/collection/tools)
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
 
 import dashscope
 
@@ -23,7 +31,6 @@ from collection import add_log, delete_log, list_logs
 from grade_auto import grade_auto
 from tools import DASHSCOPE_API_KEY
 
-HERE = Path(__file__).parent
 RESULTS_DIR = HERE / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
