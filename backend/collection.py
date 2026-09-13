@@ -6,7 +6,6 @@ SQLite, not the in-memory session store — this has to survive a server
 restart, unlike chat history.
 """
 import sqlite3
-import sys
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -19,34 +18,12 @@ PHOTO_DIR.mkdir(exist_ok=True)
 
 MODEL = "claude-sonnet-5"
 
-_rembg_session = None
-
 
 def save_photo(contents: bytes, suffix: str) -> str:
     """Write an uploaded photo to disk and return its served URL."""
     filename = f"{uuid.uuid4().hex}{suffix or '.jpg'}"
     (PHOTO_DIR / filename).write_bytes(contents)
     return f"/dessert-photos/{filename}"
-
-
-def save_photo_cutout(contents: bytes) -> str | None:
-    """Run background removal on an uploaded photo and save the cutout as a
-    transparent PNG. Returns None (never raises) if removal fails for any
-    reason — a broken image or a first-run model-download hiccup should
-    never block saving the original photo/log entry."""
-    global _rembg_session
-    try:
-        from rembg import new_session, remove
-
-        if _rembg_session is None:
-            _rembg_session = new_session("u2net")
-        cutout_bytes = remove(contents, session=_rembg_session)
-        filename = f"{uuid.uuid4().hex}.png"
-        (PHOTO_DIR / filename).write_bytes(cutout_bytes)
-        return f"/dessert-photos/{filename}"
-    except Exception as exc:  # noqa: BLE001 — background removal is a nice-to-have, never fatal
-        print(f"background removal failed: {exc}", file=sys.stderr)
-        return None
 
 
 def _delete_photo(photo_url: str | None) -> None:
@@ -104,17 +81,16 @@ def add_log(
     photo_url: str | None = None,
     status: str = "eaten",
     planned_date: str | None = None,
-    photo_cutout_url: str | None = None,
 ) -> dict:
     created_at = datetime.now(timezone.utc).isoformat()
     with _connect() as conn:
         cur = conn.execute(
             """
             INSERT INTO dessert_logs
-                (user_id, dessert_name, store_name, rating, note, photo_url, created_at, status, planned_date, photo_cutout_url)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (user_id, dessert_name, store_name, rating, note, photo_url, created_at, status, planned_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (user_id, dessert_name, store_name, rating, note, photo_url, created_at, status, planned_date, photo_cutout_url),
+            (user_id, dessert_name, store_name, rating, note, photo_url, created_at, status, planned_date),
         )
         row_id = cur.lastrowid
     return {
@@ -128,7 +104,7 @@ def add_log(
         "created_at": created_at,
         "status": status,
         "planned_date": planned_date,
-        "photo_cutout_url": photo_cutout_url,
+        "photo_cutout_url": None,
     }
 
 
@@ -138,7 +114,6 @@ def mark_log_eaten(
     rating: int | None = None,
     note: str | None = None,
     photo_url: str | None = None,
-    photo_cutout_url: str | None = None,
 ) -> dict | None:
     """Graduate a planned reminder into a real eaten log, timestamped now."""
     created_at = datetime.now(timezone.utc).isoformat()
@@ -150,11 +125,10 @@ def mark_log_eaten(
                 created_at = ?,
                 rating = COALESCE(?, rating),
                 note = COALESCE(?, note),
-                photo_url = COALESCE(?, photo_url),
-                photo_cutout_url = COALESCE(?, photo_cutout_url)
+                photo_url = COALESCE(?, photo_url)
             WHERE id = ? AND user_id = ?
             """,
-            (created_at, rating, note, photo_url, photo_cutout_url, log_id, user_id),
+            (created_at, rating, note, photo_url, log_id, user_id),
         )
         if cur.rowcount == 0:
             return None

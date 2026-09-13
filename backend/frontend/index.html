@@ -1241,7 +1241,7 @@ function renderNotebookStars(rating) {
 function buildNotebookEntryPage(entry) {
   const page = document.createElement('div');
   page.className = 'notebook-page-content';
-  const photoSrc = entry.photo_cutout_url || entry.photo_url;
+  const photoSrc = entry.photo_url;
   const dateLabel = new Date(entry.created_at).toLocaleDateString('zh-CN');
 
   page.innerHTML = `

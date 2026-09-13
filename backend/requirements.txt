@@ -6,4 +6,3 @@ pydantic>=2.9
 requests>=2.32
 numpy>=1.26
 python-multipart>=0.0.9
-rembg[cpu]>=2.0.84
