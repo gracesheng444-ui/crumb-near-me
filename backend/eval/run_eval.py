@@ -1,8 +1,14 @@
 """
-Runs test_questions.json through the agent, then uses Claude as a judge to
+Runs test_questions.json through the agent, then uses Qwen as a judge to
 score each response for groundedness/correctness. Saves a timestamped
 results file so you can track the score improving across iterations —
 that trend is your "how did you make it better" evidence.
+
+The judge is the same model family as the agent it's grading, not an
+independent one — a real tradeoff (a model can be systematically kinder
+to its own kind of answer than a genuinely independent judge would be),
+accepted here to avoid a second paid provider for a personal project.
+Worth keeping in mind when reading scores, not just the number itself.
 
 Usage: python -m eval.run_eval
 """
@@ -10,14 +16,18 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+import dashscope
+
 from agent import run_agent
 from collection import add_log, delete_log, list_logs
 from grade_auto import grade_auto
-from tools import get_client
+from tools import DASHSCOPE_API_KEY
 
 HERE = Path(__file__).parent
 RESULTS_DIR = HERE / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
+
+JUDGE_MODEL = "qwen-plus"
 
 JUDGE_PROMPT = """You are grading a Shanghai dessert-guide agent's response against a \
 known-correct expected behavior — you are NOT judging plausibility from \
@@ -38,9 +48,11 @@ Reply with ONLY JSON: {{"grounded": 0-2, "on_task": 0-2, "note": "one short sent
 
 
 def judge(question: str, expects: str, reply: str) -> dict:
-    response = get_client().messages.create(
-        model="claude-sonnet-5",
-        max_tokens=200,
+    response = dashscope.Generation.call(
+        api_key=DASHSCOPE_API_KEY,
+        model=JUDGE_MODEL,
+        result_format="message",
+        temperature=0.1,  # a grading pass should be consistent, not creative
         messages=[
             {
                 "role": "user",
@@ -50,9 +62,20 @@ def judge(question: str, expects: str, reply: str) -> dict:
             }
         ],
     )
-    text = "".join(
-        block.text for block in response.content if block.type == "text"
-    ).strip()
+    if response.status_code != 200:
+        return {
+            "grounded": None,
+            "on_task": None,
+            "note": f"judge call failed: {response.status_code} {response.message}",
+        }
+    text = (response.output.choices[0].message.get("content") or "").strip()
+    # The model sometimes wraps JSON in a ```json fence despite the prompt
+    # asking for bare JSON — strip that before parsing rather than failing.
+    if text.startswith("```"):
+        text = text.strip("`")
+        if text.startswith("json"):
+            text = text[4:]
+        text = text.strip()
     try:
         return json.loads(text)
     except json.JSONDecodeError:

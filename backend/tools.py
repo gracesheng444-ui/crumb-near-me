@@ -14,7 +14,6 @@ from pathlib import Path
 
 import dashscope
 import requests
-from anthropic import Anthropic
 from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).parent.parent / ".env")
@@ -34,18 +33,6 @@ if _DASHSCOPE_WORKSPACE_ID:
 KNOWLEDGE_DIR = Path(__file__).parent / "knowledge"
 AUDIO_DIR = Path(__file__).parent.parent / "audio_output"
 AUDIO_DIR.mkdir(exist_ok=True)
-
-_client = None
-
-
-def get_client() -> Anthropic:
-    """Claude client — used only by eval/run_eval.py's judge (an independent
-    model grading Qwen's replies), not by the running app anymore."""
-    global _client
-    if _client is None:
-        _client = Anthropic()  # reads ANTHROPIC_API_KEY from env
-    return _client
-
 
 def load_knowledge_base(include_canary: bool = True) -> list[dict]:
     entries = []
