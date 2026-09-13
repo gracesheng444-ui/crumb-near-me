@@ -242,8 +242,25 @@ _WEB_ATTRIBUTION_RE = re.compile(
 # proof, distinct from the sanctioned attribution phrasings above (rule 3's
 # "有访客提到"/"访客反馈"), which stay legitimate and are deliberately not
 # in this list.
+#
+# First version of this pattern only matched the exact phrasing of one
+# caught example ("不少顾客反馈") — repeated live sampling of the same
+# question showed the model paraphrases the same fabrication endlessly
+# (食客/网友/大家 instead of 顾客, 提到/称/联想 instead of 反馈, or citing
+# a review platform by name — "小红书和大众点评上不少笔记提到..." — with no
+# "顾客" word at all). A literal phrase list can't keep up with paraphrase,
+# so this matches the general shape (aggregate-opinion subject + hearsay
+# verb, or a review-platform name followed by a hearsay verb) instead of
+# specific wording — still deliberately excluding the two sanctioned
+# attribution phrases above.
 _FABRICATED_TESTIMONIAL_RE = re.compile(
-    r"很多访客说|许多顾客反馈|顾客都说|网友都说|大家都说|不少顾客反馈"
+    r"(很多|不少|许多|大量|大部分|部分)(访客|顾客|食客|网友|用户|大家|人)(们|都)?"
+    r".{0,15}?(说|反馈|提到|称|评价|觉得|反映|联想)"
+    # Platform-name variant needs an existence word ("上有"/"上不少"/"网友")
+    # before the verb, not just co-occurrence — otherwise this also matches
+    # the agent legitimately OFFERING to go check social platforms ("要不要
+    # 我帮你查查小红书..."), which is a future action, not an asserted claim.
+    r"|(小红书|大众点评|豆瓣|抖音|微博)(上|里)?(有|不少|很多|不少人|网友)[^。\n]{0,15}(提到|称|评价|说|反馈)"
     r"|customers (say|report)|visitors (say|report)|many (people )?(say|report)",
     re.IGNORECASE,
 )
@@ -262,11 +279,49 @@ _FABRICATED_CITATION_RE = re.compile(
 )
 
 
-def _looks_like_unverified_shop_claim(reply: str) -> bool:
+# A fourth gap, found testing recommendation_long_01/_multiintent_01 live:
+# naming a real brand isn't the same as the specific claim about it being
+# real. A reply can correctly name "Azabuya" (a real entry) while inventing
+# a menu variant ("Matcha #3 gelato") or a price (¥35/¥40) that entry's own
+# data never mentioned — the old check only verified the brand name, so
+# this passed straight through. Extract number-bearing tokens the model
+# can only get from grounded data (a price, a distance, a "#N" variant
+# label) and cross-check each against the actual tool-result text already
+# in this turn's conversation — not just against the brand name.
+_NUMBER_CLAIM_RE = re.compile(
+    r"[¥$]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*(?:元|rmb|块钱)|\d+\s*(?:米|m\b|km|分钟|min)\b|#\s?\d+",
+    re.IGNORECASE,
+)
+
+# A fifth gap, found on a vague "old-school Chinese dessert shop" question
+# with no KB match: the model answered with six real-world heritage brands
+# (沈大成, 乔家栅, 杏花楼...) and specific founding years — NONE of which
+# exist anywhere in knowledge/*.json — while explicitly prefacing it with
+# "根据知识库" ("per the knowledge base"). No price/address/testimonial
+# pattern fires on plain prose like this, so it sailed through undetected.
+# Whenever a reply claims KB-sourcing this explicitly, at least one thing it
+# names had better actually be a real entry.
+_KB_ATTRIBUTION_CLAIM_RE = re.compile(
+    r"根据(我们的|本)?知识库|知识库(中|里)?(记录|收录|显示|标注)|根据本指南"
+    r"|knowledge base (says|shows|lists)|according to (the |our )?(knowledge base|guide)",
+    re.IGNORECASE,
+)
+
+
+def _looks_like_unverified_shop_claim(reply: str, grounded_text: str = "") -> bool:
     if _FABRICATED_TESTIMONIAL_RE.search(reply):
+        return True
+    if _KB_ATTRIBUTION_CLAIM_RE.search(reply) and not any(
+        name in reply for name in get_real_brand_names()
+    ):
         return True
     if _FABRICATED_CITATION_RE.search(reply) and not _WEB_ATTRIBUTION_RE.search(reply):
         return True
+    if grounded_text and not _WEB_ATTRIBUTION_RE.search(reply):
+        for claim in _NUMBER_CLAIM_RE.findall(reply):
+            claim = claim.strip()
+            if claim and claim not in grounded_text:
+                return True
     if not _CONCRETE_CLAIM_RE.search(reply):
         return False
     if _WEB_ATTRIBUTION_RE.search(reply):
@@ -315,7 +370,12 @@ def run_agent(
 
         if not tool_calls:
             final_text = message.get("content") or ""
-            if correction_notice is None and _looks_like_unverified_shop_claim(final_text):
+            grounded_text = " ".join(
+                m["content"] for m in messages if m.get("role") == "tool"
+            )
+            if correction_notice is None and _looks_like_unverified_shop_claim(
+                final_text, grounded_text
+            ):
                 # Prompt-only fixes plateaued in eval testing (see agent.py's
                 # module docstring context / first_refinement.md) — this is
                 # deliberately not returned yet. One bounded retry, forcing
@@ -329,13 +389,23 @@ def run_agent(
                     "shop was invented instead of grounded — (b) includes an "
                     "unattributed 'many customers/visitors say...' style "
                     "testimonial, which is fabricated unless it came from an "
-                    "actual search_community_notes result, or (c) cites a "
+                    "actual search_community_notes result, (c) cites a "
                     "study/statistic/biochemistry term with no web-search "
-                    "attribution, which this app has no real source for. "
-                    "Revise your reply: call retrieve_info if you haven't, "
-                    "only state specifics for a real entry it returns, drop "
-                    "any invented testimonial or citation, and say plainly if "
-                    "you don't have something rather than inventing it."
+                    "attribution, which this app has no real source for, or "
+                    "(d) states a specific price, distance, or menu-variant "
+                    "number (e.g. '#3') for a real shop that its own "
+                    "retrieve_info result never actually mentioned — naming "
+                    "a real shop doesn't make up for inventing a detail about "
+                    "it — or (e) says 'according to the knowledge base' / "
+                    "'根据知识库' while naming shops that aren't real "
+                    "knowledge-base entries — general knowledge dressed up as "
+                    "a KB lookup is still fabrication. Revise your reply: "
+                    "call retrieve_info if you haven't, only state specifics "
+                    "that actually appear in what it returned, drop any "
+                    "invented testimonial, citation, or unconfirmed number, "
+                    "and say plainly if you don't have something rather than "
+                    "inventing it or falsely attributing it to the knowledge "
+                    "base."
                 )
                 continue
             messages.append({"role": "assistant", "content": final_text})
