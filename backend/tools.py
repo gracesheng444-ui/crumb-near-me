@@ -63,11 +63,26 @@ def _tokenize(text: str) -> set[str]:
     return tokens
 
 
-def retrieve_info(query: str, top_k: int = 6) -> list[dict]:
+def retrieve_info(query: str, top_k: int = 20) -> list[dict]:
     """Naive keyword-overlap retrieval across the knowledge base.
 
     Returns the top_k entries with the highest token overlap against the
     query, each tagged with its source id so responses can cite it.
+
+    top_k defaults well above the current ~15-entry knowledge base size —
+    not exposed to the model as a tool parameter, so this was the only
+    thing controlling it. A lower default (6) caused a real, confirmed
+    eval failure: a brand with 5 separate near-identical branch entries
+    (each scoring high on any query about that brand) crowded other
+    genuinely relevant brands out of the results entirely, and left only
+    one arbitrary survivor among that brand's own branches — so a
+    location-constrained question ("near Jing'an") had no way to compare
+    branches against each other, since it only ever saw whichever one
+    branch happened to survive the cutoff. Only entries that score above
+    0 are ever returned, so raising this doesn't inject irrelevant noise
+    — it just stops truncating genuine matches once the KB is bigger than
+    the cap. Revisit if the knowledge base grows enough that returning
+    most/all of it stops being cheap or useful.
     """
     query_tokens = _tokenize(query)
     entries = load_knowledge_base()
