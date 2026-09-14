@@ -13,7 +13,6 @@ from fastapi.staticfiles import StaticFiles
 from agent import run_agent
 from auth import get_user_id_for_token
 from collection import (
-    PHOTO_DIR,
     add_log,
     delete_log,
     list_logs,
@@ -208,4 +207,3 @@ def remove_note(note_id: int, user_id: str, authorization: str | None = Header(N
 
 
 app.mount("/audio", StaticFiles(directory=str(AUDIO_DIR)), name="audio")
-app.mount("/dessert-photos", StaticFiles(directory=str(PHOTO_DIR)), name="dessert-photos")
