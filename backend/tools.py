@@ -284,12 +284,21 @@ def identify_exhibit(image_base64: str, media_type: str = "image/jpeg") -> dict:
     return clean
 
 
-def describe_unmatched_photo(image_base64: str, media_type: str = "image/jpeg") -> str:
+def describe_unmatched_photo(image_base64: str, media_type: str = "image/jpeg") -> dict:
     """When identify_exhibit finds no knowledge-base match, ask Qwen-VL for a
     plain-language description instead — a store name if signage is visible,
     or the dish/food type otherwise. Fed into a normal chat turn afterward so
     the existing agent (retrieve_info/web-search/attribution rules) handles
-    it like any other question, rather than dead-ending on "no match"."""
+    it like any other question, rather than dead-ending on "no match".
+
+    Still requires a legible name before naming a brand (no guessing from
+    packaging style alone — same evidence bar as identify_exhibit, just
+    without a knowledge-base candidate to check it against). What changed is
+    tone and a confidence field: state it directly ("这是Godiva的黑巧克力松
+    露") instead of hedging with "the image shows text reading...", and
+    report how sure that reading is so the frontend can label it as a guess
+    rather than pass it off as a verified match.
+    """
     response = dashscope.MultiModalConversation.call(
         api_key=DASHSCOPE_API_KEY,
         model="qwen-vl-max",
@@ -301,11 +310,33 @@ def describe_unmatched_photo(image_base64: str, media_type: str = "image/jpeg") 
                     {
                         "text": (
                             "This photo didn't match any entry in a curated "
-                            "dessert-shop database. In one short factual "
-                            "sentence, describe what it shows — if a store "
-                            "name is visible on signage/packaging, name it; "
-                            "otherwise just describe the food/dish. Don't "
-                            "guess a store name if none is visible."
+                            "dessert-shop database. State what it shows "
+                            "directly and confidently, like a knowledgeable "
+                            "friend naming it on sight — not a clinical "
+                            "description of pixels or text you see. If a "
+                            "store/brand name is legible on signage or "
+                            "packaging, say outright what it is (e.g. "
+                            '"这是Godiva的黑巧克力松露"), don\'t hedge with '
+                            '"appears to show" or "text reading X". If no '
+                            "brand name is legible anywhere, just name the "
+                            "food/dish confidently — don't invent a brand. "
+                            "Reply in Chinese unless the visible text is "
+                            "English. Reply with ONLY this JSON, no other "
+                            "text: "
+                            '{"description": "<one short confident '
+                            'sentence>", "confidence": "<high|medium|low>"}'
+                            "\n\nconfidence is ONLY about whether a store/"
+                            "brand NAME is legible in the photo — it is NOT "
+                            "about how sure you are what the food/dish is. "
+                            "high = a store/brand name is clearly legible; "
+                            "medium = a store/brand name is partially "
+                            "legible or small/blurry but you're fairly sure "
+                            "what it says; low = no store/brand name is "
+                            "legible anywhere in the photo, even if you're "
+                            "completely certain what the food itself is — "
+                            "being sure this is, say, a Basque cheesecake "
+                            "is NOT high confidence, since no brand backs "
+                            "that claim. Default to low whenever in doubt."
                         )
                     },
                 ],
@@ -314,7 +345,21 @@ def describe_unmatched_photo(image_base64: str, media_type: str = "image/jpeg") 
     )
     if response.status_code != 200:
         raise RuntimeError(f"Qwen-VL error {response.status_code}: {response.message}")
-    return response.output.choices[0].message.content[0]["text"].strip()
+    text = response.output.choices[0].message.content[0]["text"].strip()
+    if text.startswith("```"):
+        text = text.strip("`")
+        if text.startswith("json"):
+            text = text[4:]
+        text = text.strip()
+    try:
+        parsed = json.loads(text)
+    except json.JSONDecodeError:
+        return {"description": text, "confidence": "low"}
+    confidence = parsed.get("confidence")
+    return {
+        "description": (parsed.get("description") or "").strip(),
+        "confidence": confidence if confidence in ("high", "medium", "low") else "low",
+    }
 
 
 def speak(text: str, lang: str = "zh") -> str:

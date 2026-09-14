@@ -21,6 +21,7 @@ from collection import (
     summarize_taste,
 )
 from community import add_note, delete_note, list_notes
+from profile import get_profile, save_avatar_photo, save_profile
 from tools import AUDIO_DIR, describe_unmatched_photo, identify_exhibit
 
 app = FastAPI(title="Shanghai Dessert Guide Agent")
@@ -96,7 +97,9 @@ async def identify(image: UploadFile = File(...)):
     media_type = image.content_type or "image/jpeg"
     match = identify_exhibit(image_b64, media_type=media_type)
     if match["id"] == "unknown":
-        match["description"] = describe_unmatched_photo(image_b64, media_type=media_type)
+        guess = describe_unmatched_photo(image_b64, media_type=media_type)
+        match["description"] = guess["description"]
+        match["confidence"] = guess["confidence"]
     return match
 
 
@@ -204,6 +207,25 @@ def get_notes():
 def remove_note(note_id: int, user_id: str, authorization: str | None = Header(None)):
     deleted = delete_note(_resolve_user_id(authorization, user_id), note_id)
     return {"deleted": deleted}
+
+
+@app.get("/profile")
+def read_profile(user_id: str, authorization: str | None = Header(None)):
+    return get_profile(_resolve_user_id(authorization, user_id)) or {}
+
+
+@app.post("/profile")
+async def write_profile(
+    user_id: str = Form(...),
+    display_name: str = Form(...),
+    avatar: str = Form(""),
+    photo: UploadFile | None = File(None),
+    authorization: str | None = Header(None),
+):
+    if photo is not None and photo.filename:
+        contents = await photo.read()
+        avatar = save_avatar_photo(contents, Path(photo.filename).suffix)
+    return save_profile(_resolve_user_id(authorization, user_id), display_name.strip(), avatar)
 
 
 app.mount("/audio", StaticFiles(directory=str(AUDIO_DIR)), name="audio")

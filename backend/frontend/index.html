@@ -406,6 +406,7 @@
   #tab-chat { --tab-color: var(--accent); --tab-color-dim: var(--accent-dim); }
   #tab-collection { --tab-color: var(--accent-2); --tab-color-dim: var(--accent-2-dim); }
   #tab-community { --tab-color: #d6588f; --tab-color-dim: #f9e0ea; }
+  #tab-settings { --tab-color: #6f8fd6; --tab-color-dim: #e3e9fa; }
 
   #collection-view {
     overflow-y: auto;
@@ -738,6 +739,136 @@
   }
   .note-entry .del-btn:hover { color: var(--accent); }
 
+  /* ---------- SETTINGS ---------- */
+  #settings-view { overflow-y: auto; padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 14px; }
+  .field-label { font-size: 12.5px; color: var(--text-dim); margin: 2px 0 -2px; }
+  .avatar-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .avatar-grid.centered { justify-content: center; }
+  .avatar-option {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--bg-accent);
+    font-size: 19px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .avatar-option:hover { transform: translateY(-1px); }
+  .avatar-option.selected { border-color: var(--accent); background: var(--accent-dim); }
+  .avatar-photo-row { display: flex; align-items: center; gap: 10px; }
+  .avatar-photo-row.centered { justify-content: center; }
+  .avatar-photo-btn {
+    border: 1px solid var(--border);
+    background: var(--bg-accent);
+    color: var(--text-dim);
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .avatar-photo-preview { position: relative; display: inline-block; }
+  .avatar-photo-preview img {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    border: 1px solid var(--border);
+  }
+  .avatar-photo-remove {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-size: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+  }
+  #profile-form { display: flex; flex-direction: column; gap: 10px; }
+  #profile-form input {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 11px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--bg-accent);
+    color: var(--text);
+  }
+  #profile-form input:focus { outline: none; border-color: var(--accent); }
+  #profile-save-btn {
+    border: none;
+    background: linear-gradient(135deg, var(--accent), #ff9470);
+    color: #fff;
+    border-radius: 10px;
+    padding: 11px;
+    font-size: 15px;
+    cursor: pointer;
+    font-family: var(--font-display);
+    box-shadow: var(--shadow);
+  }
+  #profile-save-btn:disabled { opacity: 0.5; cursor: default; box-shadow: none; }
+  #profile-saved-msg { font-size: 12.5px; color: var(--accent-2); text-align: center; margin: -2px 0 0; }
+  #settings-account-signedin { display: flex; flex-direction: column; gap: 14px; }
+  .settings-account-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .settings-account-row .hint { font-size: 12.5px; color: var(--text-dim); margin: 0; }
+  .settings-account-row .email { font-size: 13.5px; color: var(--text); word-break: break-all; margin: 2px 0 0; }
+  #password-form { display: flex; flex-direction: column; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border); }
+  #password-form input {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 11px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--bg-accent);
+    color: var(--text);
+  }
+  #password-form input:focus { outline: none; border-color: var(--accent); }
+  #password-save-btn {
+    border: 1px solid var(--border);
+    background: var(--bg-accent);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 9px;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: var(--font-display);
+  }
+  #password-save-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  #password-save-btn:disabled { opacity: 0.5; cursor: default; }
+  #password-msg { font-size: 12.5px; text-align: center; color: var(--accent); margin: -2px 0 0; }
+  #password-msg.success { color: var(--accent-2); }
+  .settings-btn {
+    border: 1px solid var(--border);
+    background: var(--bg-accent);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-family: var(--font-display);
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .settings-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .settings-btn.danger { color: var(--accent); }
+
   /* ---------- AUTH ---------- */
   #main-app {
     flex: 1;
@@ -847,6 +978,51 @@
     align-self: flex-start;
   }
   #logout-btn:hover { color: var(--accent); }
+
+  #profile-setup-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 32px 28px 40px;
+  }
+  #profile-setup-view h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 20px;
+    text-align: center;
+    margin: 0 0 6px;
+  }
+  #profile-setup-view p.sub {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin: 0 0 24px;
+  }
+  #profile-setup-form { display: flex; flex-direction: column; gap: 14px; }
+  #profile-setup-form input {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 13px;
+    font-size: 14.5px;
+    font-family: inherit;
+    background: var(--bg-accent);
+    color: var(--text);
+  }
+  #profile-setup-form input:focus { outline: none; border-color: var(--accent); }
+  #profile-setup-submit {
+    border: none;
+    background: linear-gradient(135deg, var(--accent), #ff9470);
+    color: #fff;
+    border-radius: 10px;
+    padding: 13px;
+    font-size: 15px;
+    cursor: pointer;
+    font-family: var(--font-display);
+    box-shadow: var(--shadow);
+    margin-top: 4px;
+  }
+  #profile-setup-submit:disabled { opacity: 0.5; cursor: default; box-shadow: none; }
 </style>
 </head>
 <body>
@@ -871,6 +1047,30 @@
     </div>
   </div>
 
+  <div id="profile-setup-view" hidden>
+    <div class="auth-logo"><img src="/icon.png" alt="" /></div>
+    <h1>欢迎！设置你的资料</h1>
+    <p class="sub">给自己起个昵称，选一个喜欢的头像</p>
+    <form id="profile-setup-form">
+      <div class="avatar-grid centered" id="profile-setup-avatar-grid"></div>
+      <input type="file" id="profile-setup-avatar-photo-input" accept="image/*" hidden />
+      <div class="avatar-photo-row centered">
+        <button type="button" id="profile-setup-avatar-photo-btn" class="avatar-photo-btn">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          从相册选择
+        </button>
+        <div id="profile-setup-avatar-photo-preview" class="avatar-photo-preview" hidden>
+          <img id="profile-setup-avatar-photo-preview-img" alt="预览" />
+          <button type="button" id="profile-setup-avatar-photo-remove" class="avatar-photo-remove">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="9" height="9"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <input type="text" id="profile-setup-name" placeholder="你的昵称" maxlength="24" required />
+      <button type="submit" id="profile-setup-submit">开始使用</button>
+    </form>
+  </div>
+
   <div id="main-app" hidden>
   <header>
     <div class="logo">
@@ -880,7 +1080,6 @@
       <h1>上海甜品指南</h1>
       <p>巧克力・蛋糕・意式冰淇淋・更多甜品</p>
     </div>
-    <button type="button" id="logout-btn" hidden>退出登录</button>
   </header>
 
   <div id="chat-view">
@@ -1058,6 +1257,66 @@
     </div>
   </div>
 
+  <div id="settings-view" hidden>
+    <div class="card">
+      <div class="card-heading">
+        <div class="icon-badge">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <h3>个人资料</h3>
+      </div>
+      <form id="profile-form">
+        <p class="field-label">选择头像</p>
+        <div class="avatar-grid" id="settings-avatar-grid"></div>
+        <input type="file" id="settings-avatar-photo-input" accept="image/*" hidden />
+        <div class="avatar-photo-row">
+          <button type="button" id="settings-avatar-photo-btn" class="avatar-photo-btn">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            从相册选择
+          </button>
+          <div id="settings-avatar-photo-preview" class="avatar-photo-preview" hidden>
+            <img id="settings-avatar-photo-preview-img" alt="预览" />
+            <button type="button" id="settings-avatar-photo-remove" class="avatar-photo-remove">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="9" height="9"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+        <input type="text" id="settings-name-input" placeholder="你的昵称" maxlength="24" required />
+        <button type="submit" id="profile-save-btn">保存</button>
+        <p id="profile-saved-msg" hidden>已保存！</p>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-heading">
+        <div class="icon-badge gold">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h3>账户</h3>
+      </div>
+      <div id="settings-account-signedin" hidden>
+        <div class="settings-account-row">
+          <div>
+            <p class="hint">已登录</p>
+            <p class="email" id="settings-email"></p>
+          </div>
+          <button type="button" id="logout-btn" class="settings-btn danger">退出登录</button>
+        </div>
+        <form id="password-form">
+          <p class="field-label">修改密码</p>
+          <input type="password" id="new-password" placeholder="新密码" autocomplete="new-password" required />
+          <input type="password" id="new-password-confirm" placeholder="确认新密码" autocomplete="new-password" required />
+          <button type="submit" id="password-save-btn">更新密码</button>
+          <p id="password-msg" hidden></p>
+        </form>
+      </div>
+      <div id="settings-account-guest" hidden class="settings-account-row">
+        <p class="hint">访客模式 — 数据仅保存在本机，登录后可跨设备同步</p>
+        <button type="button" id="go-login-btn" class="settings-btn">登录 / 注册</button>
+      </div>
+    </div>
+  </div>
+
   <nav id="bottom-nav">
     <button type="button" id="tab-chat" class="active" data-view="chat-view">
       <span class="nav-icon-wrap"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>
@@ -1070,6 +1329,10 @@
     <button type="button" id="tab-community" data-view="community-view">
       <span class="nav-icon-wrap"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><circle cx="8.3" cy="6.3" r="0.9" fill="currentColor" stroke="none"/><circle cx="12.2" cy="4.4" r="0.9" fill="currentColor" stroke="none"/><circle cx="15.9" cy="6.4" r="0.9" fill="currentColor" stroke="none"/></svg></span>
       <span class="nav-label">社区</span>
+    </button>
+    <button type="button" id="tab-settings" data-view="settings-view">
+      <span class="nav-icon-wrap"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+      <span class="nav-label">设置</span>
     </button>
   </nav>
   </div>
@@ -1090,6 +1353,37 @@ const authSubmit = document.getElementById('auth-submit');
 const authError = document.getElementById('auth-error');
 const guestBtn = document.getElementById('guest-btn');
 const logoutBtn = document.getElementById('logout-btn');
+const profileSetupView = document.getElementById('profile-setup-view');
+const profileSetupForm = document.getElementById('profile-setup-form');
+const profileSetupNameInput = document.getElementById('profile-setup-name');
+const profileSetupAvatarGrid = document.getElementById('profile-setup-avatar-grid');
+const profileSetupSubmit = document.getElementById('profile-setup-submit');
+const profileSetupAvatarPhotoInput = document.getElementById('profile-setup-avatar-photo-input');
+const profileSetupAvatarPhotoBtn = document.getElementById('profile-setup-avatar-photo-btn');
+const profileSetupAvatarPhotoPreview = document.getElementById('profile-setup-avatar-photo-preview');
+const profileSetupAvatarPhotoPreviewImg = document.getElementById('profile-setup-avatar-photo-preview-img');
+const profileSetupAvatarPhotoRemove = document.getElementById('profile-setup-avatar-photo-remove');
+const settingsAvatarGrid = document.getElementById('settings-avatar-grid');
+const settingsAvatarPhotoInput = document.getElementById('settings-avatar-photo-input');
+const settingsAvatarPhotoBtn = document.getElementById('settings-avatar-photo-btn');
+const settingsAvatarPhotoPreview = document.getElementById('settings-avatar-photo-preview');
+const settingsAvatarPhotoPreviewImg = document.getElementById('settings-avatar-photo-preview-img');
+const settingsAvatarPhotoRemove = document.getElementById('settings-avatar-photo-remove');
+const settingsNameInput = document.getElementById('settings-name-input');
+const profileForm = document.getElementById('profile-form');
+const profileSaveBtn = document.getElementById('profile-save-btn');
+const profileSavedMsg = document.getElementById('profile-saved-msg');
+const settingsAccountSignedin = document.getElementById('settings-account-signedin');
+const settingsAccountGuest = document.getElementById('settings-account-guest');
+const settingsEmail = document.getElementById('settings-email');
+const goLoginBtn = document.getElementById('go-login-btn');
+const passwordForm = document.getElementById('password-form');
+const newPasswordInput = document.getElementById('new-password');
+const newPasswordConfirmInput = document.getElementById('new-password-confirm');
+const passwordSaveBtn = document.getElementById('password-save-btn');
+const passwordMsg = document.getElementById('password-msg');
+let selectedSettingsAvatar = null;
+let settingsAvatarPhotoFile = null;
 
 let authFormMode = 'login'; // 'login' | 'signup'
 
@@ -1111,12 +1405,118 @@ tabSignup.addEventListener('click', () => setAuthFormMode('signup'));
 // so both need to stay reassignable rather than fixed at page load.
 let authToken = null;
 let supabaseClient = null;
+let currentUserEmail = null;
+let myProfile = null;
+
+const AVATAR_OPTIONS = ['🍰', '🧁', '🍩', '🍪', '🍫', '🍦', '🍓', '🥮', '🍡', '🍬', '🍭', '🥐'];
+
+function renderAvatarGrid(container, selected, onSelect) {
+  container.innerHTML = '';
+  AVATAR_OPTIONS.forEach((emoji) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'avatar-option' + (emoji === selected ? ' selected' : '');
+    btn.textContent = emoji;
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('.avatar-option').forEach((b) => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      onSelect(emoji);
+    });
+    container.appendChild(btn);
+  });
+}
+
+async function fetchProfile() {
+  try {
+    const res = await fetch(`/profile?user_id=${encodeURIComponent(userId)}`, { headers: authHeaders() });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data && data.display_name ? data : null;
+  } catch {
+    return null;
+  }
+}
+
+async function saveProfile(displayName, avatar, photoFile) {
+  const body = new FormData();
+  body.append('user_id', userId);
+  body.append('display_name', displayName);
+  body.append('avatar', avatar || '');
+  if (photoFile) body.append('photo', photoFile);
+  const res = await fetch('/profile', { method: 'POST', body, headers: authHeaders() });
+  if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
+  return res.json();
+}
 
 function showApp() {
   authView.hidden = true;
+  profileSetupView.hidden = true;
   mainApp.hidden = false;
-  logoutBtn.hidden = !authToken;
+  updateSettingsAccountView();
 }
+
+function showProfileSetup() {
+  authView.hidden = true;
+  mainApp.hidden = true;
+  profileSetupView.hidden = false;
+}
+
+let selectedSetupAvatar = AVATAR_OPTIONS[0];
+let profileSetupAvatarPhotoFile = null;
+
+function resetProfileSetupAvatarPhoto() {
+  profileSetupAvatarPhotoFile = null;
+  profileSetupAvatarPhotoInput.value = '';
+  profileSetupAvatarPhotoPreview.hidden = true;
+  profileSetupAvatarPhotoBtn.hidden = false;
+  profileSetupAvatarPhotoPreviewImg.src = '';
+}
+
+profileSetupAvatarPhotoBtn.addEventListener('click', () => profileSetupAvatarPhotoInput.click());
+profileSetupAvatarPhotoInput.addEventListener('change', () => {
+  const file = profileSetupAvatarPhotoInput.files[0];
+  if (!file) return;
+  profileSetupAvatarPhotoFile = file;
+  profileSetupAvatarPhotoPreviewImg.src = URL.createObjectURL(file);
+  profileSetupAvatarPhotoPreview.hidden = false;
+  profileSetupAvatarPhotoBtn.hidden = true;
+  profileSetupAvatarGrid.querySelectorAll('.avatar-option').forEach((b) => b.classList.remove('selected'));
+});
+profileSetupAvatarPhotoRemove.addEventListener('click', resetProfileSetupAvatarPhoto);
+
+// Guests skip this entirely (see the instant guest-mode branch below) — a
+// profile only gets asked for once a real Supabase session exists, and only
+// if that account hasn't already picked a name/avatar before.
+async function enterApp() {
+  myProfile = await fetchProfile();
+  if (myProfile) {
+    showApp();
+    return;
+  }
+  selectedSetupAvatar = AVATAR_OPTIONS[0];
+  resetProfileSetupAvatarPhoto();
+  profileSetupNameInput.value = (currentUserEmail || '').split('@')[0];
+  renderAvatarGrid(profileSetupAvatarGrid, selectedSetupAvatar, (a) => {
+    selectedSetupAvatar = a;
+    resetProfileSetupAvatarPhoto();
+  });
+  showProfileSetup();
+}
+
+profileSetupForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = profileSetupNameInput.value.trim();
+  if (!name) return;
+  profileSetupSubmit.disabled = true;
+  try {
+    myProfile = await saveProfile(name, selectedSetupAvatar, profileSetupAvatarPhotoFile);
+    showApp();
+  } catch (err) {
+    alert(`保存失败 — ${err.message}`);
+  } finally {
+    profileSetupSubmit.disabled = false;
+  }
+});
 
 function showAuthMessage(message, isError = true) {
   authError.textContent = message;
@@ -1183,7 +1583,8 @@ async function initSupabaseAuth() {
     authToken = session ? session.access_token : null;
     if (session) {
       userId = session.user.id;
-      showApp();
+      currentUserEmail = session.user.email || null;
+      enterApp();
     }
   });
 
@@ -1191,7 +1592,8 @@ async function initSupabaseAuth() {
   if (session) {
     authToken = session.access_token;
     userId = session.user.id;
-    showApp();
+    currentUserEmail = session.user.email || null;
+    enterApp();
   } else if (localStorage.getItem('authMode') !== 'guest') {
     authView.hidden = false;
     mainApp.hidden = true;
@@ -1275,12 +1677,19 @@ function addIdCard(entry) {
   hideEmptyState();
   const row = document.createElement('div');
   row.className = 'row agent';
-  const status = entry && entry.id === 'ambiguous' ? 'ambiguous' : entry && entry.id && entry.id !== 'unknown' ? 'known' : 'unknown';
+  const hasGuess = entry && entry.id === 'unknown' && entry.description && entry.confidence !== 'low';
+  const status = entry && entry.id === 'ambiguous' ? 'ambiguous'
+    : entry && entry.id && entry.id !== 'unknown' ? 'known'
+    : hasGuess ? 'guess'
+    : 'unknown';
+  const confidenceLabel = { high: '比较确定', medium: '不太确定' }[entry && entry.confidence] || '';
   const name = status === 'known' ? (entry.name_zh || entry.name_en)
     : status === 'ambiguous' ? `看起来像${entry.brand_zh || entry.brand_en}，但看不出是哪家分店`
+    : status === 'guess' ? entry.description
     : '知识库里没有直接匹配';
   const sub = status === 'known' ? (entry.name_en || '')
     : status === 'ambiguous' ? `${entry.options.length}家分店都有可能`
+    : status === 'guess' ? `不在知识库里，AI的推测 · ${confidenceLabel}`
     : (entry.description || '试试拍一张更清晰的门头或包装照片');
   row.innerHTML = `
     <div class="avatar pin">${PIN_ICON}</div>
@@ -1389,7 +1798,7 @@ photoInput.addEventListener('change', async () => {
     } else if (status === 'ambiguous') {
       sendMessage(`我拍了一张${entry.brand_zh || entry.brand_en}的照片，但看不出是哪家分店，能告诉我这个品牌在上海的所有分店吗？`);
     } else if (entry.description) {
-      sendMessage(`我拍了一张照片，知识库里没有直接匹配到，AI看到的大致是：${entry.description}。你知道这是哪里吗，或者上海有没有类似的地方？`);
+      sendMessage(`我拍了一张照片，知识库里没有直接匹配到。AI从照片上读到的信息是：${entry.description}（这只是照片识别的初步结果，可能不完全准确）。你知道这是哪里吗，或者上海有没有类似的地方？`);
     }
   } catch (err) {
     typingRow.remove();
@@ -1404,7 +1813,7 @@ const navButtons = document.querySelectorAll('#bottom-nav button');
 navButtons.forEach((btn) => {
   btn.addEventListener('click', () => {
     navButtons.forEach((b) => b.classList.toggle('active', b === btn));
-    document.querySelectorAll('#chat-view, #collection-view, #community-view').forEach((view) => {
+    document.querySelectorAll('#chat-view, #collection-view, #community-view, #settings-view').forEach((view) => {
       view.hidden = view.id !== btn.dataset.view;
     });
     if (btn.dataset.view === 'collection-view') {
@@ -1413,6 +1822,9 @@ navButtons.forEach((btn) => {
     } else if (btn.dataset.view === 'community-view') {
       loadNotes();
       setCommunityPane('browse');
+    } else if (btn.dataset.view === 'settings-view') {
+      updateSettingsAccountView();
+      renderSettingsProfileForm();
     }
   });
 });
@@ -1745,6 +2157,111 @@ noteForm.addEventListener('submit', async (e) => {
     alert(`发布失败 — ${err.message}`);
   } finally {
     noteFormSubmit.disabled = false;
+  }
+});
+
+// --- Settings tab: profile (name + avatar) and account status ---
+function updateSettingsAccountView() {
+  const signedIn = !!authToken;
+  settingsAccountSignedin.hidden = !signedIn;
+  settingsAccountGuest.hidden = signedIn;
+  if (signedIn) settingsEmail.textContent = currentUserEmail || '';
+}
+
+function resetSettingsAvatarPhoto() {
+  settingsAvatarPhotoFile = null;
+  settingsAvatarPhotoInput.value = '';
+  settingsAvatarPhotoPreview.hidden = true;
+  settingsAvatarPhotoBtn.hidden = false;
+  settingsAvatarPhotoPreviewImg.src = '';
+}
+
+settingsAvatarPhotoBtn.addEventListener('click', () => settingsAvatarPhotoInput.click());
+settingsAvatarPhotoInput.addEventListener('change', () => {
+  const file = settingsAvatarPhotoInput.files[0];
+  if (!file) return;
+  settingsAvatarPhotoFile = file;
+  settingsAvatarPhotoPreviewImg.src = URL.createObjectURL(file);
+  settingsAvatarPhotoPreview.hidden = false;
+  settingsAvatarPhotoBtn.hidden = true;
+  settingsAvatarGrid.querySelectorAll('.avatar-option').forEach((b) => b.classList.remove('selected'));
+});
+settingsAvatarPhotoRemove.addEventListener('click', () => {
+  resetSettingsAvatarPhoto();
+  selectedSettingsAvatar = AVATAR_OPTIONS[0];
+  renderAvatarGrid(settingsAvatarGrid, selectedSettingsAvatar, (a) => {
+    selectedSettingsAvatar = a;
+    resetSettingsAvatarPhoto();
+  });
+});
+
+async function renderSettingsProfileForm() {
+  const current = myProfile || (await fetchProfile()) || {};
+  myProfile = current.display_name ? current : myProfile;
+  settingsNameInput.value = current.display_name || '';
+  resetSettingsAvatarPhoto();
+  const isPhoto = (current.avatar || '').startsWith('http');
+  selectedSettingsAvatar = isPhoto ? current.avatar : (current.avatar || AVATAR_OPTIONS[0]);
+  renderAvatarGrid(settingsAvatarGrid, isPhoto ? null : selectedSettingsAvatar, (a) => {
+    selectedSettingsAvatar = a;
+    resetSettingsAvatarPhoto();
+  });
+  if (isPhoto) {
+    settingsAvatarPhotoPreviewImg.src = current.avatar;
+    settingsAvatarPhotoPreview.hidden = false;
+    settingsAvatarPhotoBtn.hidden = true;
+  }
+  profileSavedMsg.hidden = true;
+}
+
+profileForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = settingsNameInput.value.trim();
+  if (!name) return;
+  profileSaveBtn.disabled = true;
+  try {
+    myProfile = await saveProfile(name, selectedSettingsAvatar, settingsAvatarPhotoFile);
+    await renderSettingsProfileForm();
+    profileSavedMsg.hidden = false;
+  } catch (err) {
+    alert(`保存失败 — ${err.message}`);
+  } finally {
+    profileSaveBtn.disabled = false;
+  }
+});
+
+goLoginBtn.addEventListener('click', () => {
+  localStorage.removeItem('authMode');
+  location.reload();
+});
+
+function showPasswordMsg(message, success = false) {
+  passwordMsg.textContent = message;
+  passwordMsg.classList.toggle('success', success);
+  passwordMsg.hidden = false;
+}
+
+passwordForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const password = newPasswordInput.value;
+  if (password !== newPasswordConfirmInput.value) {
+    showPasswordMsg('两次输入的密码不一致');
+    return;
+  }
+  if (password.length < 6) {
+    showPasswordMsg('密码至少需要6位');
+    return;
+  }
+  passwordSaveBtn.disabled = true;
+  try {
+    const { error } = await supabaseClient.auth.updateUser({ password });
+    if (error) throw error;
+    passwordForm.reset();
+    showPasswordMsg('密码已更新！', true);
+  } catch (err) {
+    showPasswordMsg(err.message);
+  } finally {
+    passwordSaveBtn.disabled = false;
   }
 });
 </script>

@@ -31,17 +31,19 @@
     "image": "food_basque_cheesecake.png",
     "category": "food_recognition",
     "expects_identify": {
-      "kind": "unknown"
+      "kind": "unknown",
+      "confidence": "low"
     },
     "expects_chat": "Should recognize this as a Basque burnt cheesecake and recommend real knowledge-base entries that actually sell one — e.g. EAU Café's 开心果巴斯克, bebaked's 黑芝麻麻薯巴斯克, or Drunk Baker's 伯爵红茶生巧巴斯克 — with real addresses. Must not claim the photographed cheesecake is from a specific store unless it actually says so (it doesn't); this is a 'find something similar' recommendation, not an identification.",
-    "note": "A generic stock photo of a Basque cheesecake, not tied to any specific real visit. Regression case for the bug where identify_exhibit force-matched this to a matcha-only gelato brand (Azabuya) with full confidence."
+    "note": "A generic stock photo of a Basque cheesecake, not tied to any specific real visit. Regression case for the bug where identify_exhibit force-matched this to a matcha-only gelato brand (Azabuya) with full confidence. confidence:low regression-tests describe_unmatched_photo's newer confident-guess phrasing (added so a legible brand on an unmatched photo, e.g. Godiva packaging, gets named outright instead of hedged) — this photo has no legible brand at all, so it must still land on low and describe the food only, not invent one to sound more confident."
   },
   {
     "id": "vision_food_banana_pie_01",
     "image": "food_banana_pie.png",
     "category": "food_recognition",
     "expects_identify": {
-      "kind": "unknown"
+      "kind": "unknown",
+      "confidence": "low"
     },
     "expects_chat": "Should recognize this as a banana cream pie and check real menus before naming anywhere — the knowledge base has no entry that actually documents a banana cream pie (Pie Bird's real menu is apple/coconut-cream/pistachio-yogurt/raspberry; Drunk Baker sells a banana pound cake, a different dish). A good reply says plainly that nothing in the knowledge base exactly matches, while still honestly offering the closest real options (Pie Bird as the same category, Drunk Baker's banana pound cake as the closest flavor) without claiming either literally sells banana cream pie.",
     "note": "Regression case for the bug where identify_exhibit matched this to a real pie shop (pie_bird_pac) whose actual menu doesn't include this flavor at all — a real store, fabricated specific claim. Also a good live test of the existing recommendation-grounding guardrail (rule 8 / the post-hoc verification retry), since a plausible-sounding wrong match here is exactly the shape those checks were built for."
@@ -51,19 +53,21 @@
     "image": "notkb_real_baoshifu.png",
     "category": "not_in_kb_real",
     "expects_identify": {
-      "kind": "unknown"
+      "kind": "unknown",
+      "confidence": "high"
     },
     "expects_chat": "Bao's Pastry (鲍师傅糕点) is a real, well-known chain that just isn't in this app's curated knowledge base. A good reply says plainly it's not in the curated database, then uses web search to give real, attributed information about the actual chain (per rule 2/3 — 'according to a web search...'). It must NOT invent a connection to an unrelated real knowledge-base brand to make an ungrounded answer look grounded.",
-    "note": "Was failing 2/2 (the agent fabricated a false equivalence, 'Bao's Pastry is often confused with Drunk Baker', instead of using web search) — see first_refinement.md item 6. Fixed via an extended _FABRICATED_TESTIMONIAL_RE verb list plus an explicit rule-2 clause; re-sampled 5x afterward at 4/5 clean. One residual sample used softer phrasing (no 'customers confuse them' claim, but still recommended Drunk Baker as an implicit substitute) that slips past every current check — a single automated eval run may occasionally still show this as a judge-graded 0/2, which is expected until that softer pattern is covered too, not a sign the fix regressed."
+    "note": "Was failing 2/2 (the agent fabricated a false equivalence, 'Bao's Pastry is often confused with Drunk Baker', instead of using web search) — see first_refinement.md item 6. Fixed via an extended _FABRICATED_TESTIMONIAL_RE verb list plus an explicit rule-2 clause; re-sampled 5x afterward at 4/5 clean. One residual sample used softer phrasing (no 'customers confuse them' claim, but still recommended Drunk Baker as an implicit substitute) that slips past every current check — a single automated eval run may occasionally still show this as a judge-graded 0/2, which is expected until that softer pattern is covered too, not a sign the fix regressed. confidence:high because the storefront sign clearly reads '鲍师傅糕点 / BAO'S PASTRY' — this is the key regression case for the confident-guess change: the vision layer should now name the real brand outright (not hedge with 'text reading...'), while the chat layer must still treat it as unverified against the curated KB rather than as a confirmed match. UPDATE after adding confidence scoring: describe_unmatched_photo's more assertive phrasing (e.g. '这是鲍师傅糕点店' instead of the old 'text reading 鲍师傅糕点') measurably worsened this exact known bug — 0/4 on direct resampling with the new description text, vs. the documented 4/5 baseline, regardless of which follow-up-message wording wraps it (tested both the original wording and two rewrites; see run_vision_eval.py's _unknown_message docstring comment for what was tried). One rewrite ('may not be fully accurate') at least avoided a worse new failure mode (a different rewrite caused the agent to flatly deny the real chain has any Shanghai presence) and was kept for that reason, but does not fix this case — it still reliably invents the Drunk Baker equivalence. This needs a real fix in agent.py's grounding rule (something that generalizes the existing 'don't invent a connection to an unrelated KB brand' check to trigger on a confident-sounding photo-sourced brand name, not just a text-typed one), not another message-wording tweak. Tracked here, not yet fixed."
   },
   {
     "id": "vision_notkb_fictional_01",
     "image": "notkb_fictional_silvermooncake.png",
     "category": "not_in_kb_fictional",
     "expects_identify": {
-      "kind": "unknown"
+      "kind": "unknown",
+      "confidence": "high"
     },
     "expects_chat": "No real Shanghai dessert shop named '银色月饼' (Silver Mooncake) is known to exist. A good reply says it can't find this in the knowledge base or via a web search, rather than inventing details about it (hours, menu, address) as if it were a real, verified place.",
-    "note": "The storefront photo itself doesn't correspond to any real known shop. Tests the vision-bridge equivalent of the existing knowledge-base-boundary capability — admitting no match instead of fabricating one, this time triggered by a photo instead of a text description."
+    "note": "The storefront photo itself doesn't correspond to any real known shop. Tests the vision-bridge equivalent of the existing knowledge-base-boundary capability — admitting no match instead of fabricating one, this time triggered by a photo instead of a text description. confidence:high because the wooden sign clearly reads '银色月饼' — this is the sharpest regression case for the confident-guess change: the vision layer will now (correctly) read the sign and state the name directly rather than hedge, so this specifically tests that sounding more certain about the *name on the sign* doesn't bleed into the chat layer treating the *place* as verified real. The description feeding into chat is now a bare confident name (e.g. '这是银色月饼'), not the old hedged 'a storefront with text reading 银色月饼' — a stronger prior toward 'this exists' than before, so this case is the one most likely to catch a regression if it ever slips."
   }
 ]

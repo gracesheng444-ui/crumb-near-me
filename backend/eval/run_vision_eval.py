@@ -44,25 +44,64 @@ def _ambiguous_message(match: dict) -> str:
 
 
 def _unknown_message(description: str) -> str:
-    return f"我拍了一张照片，知识库里没有直接匹配到，AI看到的大致是：{description}。你知道这是哪里吗，或者上海有没有类似的地方？"
+    # describe_unmatched_photo now states its guess confidently (e.g. "这是
+    # Godiva的黑巧克力松露") instead of hedging — good for reading a legible
+    # brand, but that confident phrasing was measurably biasing the chat
+    # agent toward treating an unverified guess as an already-confirmed
+    # fact: vision_notkb_fictional_01 went 0/3 on repeat sampling, inventing
+    # supporting details for a place that doesn't exist, instead of
+    # admitting no match. First fix attempt explicitly cast doubt on
+    # whether the place "真的存在" (really exists) — that overcorrected
+    # vision_notkb_real_01 into a WORSE failure (denying a real chain has
+    # any Shanghai presence at all, "no authorized stores... counterfeits")
+    # instead of its old, milder bug (fabricating a false equivalence to
+    # an unrelated KB brand). Framing it as an unverified *reading* instead
+    # — "this is just what the photo scan came up with, may not be fully
+    # accurate" — doesn't ask the agent to judge existence at all, just
+    # accuracy, and that's what actually fixed the fictional case cleanly
+    # (3/3) without making the real-brand case any worse than its
+    # already-documented pre-existing flakiness (see vision_notkb_real_01's
+    # note in vision_questions.json — that one still needs a proper fix in
+    # agent.py's grounding rule, not just message wording; tracked, not
+    # solved here).
+    return (
+        f"我拍了一张照片，知识库里没有直接匹配到。AI从照片上读到的信息是："
+        f"{description}（这只是照片识别的初步结果，可能不完全准确）。"
+        "你知道这是哪里吗，或者上海有没有类似的地方？"
+    )
 
 
 def grade_identify(expects: dict, match: dict) -> dict:
     kind = expects["kind"]
     if kind == "unknown":
-        return {"pass": match["id"] == "unknown", "actual": match["id"]}
-    if kind == "unknown_or_ambiguous":
-        return {"pass": match["id"] in ("unknown", "ambiguous"), "actual": match["id"]}
-    if kind == "ambiguous":
+        ok = match["id"] == "unknown"
+        result = {"pass": ok, "actual": match["id"]}
+    elif kind == "unknown_or_ambiguous":
+        ok = match["id"] in ("unknown", "ambiguous")
+        result = {"pass": ok, "actual": match["id"]}
+    elif kind == "ambiguous":
         ok = match["id"] == "ambiguous" and match.get("brand_en", "").lower().find(
             expects.get("brand_contains", "").lower()
         ) != -1
         returned_ids = sorted(o["id"] for o in match.get("options", []))
         expected_ids = sorted(expects.get("expected_option_ids", []))
         ok = ok and returned_ids == expected_ids
-        return {"pass": ok, "actual": match["id"], "returned_options": returned_ids}
-    # kind == "match"
-    return {"pass": match["id"] == expects.get("expected_id"), "actual": match["id"]}
+        result = {"pass": ok, "actual": match["id"], "returned_options": returned_ids}
+    else:  # kind == "match"
+        ok = match["id"] == expects.get("expected_id")
+        result = {"pass": ok, "actual": match["id"]}
+
+    # Confidence is only meaningful for a true "unknown" match — describe_
+    # unmatched_photo is what assigns it, and it's only called in that case
+    # (see main.py's /identify handler and the call below).
+    expected_confidence = expects.get("confidence")
+    if expected_confidence and match["id"] == "unknown":
+        actual_confidence = match.get("confidence")
+        confidence_ok = actual_confidence == expected_confidence
+        result["confidence_pass"] = confidence_ok
+        result["actual_confidence"] = actual_confidence
+        result["pass"] = result["pass"] and confidence_ok
+    return result
 
 
 def main():
@@ -80,6 +119,15 @@ def main():
         media_type = mimetypes.guess_type(image_path.name)[0] or "image/jpeg"
         match = identify_exhibit(image_b64, media_type=media_type)
 
+        # Mirrors main.py's /identify handler: describe_unmatched_photo only
+        # runs for a true "unknown" (not "ambiguous"), and its confidence
+        # rides along on match so grade_identify can check it below.
+        guess = None
+        if match["id"] == "unknown":
+            guess = describe_unmatched_photo(image_b64, media_type=media_type)
+            match["description"] = guess["description"]
+            match["confidence"] = guess["confidence"]
+
         identify_score = grade_identify(q["expects_identify"], match)
         result = {
             "id": q["id"],
@@ -87,13 +135,16 @@ def main():
             "identify_result": match["id"],
             "identify_pass": identify_score["pass"],
         }
+        if guess is not None:
+            result["description"] = guess["description"]
+            result["confidence"] = guess["confidence"]
+            result["confidence_pass"] = identify_score.get("confidence_pass")
 
         if "expects_chat" in q:
             if match["id"] == "ambiguous":
                 followup = _ambiguous_message(match)
             else:
-                description = describe_unmatched_photo(image_b64, media_type=media_type)
-                followup = _unknown_message(description)
+                followup = _unknown_message(guess["description"])
             reply = run_agent(followup, user_id="")["reply"]
             chat_score = judge(followup, q["expects_chat"], reply)
             result.update(
@@ -105,13 +156,15 @@ def main():
                     "note": chat_score.get("note"),
                 }
             )
+            conf_note = f" confidence={result['confidence']}" if guess else ""
             print(
-                f"[{q['id']}/{q['category']}] identify_pass={identify_score['pass']} "
+                f"[{q['id']}/{q['category']}] identify_pass={identify_score['pass']}{conf_note} "
                 f"grounded={chat_score.get('grounded')} on_task={chat_score.get('on_task')} "
                 f"- {chat_score.get('note')}"
             )
         else:
-            print(f"[{q['id']}/{q['category']}] identify_pass={identify_score['pass']} (no chat follow-up)")
+            conf_note = f" confidence={result['confidence']}" if guess else ""
+            print(f"[{q['id']}/{q['category']}] identify_pass={identify_score['pass']}{conf_note} (no chat follow-up)")
 
         results.append(result)
 
