@@ -243,6 +243,59 @@ clarity, which would be 2×2×2 = 8 phrasing variants instead of 4) —
 technically more exhaustive, but most of those extra cells aren't
 meaningfully different tests.
 
+## Vision capability — a separate, smaller slice
+
+Everything above only exercises the chat agent (`qwen-plus`, text in/out).
+The app has a second, independent model path — `identify_exhibit` in
+`tools.py`, which sends a photo to `qwen-vl-max` and asks it to match the
+image against the knowledge-base catalogue — and until now that path had
+zero eval coverage. It's a real gap, not a hypothetical one: a vision
+model matching a photo to the nearest catalogue entry has the same
+shape of failure as the text agent's recommendation-stretching bug —
+answering with false confidence instead of admitting no match — just on
+a different model and a different input type.
+
+`identify_exhibit`'s own output (`vision_questions.json`'s
+`expects_identify`) is graded automatically — a plain equality/membership
+check against one of three possible states: a specific matched entry, an
+`"ambiguous"` result (same brand, can't tell which branch — real photos
+of a multi-branch product almost never carry a legible address, so this
+turned out to be the common honest outcome, not `"unknown"`), or
+`"unknown"` (nothing matches at all). But an unmatched photo doesn't dead
+-end: `describe_unmatched_photo` gives a plain description, which the
+frontend feeds into a normal chat turn — so 4 of the 6 cases also carry
+an `expects_chat` field and get judged (reusing `run_eval.py`'s
+`judge()`) on whether that follow-up chat reply stays grounded, same as
+the text-side judge-graded capabilities.
+
+Six real cases in `vision_questions.json` / `run_vision_eval.py`, across
+three sub-shapes:
+
+1. **Brand recognition** (explicit vs. logo-only) — does the vision path
+   correctly recognize the brand without guessing the specific branch
+   when the photo doesn't show one?
+2. **Food recognition** (a dish with no specific-store evidence) — does
+   the chat follow-up recommend real knowledge-base entries that
+   actually serve that dish, rather than a wrong forced match or an
+   invented one?
+3. **Not in the knowledge base** (a real chain vs. a fictional one) —
+   does it admit no match and use web search for the real case, and
+   admit it can't verify existence for the fictional case, rather than
+   fabricating either way?
+
+Real photos, sourced by hand (not generated) — see
+`vision_photos/README.md`. The harness reports a question as skipped,
+not failed, if its photo isn't present yet.
+
+A first automated run (all 6 photos in place) found `identify_exhibit`
+itself at 5/6 (see `first_refinement.md` item 6 for the one open case —
+a fabricated brand-equivalence, not a matching failure), and the chat
+follow-up split 2/4 grounded — with the 2 failures tracing back to
+finding #1's already-known, still-open recommendation-stretching gap
+surfacing through this new photo-triggered entry point, not a new bug.
+Useful independent confirmation that gap isn't fully closed, from an
+angle the text-only eval suite can't reach on its own.
+
 ## Adding a new knowledge-base entry
 
 Adding a store to `backend/knowledge/*.json` is not "run the

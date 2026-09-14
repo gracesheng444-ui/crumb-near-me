@@ -1,15 +1,17 @@
 import base64
+import os
 from pathlib import Path
 
 from dotenv import load_dotenv
 
 load_dotenv()  # must run before agent/tools read env vars at import time
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from agent import run_agent
+from auth import get_user_id_for_token
 from collection import (
     PHOTO_DIR,
     add_log,
@@ -20,13 +22,38 @@ from collection import (
     summarize_taste,
 )
 from community import add_note, delete_note, list_notes
-from tools import AUDIO_DIR, identify_exhibit
+from tools import AUDIO_DIR, describe_unmatched_photo, identify_exhibit
 
 app = FastAPI(title="Shanghai Dessert Guide Agent")
 
 # In-memory session store keyed by a client-generated session id.
 # Fine for a one-week demo; not meant to survive a server restart.
 _sessions: dict[str, list[dict]] = {}
+
+
+def _resolve_user_id(authorization: str | None, fallback: str) -> str:
+    """Prefer the real, server-verified user id from a bearer token over
+    whatever user_id a client form field claims — signed-in users can't be
+    impersonated by someone guessing their id this way. Falls back to the
+    client-supplied id (the existing anonymous/guest behavior) only when
+    there's no valid session, so guest mode keeps working unchanged."""
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization.removeprefix("Bearer ").strip()
+        user_id = get_user_id_for_token(token)
+        if user_id:
+            return user_id
+    return fallback
+
+
+@app.get("/config")
+def get_config():
+    """Public config the frontend needs to talk to Supabase directly for
+    signup/login/logout — both values are meant to be embedded client-side,
+    same as Supabase's own docs show, so serving them isn't a secret leak."""
+    return {
+        "supabase_url": os.environ.get("SUPABASE_URL", ""),
+        "supabase_publishable_key": os.environ.get("SUPABASE_PUBLISHABLE_KEY", ""),
+    }
 
 
 @app.get("/health")
@@ -49,7 +76,9 @@ def chat(
     message: str = Form(...),
     session_id: str = Form("default"),
     user_id: str = Form(""),
+    authorization: str | None = Header(None),
 ):
+    user_id = _resolve_user_id(authorization, user_id)
     history = _sessions.get(session_id, [])
     result = run_agent(message, history, user_id=user_id)
     _sessions[session_id] = result["messages"]
@@ -65,7 +94,10 @@ def chat(
 async def identify(image: UploadFile = File(...)):
     image_bytes = await image.read()
     image_b64 = base64.b64encode(image_bytes).decode()
-    match = identify_exhibit(image_b64, media_type=image.content_type or "image/jpeg")
+    media_type = image.content_type or "image/jpeg"
+    match = identify_exhibit(image_b64, media_type=media_type)
+    if match["id"] == "unknown":
+        match["description"] = describe_unmatched_photo(image_b64, media_type=media_type)
     return match
 
 
@@ -79,7 +111,9 @@ async def create_log(
     photo: UploadFile | None = File(None),
     status: str = Form("eaten"),
     planned_date: str = Form(""),
+    authorization: str | None = Header(None),
 ):
+    user_id = _resolve_user_id(authorization, user_id)
     photo_url = None
     if photo is not None and photo.filename:
         contents = await photo.read()
@@ -97,13 +131,13 @@ async def create_log(
 
 
 @app.get("/log")
-def get_logs(user_id: str):
-    return list_logs(user_id)
+def get_logs(user_id: str, authorization: str | None = Header(None)):
+    return list_logs(_resolve_user_id(authorization, user_id))
 
 
 @app.delete("/log/{log_id}")
-def remove_log(log_id: int, user_id: str):
-    deleted = delete_log(user_id, log_id)
+def remove_log(log_id: int, user_id: str, authorization: str | None = Header(None)):
+    deleted = delete_log(_resolve_user_id(authorization, user_id), log_id)
     return {"deleted": deleted}
 
 
@@ -114,8 +148,10 @@ async def complete_log(
     rating: int | None = Form(None),
     note: str = Form(""),
     photo: UploadFile | None = File(None),
+    authorization: str | None = Header(None),
 ):
     """Graduate a planned reminder into a real eaten log."""
+    user_id = _resolve_user_id(authorization, user_id)
     photo_url = None
     if photo is not None and photo.filename:
         contents = await photo.read()
@@ -133,8 +169,8 @@ async def complete_log(
 
 
 @app.get("/log/summary")
-def get_summary(user_id: str):
-    return {"summary": summarize_taste(user_id)}
+def get_summary(user_id: str, authorization: str | None = Header(None)):
+    return {"summary": summarize_taste(_resolve_user_id(authorization, user_id))}
 
 
 @app.post("/notes")
@@ -144,7 +180,9 @@ async def create_note(
     user_id: str = Form(""),
     author_name: str = Form(""),
     photo: UploadFile | None = File(None),
+    authorization: str | None = Header(None),
 ):
+    user_id = _resolve_user_id(authorization, user_id)
     photo_url = None
     if photo is not None and photo.filename:
         contents = await photo.read()
@@ -164,8 +202,8 @@ def get_notes():
 
 
 @app.delete("/notes/{note_id}")
-def remove_note(note_id: int, user_id: str):
-    deleted = delete_note(user_id, note_id)
+def remove_note(note_id: int, user_id: str, authorization: str | None = Header(None)):
+    deleted = delete_note(_resolve_user_id(authorization, user_id), note_id)
     return {"deleted": deleted}
 
 

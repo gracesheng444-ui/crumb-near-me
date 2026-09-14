@@ -1,0 +1,69 @@
+[
+  {
+    "id": "vision_ambiguous_branch_01",
+    "image": "brand_explicit_azabuya.png",
+    "category": "brand_explicit",
+    "expects_identify": {
+      "kind": "ambiguous",
+      "brand_contains": "azabuya",
+      "expected_option_ids": [
+        "azabuya_taikoohui",
+        "azabuya_wanxiangcheng",
+        "azabuya_wulumuqi",
+        "azabuya_yanping",
+        "azabuya_yongkang"
+      ]
+    },
+    "expects_chat": "The agent doesn't know which of the 5 real Azabuya branches the photo shows (no address/branch marker was visible), so it should list all 5 real Azabuya branches with their real addresses when asked, matching the same ground truth as the existing factual-lookup question '麻布屋在上海有几家店？'. It must not claim to know which specific branch the photo is from.",
+    "note": "A photo with the brand name/logo clearly visible on both the cup and the storefront sign, but no address or other branch-distinguishing detail in frame. Regression case for the bug where identify_exhibit used to guess one specific (and each time different, i.e. wrong) branch instead of admitting it can't tell which one."
+  },
+  {
+    "id": "vision_logo_only_01",
+    "image": "brand_logo_azabuya.png",
+    "category": "brand_logo_only",
+    "expects_identify": {
+      "kind": "unknown_or_ambiguous"
+    },
+    "note": "Same brand, but only the abstract circular logo mark is visible (no wordmark, no storefront, no address). Re-tested twice: came back both 'unknown' and 'ambiguous' (with all 5 real Azabuya branches) across separate runs on the exact same photo — both are honest, non-hallucinating outcomes (recognizing the brand from the logo but correctly not guessing a branch is arguably the more useful of the two), so either passes. What must NOT happen is a wrong single-branch guess. Intentionally NOT tested end-to-end through chat: unlike the other unknown cases, there's no reasonable follow-up question a user would ask about an unidentified logo alone."
+  },
+  {
+    "id": "vision_food_basque_cheesecake_01",
+    "image": "food_basque_cheesecake.png",
+    "category": "food_recognition",
+    "expects_identify": {
+      "kind": "unknown"
+    },
+    "expects_chat": "Should recognize this as a Basque burnt cheesecake and recommend real knowledge-base entries that actually sell one — e.g. EAU Café's 开心果巴斯克, bebaked's 黑芝麻麻薯巴斯克, or Drunk Baker's 伯爵红茶生巧巴斯克 — with real addresses. Must not claim the photographed cheesecake is from a specific store unless it actually says so (it doesn't); this is a 'find something similar' recommendation, not an identification.",
+    "note": "A generic stock photo of a Basque cheesecake, not tied to any specific real visit. Regression case for the bug where identify_exhibit force-matched this to a matcha-only gelato brand (Azabuya) with full confidence."
+  },
+  {
+    "id": "vision_food_banana_pie_01",
+    "image": "food_banana_pie.png",
+    "category": "food_recognition",
+    "expects_identify": {
+      "kind": "unknown"
+    },
+    "expects_chat": "Should recognize this as a banana cream pie and check real menus before naming anywhere — the knowledge base has no entry that actually documents a banana cream pie (Pie Bird's real menu is apple/coconut-cream/pistachio-yogurt/raspberry; Drunk Baker sells a banana pound cake, a different dish). A good reply says plainly that nothing in the knowledge base exactly matches, while still honestly offering the closest real options (Pie Bird as the same category, Drunk Baker's banana pound cake as the closest flavor) without claiming either literally sells banana cream pie.",
+    "note": "Regression case for the bug where identify_exhibit matched this to a real pie shop (pie_bird_pac) whose actual menu doesn't include this flavor at all — a real store, fabricated specific claim. Also a good live test of the existing recommendation-grounding guardrail (rule 8 / the post-hoc verification retry), since a plausible-sounding wrong match here is exactly the shape those checks were built for."
+  },
+  {
+    "id": "vision_notkb_real_01",
+    "image": "notkb_real_baoshifu.png",
+    "category": "not_in_kb_real",
+    "expects_identify": {
+      "kind": "unknown"
+    },
+    "expects_chat": "Bao's Pastry (鲍师傅糕点) is a real, well-known chain that just isn't in this app's curated knowledge base. A good reply says plainly it's not in the curated database, then uses web search to give real, attributed information about the actual chain (per rule 2/3 — 'according to a web search...'). It must NOT invent a connection to an unrelated real knowledge-base brand to make an ungrounded answer look grounded.",
+    "note": "Was failing 2/2 (the agent fabricated a false equivalence, 'Bao's Pastry is often confused with Drunk Baker', instead of using web search) — see first_refinement.md item 6. Fixed via an extended _FABRICATED_TESTIMONIAL_RE verb list plus an explicit rule-2 clause; re-sampled 5x afterward at 4/5 clean. One residual sample used softer phrasing (no 'customers confuse them' claim, but still recommended Drunk Baker as an implicit substitute) that slips past every current check — a single automated eval run may occasionally still show this as a judge-graded 0/2, which is expected until that softer pattern is covered too, not a sign the fix regressed."
+  },
+  {
+    "id": "vision_notkb_fictional_01",
+    "image": "notkb_fictional_silvermooncake.png",
+    "category": "not_in_kb_fictional",
+    "expects_identify": {
+      "kind": "unknown"
+    },
+    "expects_chat": "No real Shanghai dessert shop named '银色月饼' (Silver Mooncake) is known to exist. A good reply says it can't find this in the knowledge base or via a web search, rather than inventing details about it (hours, menu, address) as if it were a real, verified place.",
+    "note": "The storefront photo itself doesn't correspond to any real known shop. Tests the vision-bridge equivalent of the existing knowledge-base-boundary capability — admitting no match instead of fabricating one, this time triggered by a photo instead of a text description."
+  }
+]

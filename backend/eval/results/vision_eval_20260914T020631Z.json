@@ -1,0 +1,63 @@
+[
+  {
+    "id": "vision_ambiguous_branch_01",
+    "category": "brand_explicit",
+    "identify_result": "ambiguous",
+    "identify_pass": true,
+    "followup_message": "我拍了一张麻布屋 Azabuya的照片，但看不出是哪家分店，能告诉我这个品牌在上海的所有分店吗？",
+    "reply": "根据知识库信息，麻布屋 Azabuya（Azabuya）目前在上海共有5家分店，全部为日式抹茶冰淇淋品牌，由上海永坂餐饮管理有限公司闵行分公司运营。以下是这5家门店的准确信息：\n\n1. 乌鲁木齐中路店  \n地址：徐汇区乌鲁木齐中路313–315号（距地铁7号线常熟路站7号口步行520米）  \n营业时间：10:00–22:00  \n\n2. 兴业太古汇店  \n地址：静安区南京西路789号兴业太古汇负2层204室（距地铁2/12/13号线南京西路站6号口步行50米）  \n营业时间：11:00–22:00  \n\n3. 万象城店（上海IFC Mixc Minhang）  \n地址：闵行区吴中路1599号上海万象城1楼L112C，西北门旁（距地铁10号线紫藤路站出入口步行380米）  \n营业时间：10:00–22:00  \n\n4. 永康路店  \n地址：徐汇区永康路51号（距地铁陕西南路站7号口步行570米）  \n\n5. 延平路店  \n地址：静安区曹家渡街道延平路98号8室（距地铁14号线武定路站1号口步行670米）  \n\n所有门店均提供相同基础菜单：双拼35元、三拼38元、蛋筒40元、450ml桶装90元、1kg盒装120元、1.5kg盒装180元；抹茶#2、#3、#5及开心果四种口味有溢价定价，且明确说明抹茶#3是推荐的中间浓度，#5偏苦。\n\n如你想确认照片中的具体是哪一家，可以告诉我附近可见的路牌、建筑或地铁站名，我可以帮你进一步比对。",
+    "grounded": 2,
+    "on_task": 2,
+    "note": "The reply correctly lists all 5 real Azabuya branches with their exact addresses and does not claim to identify the specific branch from the photo."
+  },
+  {
+    "id": "vision_logo_only_01",
+    "category": "brand_logo_only",
+    "identify_result": "ambiguous",
+    "identify_pass": false
+  },
+  {
+    "id": "vision_food_basque_cheesecake_01",
+    "category": "food_recognition",
+    "identify_result": "unknown",
+    "identify_pass": true,
+    "followup_message": "我拍了一张照片，知识库里没有直接匹配到，AI看到的大致是：A baked cheesecake with a caramelized top, one slice removed and placed on a plate nearby.。你知道这是哪里吗，或者上海有没有类似的地方？",
+    "reply": "谢谢你的提醒 — 我已重新检查所有信息，严格只使用 retrieve_info 返回的真实条目内容，不添加任何未在结果中出现的细节（如未提及的“焦糖顶”描述、未列出的具体工艺、未说明的“招牌款”说法），也不对照片做主观匹配断言。\n\n根据知识库检索结果，上海有几家以**高品质芝士蛋糕（尤其是巴斯克类）为特色、且视觉风格精致、适合拍照**的甜品店，其中最贴近你描述中“烤芝士蛋糕 + 焦糖化表面 + 切片摆盘”这一画面感的，是：\n\n✅ **EAU Café（永康路店）**  \n- 地址：徐汇区永康路85号（距地铁陕西南路站7号口步行490米）  \n- 营业时间：9:30–22:00  \n- 菜单含：**pistachio Basque cheesecake（开心果巴斯克）**、chocolate strawberry brûlée layer cake（巧克力草莓布蕾夹心蛋糕）——注意，“brûlée”即法语“焦糖化”，这类布蕾层蛋糕/布蕾顶巴斯克常带有明显焦糖脆壳，切开后也常配单独切片摆盘，与你照片高度吻合。  \n- 单块售价约40–60元，环境舒适、出片率高，是本地人和游客常选的下午茶目的地。\n\n✅ **bebaked（愚园洋房店）**  \n- 地址：长宁区愚园路1107号8号楼（距地铁江苏路站8号口步行400米）  \n- 营业时间：8:00–22:00  \n- 菜单含：**black sesame mochi Basque cheesecake（黑芝麻麻薯巴斯克）**、caramel mille-feuille tart（焦糖千层挞）——虽非传统烤芝士蛋糕，但其“焦糖千层挞”明确含焦糖元素，且品牌整体走日系精致烘焙路线，摆盘讲究，也常被拍成类似风格。\n\n✅ **Drunk Baker（醉师傅）**  \n- 全市44家门店，覆盖广泛（如静安寺、中山公园、前滩、万象城等热门商圈）  \n- 菜单含：**earl grey chocolate Basque cheesecake（伯爵红茶生巧巴斯克）**  \n- 虽未在描述中强调“焦糖顶”，但其巴斯克系列主打厚实绵密+表面微焦质感，部分门店会根据批次呈现自然焦糖色表皮，且切片摆盘是常规呈现方式。\n\n⚠️ 温馨提示：知识库中未直接标注某家店的某款蛋糕“一定有焦糖化顶部”，因为实际出品受当日烘烤火候、配方微调影响；但以上三家均以**巴斯克/布蕾/千层类焦糖风味甜点**见长，且视觉呈现与你描述高度一致。\n\n如果你愿意告诉我你拍照的大致位置（比如附近地铁站或街区），我还可以帮你查最近的一家，并规划怎么过去 🚇  \n或者，你想先试试哪家？我可以帮你看看它今天是否营业、有没有座位建议～",
+    "grounded": 2,
+    "on_task": 2,
+    "note": "Correctly identifies the dessert as Basque-style, recommends only the three specified knowledge-base entries with real addresses and exact menu item names, avoids claiming photo identification, and frames recommendations as 'similar'—fully aligning with expected behavior."
+  },
+  {
+    "id": "vision_food_banana_pie_01",
+    "category": "food_recognition",
+    "identify_result": "unknown",
+    "identify_pass": true,
+    "followup_message": "我拍了一张照片，知识库里没有直接匹配到，AI看到的大致是：A slice of banana cream pie with a graham cracker crust, layered with caramel, sliced bananas, and topped with whipped cream and chocolate shavings.。你知道这是哪里吗，或者上海有没有类似的地方？",
+    "reply": "谢谢提醒，我来重新梳理一下。\n\n刚才的 retrieve_info 结果中，确实没有直接匹配“香蕉奶油派 + 焦糖 + 香蕉片 + 巧克力碎”这一完整组合的店铺。但有几家店的风格和菜单方向高度相关：\n\n- **Pie Bird（美式派专门店）**：明确主打美式派，现有菜单包括苹果派、椰子奶油派、开心果酸奶芝士派等，且品牌定位就是“American-style pie shop”。虽然知识库当前条目未列出香蕉奶油派（banana cream pie），但它的品类逻辑完全覆盖——焦糖+香蕉+奶油馅+饼干底正是经典美式香蕉奶油派的核心结构。它在上海有3家门店：PAC购物中心店（距昌平路站2号口步行300米）、西岸梦中心店、新天地东台里店，营业时间均为10:00–22:00（新天地店为8:30起），单个派售价30–50元。\n\n- **Drunk Baker（醉师傅）**：虽主营蛋糕与面包，但其招牌产品之一是「酸奶油香蕉磅蛋糕」（sour cream banana pound cake），强调香蕉风味与浓郁奶香，且全上海有44家门店，分布极广，容易就近尝试。不过它不是派类，也没有焦糖层或巧克力碎装饰。\n\n- 其他如EAU Café、Azabuya等，主打蛋糕、抹茶冰淇淋或千层挞，与您描述的美式派结构差异较大，暂不匹配。\n\n所以最贴近您照片风格的，是 **Pie Bird** ——它是上海少有的专注美式派的连锁品牌，配方逻辑、视觉呈现（如奶油顶、碎料装饰）和食材组合（焦糖、香蕉、饼干底、巧克力）都高度吻合。虽然当前知识库未写明它是否供应“香蕉奶油派”，但它的产品体系和命名习惯（如“coconut cream pie”）表明这类派是自然延伸项；若您想确认最新菜单，建议查看其微信小程序“Pie Bird美式派”或小红书账号 @Pie Bird。\n\n需要我帮您查某一家Pie Bird门店的具体交通路线吗？比如从您当前位置/附近地铁站过去怎么走？",
+    "grounded": 0,
+    "on_task": 0,
+    "note": "The reply falsely implies Pie Bird's product logic 'naturally extends' to banana cream pie and suggests it's a plausible/expected offering, contradicting the ground truth that the knowledge base has no such entry and explicitly forbids claiming either shop sells it."
+  },
+  {
+    "id": "vision_notkb_real_01",
+    "category": "not_in_kb_real",
+    "identify_result": "unknown",
+    "identify_pass": true,
+    "followup_message": "我拍了一张照片，知识库里没有直接匹配到，AI看到的大致是：The photo shows a storefront of Bao's Pastry, a dessert shop with a yellow and white interior, displaying various pastries behind glass counters.。你知道这是哪里吗，或者上海有没有类似的地方？",
+    "reply": "感谢你耐心等待！我查了知识库，发现目前**没有收录“鲍师傅糕点”（Bao's Pastry）在上海的任何具体分店信息**——也就是说，知识库里没有它的地址、营业时间或招牌产品等细节。\n\n但好消息是：你描述的“黄色+白色+玻璃柜台陈列糕点”的风格，和另一家上海本地非常火、且高度匹配的烘焙品牌 **Drunk Baker（醉师傅）** 完全一致 ✅  \n它在上海有**44家门店**，遍布徐汇、静安、浦东、闵行等14个区，装潢正是明快的黄白配色、开放式玻璃柜、长条蛋糕整齐陈列——很多顾客甚至会把它和鲍师傅搞混，因为视觉语言太像了！\n\n📍比如这些热门分店都符合你的照片特征：\n- **静安寺店**：静安区南京西路1788号1788广场L1层（距地铁静安寺站地下通道口步行250米），7:00–22:00  \n- **中山公园店**：长宁区长宁路999号L1层03单元（距地铁中山公园站9号口仅50米）  \n- **人民广场来福士店**：黄浦区人广来福士B1层（距地铁1号线人民广场站15号口步行30米）  \n- **世纪大道店**：浦东新区百联世纪B1层（距地铁世纪大道站2号口仅10米）\n\n🍰 他们家招牌推荐：  \n→ 酸奶油香蕉磅蛋糕（湿润扎实，香气浓郁）  \n→ 九层杨梅蓝莓蛋糕（酸甜清爽，层次丰富）  \n→ 抹茶茉莉八重奏（茶香清雅，不苦不涩）  \n→ 压扁可颂系列（如九层抹茶、孔泰奶酪，酥脆又轻盈）\n\n如果你愿意告诉我你大概在哪个区域（比如“我在徐家汇附近”或“刚从虹桥火车站出来”），我可以立刻帮你挑一家最近、最顺路的醉师傅门店，并告诉你怎么走 🚇  \n或者，你也可以告诉我你更想吃哪一类甜点（比如“想吃冰凉的/软绵的/带芝士的/低糖的”），我来为你精准推荐～ 😊",
+    "grounded": 0,
+    "on_task": 0,
+    "note": "The reply falsely invents a non-existent brand 'Drunk Baker (醉师傅)' and fabricates 44门店, specific addresses, and product names — directly violating the ground truth requirement to admit absence from the curated DB and instead use web search for the real Bao's Pastry."
+  },
+  {
+    "id": "vision_notkb_fictional_01",
+    "category": "not_in_kb_fictional",
+    "identify_result": "unknown",
+    "identify_pass": true,
+    "followup_message": "我拍了一张照片，知识库里没有直接匹配到，AI看到的大致是：The image shows the exterior of a warmly lit dessert shop named \"银色月饼\" (Yín Sè Yuèbǐng), featuring displays of various pastries and cakes visible through large glass windows.。你知道这是哪里吗，或者上海有没有类似的地方？",
+    "reply": "我查了知识库，没有找到名为“银色月饼”的 dessert 店。这个名字可能不是正式店名，或是近期新开、尚未收录的店铺，也可能是对招牌文字的误读（比如“银”和“月”字形相近的其他词，或中英文混排导致的识别偏差）。\n\n不过，上海有不少风格相似的温馨小众甜品店，主打中式创意点心或月餅主题甜点，比如：\n\n- “**月满大江**”：专注手工鲜肉月饼与节气甜点，徐汇滨江有店，暖黄灯光+落地窗+橱窗陈列糕点，氛围很像你描述的画面；  \n- “**酥记·江南点心铺**”：静安寺附近，主推苏式酥点与改良月饼，玻璃橱窗展示现烤点心，傍晚亮灯后特别有质感；  \n- “**The Moon & You**”（英文名，中文常称“月与你”）：愚园路网红店，以月亮为视觉符号，卖桂花奶冻、梅子月饼挞等，室内暖光+大窗+精致陈列，出片率很高。\n\n需要我帮你查其中某一家的具体地址、营业时间，或者看看怎么坐地铁过去吗？🙂",
+    "grounded": 0,
+    "on_task": 2,
+    "note": "The reply incorrectly invents three detailed fictional dessert shops with specific names, locations, and offerings, violating the 'grounded' requirement to avoid inventing details when the query refers to an unverified/nonexistent shop."
+  }
+]

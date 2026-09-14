@@ -737,10 +737,141 @@
     cursor: pointer; font-size: 14px; padding: 0; height: fit-content;
   }
   .note-entry .del-btn:hover { color: var(--accent); }
+
+  /* ---------- AUTH ---------- */
+  #main-app {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #auth-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 32px 28px 40px;
+  }
+  #auth-view .auth-logo { width: 64px; height: 64px; margin: 0 auto 18px; }
+  #auth-view .auth-logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  #auth-view h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 22px;
+    text-align: center;
+    margin: 0 0 6px;
+  }
+  #auth-view p.sub {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin: 0 0 26px;
+  }
+  .auth-tabs {
+    display: flex;
+    gap: 6px;
+    background: var(--bg-accent);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 20px;
+  }
+  .auth-tabs button {
+    flex: 1;
+    border: none;
+    background: none;
+    padding: 9px;
+    border-radius: 9px;
+    font-family: var(--font-display);
+    font-size: 14px;
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+  .auth-tabs button.active { background: var(--card); color: var(--text); box-shadow: var(--shadow); }
+  #auth-form { display: flex; flex-direction: column; gap: 10px; }
+  #auth-form input {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 13px;
+    font-size: 14.5px;
+    font-family: inherit;
+    background: var(--bg-accent);
+    color: var(--text);
+  }
+  #auth-form input:focus { outline: none; border-color: var(--accent); }
+  #auth-submit {
+    border: none;
+    background: linear-gradient(135deg, var(--accent), #ff9470);
+    color: #fff;
+    border-radius: 10px;
+    padding: 13px;
+    font-size: 15px;
+    cursor: pointer;
+    font-family: var(--font-display);
+    box-shadow: var(--shadow);
+    margin-top: 4px;
+  }
+  #auth-submit:disabled { opacity: 0.5; cursor: default; box-shadow: none; }
+  #auth-error {
+    color: var(--accent);
+    font-size: 13px;
+    text-align: center;
+    margin-top: 2px;
+  }
+  #auth-error.auth-success { color: var(--accent-2); }
+  #auth-guest {
+    text-align: center;
+    margin-top: 22px;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  #auth-guest button {
+    border: none;
+    background: none;
+    color: var(--accent);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+  }
+  #logout-btn {
+    border: none;
+    background: none;
+    color: var(--text-dim);
+    font-size: 11.5px;
+    cursor: pointer;
+    padding: 4px 8px;
+    margin-left: auto;
+    align-self: flex-start;
+  }
+  #logout-btn:hover { color: var(--accent); }
 </style>
 </head>
 <body>
 <div class="app">
+  <div id="auth-view">
+    <div class="auth-logo"><img src="/icon.png" alt="" /></div>
+    <h1>上海甜品指南</h1>
+    <p class="sub">登录后可以保存你的甜品记录，跨设备同步</p>
+    <div class="auth-tabs">
+      <button type="button" id="tab-login" class="active">登录</button>
+      <button type="button" id="tab-signup">注册</button>
+    </div>
+    <form id="auth-form">
+      <input type="email" id="auth-email" placeholder="邮箱" autocomplete="email" required />
+      <input type="password" id="auth-password" placeholder="密码" autocomplete="current-password" required />
+      <input type="password" id="auth-password-confirm" placeholder="确认密码" autocomplete="new-password" hidden />
+      <button type="submit" id="auth-submit">登录</button>
+    </form>
+    <p id="auth-error" hidden></p>
+    <div id="auth-guest">
+      <button type="button" id="guest-btn">以访客身份继续，无需注册</button>
+    </div>
+  </div>
+
+  <div id="main-app" hidden>
   <header>
     <div class="logo">
       <img src="/icon.png" alt="" />
@@ -749,6 +880,7 @@
       <h1>上海甜品指南</h1>
       <p>巧克力・蛋糕・意式冰淇淋・更多甜品</p>
     </div>
+    <button type="button" id="logout-btn" hidden>退出登录</button>
   </header>
 
   <div id="chat-view">
@@ -940,9 +1072,137 @@
       <span class="nav-label">社区</span>
     </button>
   </nav>
+  </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// --- Auth (Supabase) ---
+const authView = document.getElementById('auth-view');
+const mainApp = document.getElementById('main-app');
+const tabLogin = document.getElementById('tab-login');
+const tabSignup = document.getElementById('tab-signup');
+const authForm = document.getElementById('auth-form');
+const authEmail = document.getElementById('auth-email');
+const authPassword = document.getElementById('auth-password');
+const authPasswordConfirm = document.getElementById('auth-password-confirm');
+const authSubmit = document.getElementById('auth-submit');
+const authError = document.getElementById('auth-error');
+const guestBtn = document.getElementById('guest-btn');
+const logoutBtn = document.getElementById('logout-btn');
+
+let authFormMode = 'login'; // 'login' | 'signup'
+
+function setAuthFormMode(mode) {
+  authFormMode = mode;
+  tabLogin.classList.toggle('active', mode === 'login');
+  tabSignup.classList.toggle('active', mode === 'signup');
+  authPasswordConfirm.hidden = mode !== 'signup';
+  authPasswordConfirm.required = mode === 'signup';
+  authPassword.autocomplete = mode === 'signup' ? 'new-password' : 'current-password';
+  authSubmit.textContent = mode === 'signup' ? '注册' : '登录';
+  authError.hidden = true;
+}
+tabLogin.addEventListener('click', () => setAuthFormMode('login'));
+tabSignup.addEventListener('click', () => setAuthFormMode('signup'));
+
+// authToken/userId are `let`, not `const` — Supabase's session check is
+// async, and its background token refresh can update authToken again later,
+// so both need to stay reassignable rather than fixed at page load.
+let authToken = null;
+let supabaseClient = null;
+
+function showApp() {
+  authView.hidden = true;
+  mainApp.hidden = false;
+  logoutBtn.hidden = !authToken;
+}
+
+function showAuthMessage(message, isError = true) {
+  authError.textContent = message;
+  authError.classList.toggle('auth-success', !isError);
+  authError.hidden = false;
+}
+
+authForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  authError.hidden = true;
+  const email = authEmail.value.trim();
+  const password = authPassword.value;
+  if (authFormMode === 'signup' && password !== authPasswordConfirm.value) {
+    showAuthMessage('两次输入的密码不一致');
+    return;
+  }
+  authSubmit.disabled = true;
+  try {
+    if (authFormMode === 'signup') {
+      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+      if (error) throw error;
+      if (!data.session) {
+        // Email confirmation is required before a session exists — the
+        // account is created, but signing in has to wait until they click
+        // the link Supabase just emailed them.
+        setAuthFormMode('login');
+        showAuthMessage('注册成功！请查收邮箱并点击确认链接，然后回来登录。', false);
+      }
+      // If confirmation is disabled on the project, signUp already returns
+      // a session and onAuthStateChange below handles showing the app.
+    } else {
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+    }
+  } catch (err) {
+    showAuthMessage(err.message);
+  } finally {
+    authSubmit.disabled = false;
+  }
+});
+
+guestBtn.addEventListener('click', () => {
+  localStorage.setItem('authMode', 'guest');
+  location.reload();
+});
+
+logoutBtn.addEventListener('click', async () => {
+  if (supabaseClient) await supabaseClient.auth.signOut();
+  localStorage.removeItem('authMode');
+  location.reload();
+});
+
+// Guest mode needs no network round trip, so it can show the app instantly
+// rather than waiting on the Supabase session check below.
+if (localStorage.getItem('authMode') === 'guest') {
+  showApp();
+}
+
+async function initSupabaseAuth() {
+  const cfg = await fetch('/config').then((r) => r.json());
+  supabaseClient = supabase.createClient(cfg.supabase_url, cfg.supabase_publishable_key);
+
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    authToken = session ? session.access_token : null;
+    if (session) {
+      userId = session.user.id;
+      showApp();
+    }
+  });
+
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session) {
+    authToken = session.access_token;
+    userId = session.user.id;
+    showApp();
+  } else if (localStorage.getItem('authMode') !== 'guest') {
+    authView.hidden = false;
+    mainApp.hidden = true;
+  }
+}
+initSupabaseAuth();
+
+function authHeaders() {
+  return authToken ? { Authorization: `Bearer ${authToken}` } : {};
+}
+
 const log = document.getElementById('log');
 const emptyState = document.getElementById('empty-state');
 const form = document.getElementById('chat-form');
@@ -1015,19 +1275,25 @@ function addIdCard(entry) {
   hideEmptyState();
   const row = document.createElement('div');
   row.className = 'row agent';
-  const known = entry && entry.id && entry.id !== 'unknown';
+  const status = entry && entry.id === 'ambiguous' ? 'ambiguous' : entry && entry.id && entry.id !== 'unknown' ? 'known' : 'unknown';
+  const name = status === 'known' ? (entry.name_zh || entry.name_en)
+    : status === 'ambiguous' ? `看起来像${entry.brand_zh || entry.brand_en}，但看不出是哪家分店`
+    : '知识库里没有直接匹配';
+  const sub = status === 'known' ? (entry.name_en || '')
+    : status === 'ambiguous' ? `${entry.options.length}家分店都有可能`
+    : (entry.description || '试试拍一张更清晰的门头或包装照片');
   row.innerHTML = `
     <div class="avatar pin">${PIN_ICON}</div>
     <div class="id-card">
       <div class="thumb"></div>
       <div>
-        <div class="name">${known ? escapeHtml(entry.name_zh || entry.name_en) : '无法识别这家店'}</div>
-        <div class="sub">${known ? escapeHtml(entry.name_en || '') : '试试拍一张更清晰的门头或包装照片'}</div>
+        <div class="name">${escapeHtml(name)}</div>
+        <div class="sub">${escapeHtml(sub)}</div>
       </div>
     </div>`;
   log.appendChild(row);
   scrollToBottom();
-  return known;
+  return status;
 }
 
 function escapeHtml(s) {
@@ -1046,7 +1312,7 @@ async function sendMessage(message) {
     body.append('message', message);
     body.append('session_id', sessionId);
     body.append('user_id', userId);
-    const res = await fetch('/chat', { method: 'POST', body });
+    const res = await fetch('/chat', { method: 'POST', body, headers: authHeaders() });
     if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
     const data = await res.json();
     typingRow.remove();
@@ -1116,10 +1382,14 @@ photoInput.addEventListener('change', async () => {
     if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
     const entry = await res.json();
     typingRow.remove();
-    const known = addIdCard(entry);
-    if (known) {
+    const status = addIdCard(entry);
+    if (status === 'known') {
       const name = entry.name_zh || entry.name_en;
       sendMessage(`介绍一下${name}`);
+    } else if (status === 'ambiguous') {
+      sendMessage(`我拍了一张${entry.brand_zh || entry.brand_en}的照片，但看不出是哪家分店，能告诉我这个品牌在上海的所有分店吗？`);
+    } else if (entry.description) {
+      sendMessage(`我拍了一张照片，知识库里没有直接匹配到，AI看到的大致是：${entry.description}。你知道这是哪里吗，或者上海有没有类似的地方？`);
     }
   } catch (err) {
     typingRow.remove();
@@ -1186,7 +1456,9 @@ function getUserId() {
     return sessionId; // localStorage unavailable (private window etc.) — fall back, won't persist
   }
 }
-const userId = getUserId();
+// Guest fallback by default; initSupabaseAuth() above overwrites this with
+// the real Supabase user id once a session is confirmed (or on refresh).
+let userId = getUserId();
 
 const logForm = document.getElementById('log-form');
 const logDessert = document.getElementById('log-dessert');
@@ -1257,7 +1529,7 @@ function buildNotebookEntryPage(entry) {
     </div>
   `;
   page.querySelector('.notebook-del-btn').addEventListener('click', async () => {
-    await fetch(`/log/${entry.id}?user_id=${encodeURIComponent(userId)}`, { method: 'DELETE' });
+    await fetch(`/log/${entry.id}?user_id=${encodeURIComponent(userId)}`, { method: 'DELETE', headers: authHeaders() });
     summaryText.textContent = '';
     loadEntries();
   });
@@ -1318,7 +1590,7 @@ notebookNextBtn.addEventListener('click', () => {
 
 async function loadEntries() {
   try {
-    const res = await fetch(`/log?user_id=${encodeURIComponent(userId)}`);
+    const res = await fetch(`/log?user_id=${encodeURIComponent(userId)}`, { headers: authHeaders() });
     allEntries = await res.json();
     renderNotebook();
   } catch (err) {
@@ -1340,7 +1612,7 @@ logForm.addEventListener('submit', async (e) => {
     if (selectedRating) body.append('rating', String(selectedRating));
     body.append('note', logNote.value.trim());
     if (logPhotoInput.files[0]) body.append('photo', logPhotoInput.files[0]);
-    const res = await fetch('/log', { method: 'POST', body });
+    const res = await fetch('/log', { method: 'POST', body, headers: authHeaders() });
     if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
 
     logDessert.value = '';
@@ -1364,7 +1636,7 @@ summaryBtn.addEventListener('click', async () => {
   summaryBtn.disabled = true;
   summaryText.textContent = '思考中…';
   try {
-    const res = await fetch(`/log/summary?user_id=${encodeURIComponent(userId)}`);
+    const res = await fetch(`/log/summary?user_id=${encodeURIComponent(userId)}`, { headers: authHeaders() });
     if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
     const data = await res.json();
     summaryText.textContent = data.summary;
@@ -1424,7 +1696,7 @@ function renderNoteEntry(entry) {
   const delBtn = div.querySelector('.del-btn');
   if (delBtn) {
     delBtn.addEventListener('click', async () => {
-      await fetch(`/notes/${entry.id}?user_id=${encodeURIComponent(userId)}`, { method: 'DELETE' });
+      await fetch(`/notes/${entry.id}?user_id=${encodeURIComponent(userId)}`, { method: 'DELETE', headers: authHeaders() });
       loadNotes();
     });
   }
@@ -1460,7 +1732,7 @@ noteForm.addEventListener('submit', async (e) => {
     body.append('author_name', noteAuthor.value.trim());
     body.append('user_id', userId);
     if (notePhotoInput.files[0]) body.append('photo', notePhotoInput.files[0]);
-    const res = await fetch('/notes', { method: 'POST', body });
+    const res = await fetch('/notes', { method: 'POST', body, headers: authHeaders() });
     if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
 
     notePlace.value = '';

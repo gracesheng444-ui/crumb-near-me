@@ -135,8 +135,70 @@ def retrieve_info(query: str, top_k: int = 20) -> list[dict]:
     return results
 
 
+def _brand_key(entry: dict) -> str:
+    return entry["name_en"].split(" (")[0].strip().lower()
+
+
+def _food_matches_menu(visible_food: str, candidate: dict) -> bool:
+    """A second, cheap text-only call to check whether a specific dish the
+    vision model claims to see is actually plausible for this candidate's
+    real menu — plain keyword overlap isn't reliable here, since generic
+    words like "pie" or "cream" trivially overlap with a pie shop's menu
+    even when the specific flavor (e.g. banana) isn't on it at all."""
+    if not visible_food:
+        return True
+    menu_text = f"{candidate.get('description_en', '')}\n{candidate.get('description_zh', '')}"
+    response = dashscope.Generation.call(
+        api_key=DASHSCOPE_API_KEY,
+        model="qwen-plus",
+        result_format="message",
+        temperature=0.1,
+        messages=[
+            {
+                "role": "user",
+                "content": (
+                    f'A photo appears to show this dish: "{visible_food}".\n'
+                    f"Here is a specific store's real menu:\n{menu_text}\n\n"
+                    "Ignoring plating/garnish/presentation details, does this "
+                    "store's actual menu include the same core dish or flavor "
+                    "(e.g. a matcha-flavored item photo counts as a match for "
+                    "a store that sells matcha items, even if the exact "
+                    "plating differs)? A photo showing a fundamentally "
+                    "different dessert type or flavor not on this menu at all "
+                    "(e.g. cheesecake at a gelato-only shop, or a flavor "
+                    "never listed) should NOT match. Reply with ONLY 'yes' or "
+                    "'no'."
+                ),
+            }
+        ],
+    )
+    if response.status_code != 200:
+        return False
+    answer = (response.output.choices[0].message.get("content") or "").strip().lower()
+    return answer.startswith("y")
+
+
 def identify_exhibit(image_base64: str, media_type: str = "image/jpeg") -> dict:
-    """Ask Qwen-VL to match a photo against the knowledge base entries."""
+    """Ask Qwen-VL to match a photo against the knowledge base entries.
+
+    An earlier version just asked "which id, or unknown" and trusted the
+    answer — live testing with real photos showed it almost never actually
+    said unknown, instead confidently naming the nearest-looking entry even
+    across food categories (a Basque cheesecake photo matched to a
+    matcha-only gelato brand) or guessing one specific branch from a photo
+    that only showed the brand, not the branch (a bare logo/cup, no address
+    in frame — a different branch guessed each time re-tested). Same
+    false-confidence shape as the text agent's stretching bug, just on the
+    vision side.
+
+    Fix: ask for the specific evidence visible (a dish, an address/sign)
+    instead of trusting a bare id, then verify that evidence before trusting
+    the match. A food claim not actually on the candidate's own menu is
+    rejected outright. A location claim that can't confirm the specific
+    branch, when sibling branches of the same brand exist, downgrades to an
+    "ambiguous" result listing the real candidates instead of guessing one —
+    mirroring how get_transit_directions already handles an ambiguous place.
+    """
     entries = load_knowledge_base(include_canary=False)
     catalogue = "\n".join(
         f"- {e['id']}: {e['name_en']} / {e['name_zh']} ({e['category']}, {e.get('address', '')})"
@@ -155,7 +217,16 @@ def identify_exhibit(image_base64: str, media_type: str = "image/jpeg") -> dict:
                             "Here is the current catalogue of known stores/"
                             f"facilities:\n{catalogue}\n\n"
                             "Which entry id does this photo most likely show? "
-                            "Reply with ONLY the id, or 'unknown' if none match."
+                            "Only answer with a specific id if you can point "
+                            "to real visible evidence — a legible store name/"
+                            "logo, an address/mall/street sign in frame, or a "
+                            "specific dish. Reply with ONLY this JSON, no "
+                            "other text: "
+                            '{"candidate_id": "<id, or \\"unknown\\">", '
+                            '"visible_food": "<specific dish/item you can '
+                            'see, or empty string>", '
+                            '"visible_location": "<any address/mall/street/'
+                            'sign text you can read, or empty string>"}'
                         )
                     },
                 ],
@@ -164,9 +235,86 @@ def identify_exhibit(image_base64: str, media_type: str = "image/jpeg") -> dict:
     )
     if response.status_code != 200:
         raise RuntimeError(f"Qwen-VL error {response.status_code}: {response.message}")
-    match_id = response.output.choices[0].message.content[0]["text"].strip()
-    match = next((e for e in entries if e["id"] == match_id), None)
-    return match or {"id": "unknown"}
+    text = response.output.choices[0].message.content[0]["text"].strip()
+    if text.startswith("```"):
+        text = text.strip("`")
+        if text.startswith("json"):
+            text = text[4:]
+        text = text.strip()
+    try:
+        parsed = json.loads(text)
+    except json.JSONDecodeError:
+        return {"id": "unknown"}
+
+    candidate = next(
+        (e for e in entries if e["id"] == (parsed.get("candidate_id") or "").strip()), None
+    )
+    if candidate is None:
+        return {"id": "unknown"}
+
+    visible_food = (parsed.get("visible_food") or "").strip()
+    if not _food_matches_menu(visible_food, candidate):
+        return {"id": "unknown"}
+
+    visible_location = (parsed.get("visible_location") or "").strip()
+    location_confirmed = bool(
+        visible_location and _tokenize(visible_location) & _tokenize(candidate.get("address", ""))
+    )
+
+    siblings = [e for e in entries if e["id"] != candidate["id"] and _brand_key(e) == _brand_key(candidate)]
+    if not location_confirmed and siblings:
+        options = [candidate] + siblings
+        return {
+            "id": "ambiguous",
+            "brand_en": _brand_key(candidate).title(),
+            "brand_zh": candidate["name_zh"].split("（")[0].strip(),
+            "options": [
+                {
+                    "id": o["id"],
+                    "name_en": o["name_en"],
+                    "name_zh": o["name_zh"],
+                    "address": o.get("address", ""),
+                }
+                for o in options
+            ],
+        }
+
+    clean = {k: v for k, v in candidate.items() if k != "canary"}
+    clean["tags"] = [t for t in clean.get("tags", []) if t not in ("canary", "example")]
+    return clean
+
+
+def describe_unmatched_photo(image_base64: str, media_type: str = "image/jpeg") -> str:
+    """When identify_exhibit finds no knowledge-base match, ask Qwen-VL for a
+    plain-language description instead — a store name if signage is visible,
+    or the dish/food type otherwise. Fed into a normal chat turn afterward so
+    the existing agent (retrieve_info/web-search/attribution rules) handles
+    it like any other question, rather than dead-ending on "no match"."""
+    response = dashscope.MultiModalConversation.call(
+        api_key=DASHSCOPE_API_KEY,
+        model="qwen-vl-max",
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {"image": f"data:{media_type};base64,{image_base64}"},
+                    {
+                        "text": (
+                            "This photo didn't match any entry in a curated "
+                            "dessert-shop database. In one short factual "
+                            "sentence, describe what it shows — if a store "
+                            "name is visible on signage/packaging, name it; "
+                            "otherwise just describe the food/dish. Don't "
+                            "guess a store name if none is visible."
+                        )
+                    },
+                ],
+            }
+        ],
+    )
+    if response.status_code != 200:
+        raise RuntimeError(f"Qwen-VL error {response.status_code}: {response.message}")
+    return response.output.choices[0].message.content[0]["text"].strip()
 
 
 def speak(text: str, lang: str = "zh") -> str:

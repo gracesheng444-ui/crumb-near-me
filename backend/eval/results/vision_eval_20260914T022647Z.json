@@ -1,0 +1,63 @@
+[
+  {
+    "id": "vision_ambiguous_branch_01",
+    "category": "brand_explicit",
+    "identify_result": "ambiguous",
+    "identify_pass": true,
+    "followup_message": "我拍了一张麻布屋 Azabuya的照片，但看不出是哪家分店，能告诉我这个品牌在上海的所有分店吗？",
+    "reply": "根据知识库信息，麻布屋 Azabuya（Azabuya）目前在上海共有5家分店，全部为日式抹茶冰淇淋品牌，由上海永坂餐饮管理有限公司闵行分公司运营。以下是各店的准确信息：\n\n1. 乌鲁木齐中路店  \n地址：徐汇区乌鲁木齐中路313–315号（距地铁7号线常熟路站7号口步行520米）  \n营业时间：10:00–22:00  \n\n2. 兴业太古汇店  \n地址：静安区南京西路789号兴业太古汇负2层204室（距地铁2/12/13号线南京西路站6号口步行50米）  \n营业时间：11:00–22:00  \n\n3. 万象城店（上海IFC Mixc Minhang）  \n地址：闵行区吴中路1599号上海万象城1楼L112C，西北门旁（距地铁10号线紫藤路站出入口步行380米）  \n营业时间：10:00–22:00  \n\n4. 永康路店  \n地址：徐汇区永康路51号（距地铁陕西南路站7号口步行570米）  \n\n5. 延平路店  \n地址：静安区曹家渡街道延平路98号8室（距地铁14号线武定路站1号口步行670米）  \n\n所有门店均提供相同基础菜单：双拼35元、三拼38元、蛋筒40元、450ml桶装90元、1kg盒装120元、1.5kg盒装180元；抹茶#2、#3、#5及开心果为溢价口味，具体价格按规格递增。推荐从抹茶#3开始尝试，口感平衡，苦味适中。\n\n如你想确认照片中的具体是哪一家，可以告诉我照片里是否有明显地标（比如商场LOGO、街景特征、附近建筑等），我可以帮你进一步比对。",
+    "grounded": 2,
+    "on_task": 2,
+    "note": "The reply correctly lists all 5 real Azabuya branches with their verified addresses and explicitly declines to identify the specific branch from the photo, aligning exactly with the ground truth expectation."
+  },
+  {
+    "id": "vision_logo_only_01",
+    "category": "brand_logo_only",
+    "identify_result": "ambiguous",
+    "identify_pass": true
+  },
+  {
+    "id": "vision_food_basque_cheesecake_01",
+    "category": "food_recognition",
+    "identify_result": "unknown",
+    "identify_pass": true,
+    "followup_message": "我拍了一张照片，知识库里没有直接匹配到，AI看到的大致是：A baked cheesecake with a caramelized top, one slice removed and placed on a plate nearby.。你知道这是哪里吗，或者上海有没有类似的地方？",
+    "reply": "谢谢你分享这张照片的描述！一块表面焦糖化、切下一小块放在旁边的烤芝士蛋糕，确实很有辨识度——那种微微裂开的脆壳、温润绵密的内芯，是很多人心目中的“经典款”。\n\n我查了知识库，目前没有直接匹配“焦糖顶烤芝士蛋糕”且明确标注为招牌或主推款的店铺。不过，有几家店的菜单里出现了高度相关的选项：\n\n- **EAU Café（永康路店、恒隆广场店、武夷路店）**：菜单中明确列出「巧克力草莓布蕾夹心蛋糕」（chocolate strawberry brûlée layer cake）——“brûlée”即法语“焦糖化”，说明它具备你描述的焦糖表层特征；同时也有「开心果巴斯克」（pistachio Basque cheesecake），而巴斯克式烤芝士蛋糕本身常带深色焦糖外壳，视觉上非常接近。\n\n- **bebaked（愚园洋房店、真如环宇城店）**：菜单中有「焦糖千层挞」（caramel mille-feuille tart），虽非整块芝士蛋糕，但同样强调焦糖工艺与层次感；另有一款「黑芝麻麻薯巴斯克」，也属于烤芝士蛋糕大类。\n\n- **Drunk Baker（醉师傅）**：44家门店遍布全市，菜单里有「伯爵红茶生巧巴斯克」（earl grey chocolate Basque cheesecake）——同样是带焦糖外壳的巴斯克风格，且因连锁覆盖广，很可能离你最近。\n\n这些都不是凭空猜测的店，全部来自知识库真实登记信息。如果你愿意告诉我你大概在哪个区域（比如靠近哪条路、哪个地铁站），我可以帮你缩小范围，甚至查怎么过去最方便。\n\n或者，你想先试试哪家？我可以为你读一段它的环境或点单小贴士～",
+    "grounded": 1,
+    "on_task": 2,
+    "note": "Correctly treats it as a 'find similar' task and recommends the three expected Basque cheesecake entries, but incorrectly conflates 'brûlée layer cake' (not a Basque cheesecake) with焦糖化 top identification and misrepresents it as visually matching — violating groundedness by inventing a link not supported by the expects description."
+  },
+  {
+    "id": "vision_food_banana_pie_01",
+    "category": "food_recognition",
+    "identify_result": "unknown",
+    "identify_pass": true,
+    "followup_message": "我拍了一张照片，知识库里没有直接匹配到，AI看到的大致是：A slice of banana cream pie with a graham cracker crust, layered with custard, sliced bananas, and topped with whipped cream and chocolate shavings.。你知道这是哪里吗，或者上海有没有类似的地方？",
+    "reply": "我查到了上海有几家专门做美式派的店，其中最接近你描述的香蕉奶油派（banana cream pie）的是 Pie Bird —— 这是一家主打美式派的连锁甜品店，在上海有3家门店：PAC购物中心店、西岸梦中心店和新天地东台里店。\n\n不过需要说明的是：知识库中明确列出的 Pie Bird 菜单包括苹果派、椰子奶油派、开心果酸奶芝士派和白雪树莓派，但**没有直接提到香蕉奶油派**。虽然它的“椰子奶油派”在结构上（奶油馅+酥脆饼底+顶部装饰）与你照片里的香蕉奶油派高度相似，且品牌定位就是专注美式派，因此有可能会根据季节或门店推出类似风味的变体，但目前知识库未确认该款存在。\n\n另外，Drunk Baker（醉师傅）有一款招牌蛋糕叫“酸奶油香蕉磅蛋糕”，虽是蛋糕而非派，但同样突出香蕉+酸奶油的经典组合，口感湿润绵密，配咖啡很受欢迎，全上海有44家门店，方便就近尝试。\n\n如果你愿意告诉我你所在的大致区域（比如靠近哪个地铁站），我可以帮你查最近的一家 Pie Bird 或 Drunk Baker，并提供步行路线。",
+    "grounded": 2,
+    "on_task": 2,
+    "note": "The reply correctly states no banana cream pie is in the knowledge base, accurately lists Pie Bird's actual menu items, identifies coconut-cream pie as structurally similar without claiming it *is* banana cream pie, and honestly positions Drunk Baker's banana pound cake as a flavor-adjacent but category-different option — fully aligning with the ground truth expectations."
+  },
+  {
+    "id": "vision_notkb_real_01",
+    "category": "not_in_kb_real",
+    "identify_result": "unknown",
+    "identify_pass": true,
+    "followup_message": "我拍了一张照片，知识库里没有直接匹配到，AI看到的大致是：The image shows a bakery storefront with the name \"鲍师傅糕点\" (Bao's Pastry) displayed on the sign above the entrance.。你知道这是哪里吗，或者上海有没有类似的地方？",
+    "reply": "您提到的“鲍师傅糕点”（Bao's Pastry）和知识库中匹配到的“Drunk Baker（醉师傅）”是两个不同品牌——虽然中文名发音相近、都做中式风格烘焙，但“鲍师傅”是北京起源的连锁糕点品牌，而知识库中收录的是上海本土原创烘焙品牌 Drunk Baker（醉师傅），常被顾客昵称为“醉师傅”，并非“鲍师傅”。\n\n知识库确认：Drunk Baker 在上海有 44 家门店，覆盖徐汇、静安、浦东、闵行等全部主要城区，例如：\n\n- 静安寺店：南京西路1788号1788广场1楼L110B，近地铁静安寺站  \n- 中山公园店：长宁路999号L1层03单元，近地铁中山公园站9号口  \n- 世纪大道店：百联世纪B1层b106，近地铁世纪大道站2号口（步行仅10米）  \n- 人民广场来福士店：B1层14-B/C，紧邻蔡林记，近地铁1号线人民广场站15号口  \n\n它主打长条分享型蛋糕（如招牌酸奶油香蕉磅蛋糕）、压扁可颂、生吐司和特色法棍，价格区间清晰（蛋糕38–48元，吐司约28元，可颂约18元）。\n\n如果您拍到的确实是“鲍师傅糕点”，那它目前**未被收录在本上海 dessert 指南知识库中**；我们暂无其在上海的具体门店信息、菜单或营业状态。需要我帮您查一下它在上海是否有公开的分店信息（例如通过网络搜索确认是否存在及位置）吗？",
+    "grounded": 0,
+    "on_task": 0,
+    "note": "The reply falsely claims knowledge-base matching to 'Drunk Baker (醉师傅)' — which is an invented, ungrounded connection not permitted by the expects; it should have stated outright that '鲍师傅糕点' is not in the curated database and immediately offered web search, without fabricating a phonetic or conceptual link to a different brand."
+  },
+  {
+    "id": "vision_notkb_fictional_01",
+    "category": "not_in_kb_fictional",
+    "identify_result": "unknown",
+    "identify_pass": true,
+    "followup_message": "我拍了一张照片，知识库里没有直接匹配到，AI看到的大致是：The image shows the storefront of a dessert shop named \"银色月饼\" (Silver Mooncakes) at night, with illuminated displays of various pastries and cakes visible through the large glass windows.。你知道这是哪里吗，或者上海有没有类似的地方？",
+    "reply": "You’re right — my earlier draft included ungrounded details. Let me correct that.\n\nI searched the knowledge base for “月饼” (mooncakes) and related terms, but **no shop named “银色月饼” (Silver Mooncakes) appears in the Shanghai dessert guide**. None of the retrieved entries match that name or describe a mooncake-focused boutique with an illuminated nighttime storefront like the one in your photo.\n\nThe closest matches are high-end pastry cafés and bakeries — such as EAU Café (with elegant cake displays), bebaked (specializing in modern Chinese-inspired pastries like black sesame mochi Basque), or Drunk Baker (a wide-reaching bakery chain offering seasonal mooncake-style cakes). But none are mooncake specialists, nor do any have “silver” or “moon” in their branding.\n\nSo to be clear:  \n- “银色月饼” is not in our curated database.  \n- There’s no verified match for that exact name, concept, or visual style in Shanghai’s known dessert scene — at least not yet.  \n- It could be a pop-up, a very new or small-scale shop, or possibly a misread/mistranslated sign (e.g., “银月” or “银杏月饼” — though those also don’t appear in the database).\n\nIf you’d like, I can:  \n🔹 Help you search nearby based on where you took the photo (just tell me the street or metro station),  \n🔹 Suggest places known for beautiful pastry windows and evening ambiance (like EAU Café or Azabuya), or  \n🔹 Check if there’s recent buzz about new mooncake-themed dessert spots via web search.\n\nJust let me know!",
+    "grounded": 2,
+    "on_task": 2,
+    "note": "The reply correctly states '银色月饼' is not in the knowledge base, avoids inventing details, and aligns precisely with the expected behavior."
+  }
+]

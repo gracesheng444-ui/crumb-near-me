@@ -47,7 +47,12 @@ augmentation available for things a curated shop database wouldn't cover \
 yourself, it happens automatically when useful. Never use it as a \
 substitute for retrieve_info on a question retrieve_info could answer. If \
 you still don't have a solid answer after that, say plainly that you don't \
-have that information rather than guessing.
+have that information rather than guessing. Never claim a place the \
+visitor asked about "is" or "is often confused with" a DIFFERENT specific \
+knowledge-base brand as a way to answer anyway — a real brand name \
+appearing in your reply doesn't make it grounded if it's actually a \
+different place than the one asked about; that substitution is exactly as \
+fabricated as inventing a shop from nothing.
 3. If retrieve_info DOES return a matching entry, state its details \
 confidently and specifically — do not hedge, second-guess, or add \
 disclaimers about reliability. A returned entry is your source of truth by \
@@ -253,15 +258,27 @@ _WEB_ATTRIBUTION_RE = re.compile(
 # verb, or a review-platform name followed by a hearsay verb) instead of
 # specific wording — still deliberately excluding the two sanctioned
 # attribution phrases above.
+#
+# A further variant, found via the vision-photo bridge (a photo of a real
+# chain not in the KB, e.g. Bao's Pastry / 鲍师傅): instead of inventing a
+# fake shop, the model invented a fake EQUIVALENCE between the asked-about
+# real place and an unrelated real knowledge-base brand ("很多顾客甚至会把
+# 它和醉师傅搞混"), then answered using the KB brand's real facts as if
+# they satisfied the original question — reproduced identically twice.
+# The old verb list (说/反馈/提到/...) doesn't cover "搞混"/"认错" (confuse/
+# mistake for), so this sailed through even though it's the exact same
+# aggregate-opinion-testimonial shape as the cases above, just inventing
+# social proof for a brand conflation instead of a taste opinion.
 _FABRICATED_TESTIMONIAL_RE = re.compile(
     r"(很多|不少|许多|大量|大部分|部分)(访客|顾客|食客|网友|用户|大家|人)(们|都)?"
-    r".{0,15}?(说|反馈|提到|称|评价|觉得|反映|联想)"
+    r".{0,15}?(说|反馈|提到|称|评价|觉得|反映|联想|搞混|混淆|弄混|认错|误认|当成)"
     # Platform-name variant needs an existence word ("上有"/"上不少"/"网友")
     # before the verb, not just co-occurrence — otherwise this also matches
     # the agent legitimately OFFERING to go check social platforms ("要不要
     # 我帮你查查小红书..."), which is a future action, not an asserted claim.
     r"|(小红书|大众点评|豆瓣|抖音|微博)(上|里)?(有|不少|很多|不少人|网友)[^。\n]{0,15}(提到|称|评价|说|反馈)"
-    r"|customers (say|report)|visitors (say|report)|many (people )?(say|report)",
+    r"|customers (say|report)|visitors (say|report)|many (people )?(say|report)"
+    r"|(often|commonly) (confused with|mistaken for)|(mixed up|confused) with",
     re.IGNORECASE,
 )
 
@@ -388,8 +405,13 @@ def run_agent(
                     "to a web search or community note — usually meaning a "
                     "shop was invented instead of grounded — (b) includes an "
                     "unattributed 'many customers/visitors say...' style "
-                    "testimonial, which is fabricated unless it came from an "
-                    "actual search_community_notes result, (c) cites a "
+                    "testimonial (including a claim that visitors 'often "
+                    "confuse' the asked-about place with a different, "
+                    "unrelated knowledge-base brand — naming a real brand "
+                    "doesn't make it correct to substitute its facts for a "
+                    "specifically different place someone asked about), "
+                    "which is fabricated unless it came from an actual "
+                    "search_community_notes result, (c) cites a "
                     "study/statistic/biochemistry term with no web-search "
                     "attribution, which this app has no real source for, or "
                     "(d) states a specific price, distance, or menu-variant "
