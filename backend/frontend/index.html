@@ -1145,17 +1145,17 @@
 <div class="app">
   <div id="auth-view">
     <div class="auth-logo"><img src="/icon.png" alt="" /></div>
-    <h1>上海甜品指南</h1>
-    <p class="sub">登录后可以保存你的甜品记录，跨设备同步</p>
+    <h1 data-i18n="appName">上海甜品指南</h1>
+    <p class="sub" data-i18n="authSub">登录后可以保存你的甜品记录，跨设备同步</p>
     <div class="auth-tabs">
-      <button type="button" id="tab-login" class="active">登录</button>
-      <button type="button" id="tab-signup">注册</button>
+      <button type="button" id="tab-login" class="active" data-i18n="login">登录</button>
+      <button type="button" id="tab-signup" data-i18n="signup">注册</button>
     </div>
     <form id="auth-form">
-      <input type="email" id="auth-email" placeholder="邮箱" autocomplete="email" required />
+      <input type="email" id="auth-email" placeholder="邮箱" data-i18n-ph="email" autocomplete="email" required />
       <div class="pw-field">
-        <input type="password" id="auth-password" placeholder="密码" autocomplete="current-password" required />
-        <button type="button" class="pw-toggle" data-target="auth-password" aria-label="显示密码">
+        <input type="password" id="auth-password" placeholder="密码" data-i18n-ph="password" autocomplete="current-password" required />
+        <button type="button" class="pw-toggle" data-target="auth-password" aria-label="显示密码" data-i18n-aria="showPassword">
           <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
             <g class="eye-open"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></g>
             <g class="eye-closed"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></g>
@@ -1163,33 +1163,33 @@
         </button>
       </div>
       <div class="pw-field" id="auth-password-confirm-field" hidden>
-        <input type="password" id="auth-password-confirm" placeholder="确认密码" autocomplete="new-password" />
-        <button type="button" class="pw-toggle" data-target="auth-password-confirm" aria-label="显示密码">
+        <input type="password" id="auth-password-confirm" placeholder="确认密码" data-i18n-ph="confirmPassword" autocomplete="new-password" />
+        <button type="button" class="pw-toggle" data-target="auth-password-confirm" aria-label="显示密码" data-i18n-aria="showPassword">
           <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
             <g class="eye-open"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></g>
             <g class="eye-closed"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></g>
           </svg>
         </button>
       </div>
-      <button type="submit" id="auth-submit">登录</button>
+      <button type="submit" id="auth-submit" data-i18n="login">登录</button>
     </form>
     <p id="auth-error" hidden></p>
     <div id="auth-guest">
-      <button type="button" id="guest-btn">以访客身份继续，无需注册</button>
+      <button type="button" id="guest-btn" data-i18n="continueAsGuest">以访客身份继续，无需注册</button>
     </div>
   </div>
 
   <div id="profile-setup-view" hidden>
     <div class="auth-logo"><img src="/icon.png" alt="" /></div>
-    <h1>欢迎！设置你的资料</h1>
-    <p class="sub">给自己起个昵称，选一个喜欢的头像</p>
+    <h1 data-i18n="profileSetupTitle">欢迎！设置你的资料</h1>
+    <p class="sub" data-i18n="profileSetupSub">给自己起个昵称，选一个喜欢的头像</p>
     <form id="profile-setup-form">
       <div class="avatar-grid centered" id="profile-setup-avatar-grid"></div>
       <input type="file" id="profile-setup-avatar-photo-input" accept="image/*" hidden />
       <div class="avatar-photo-row centered">
         <button type="button" id="profile-setup-avatar-photo-btn" class="avatar-photo-btn">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          从相册选择
+          <span data-i18n="choosePhoto">从相册选择</span>
         </button>
         <div id="profile-setup-avatar-photo-preview" class="avatar-photo-preview" hidden>
           <img id="profile-setup-avatar-photo-preview-img" alt="预览" />
@@ -1198,8 +1198,8 @@
           </button>
         </div>
       </div>
-      <input type="text" id="profile-setup-name" placeholder="你的昵称" maxlength="24" required />
-      <button type="submit" id="profile-setup-submit">开始使用</button>
+      <input type="text" id="profile-setup-name" placeholder="你的昵称" data-i18n-ph="yourNickname" maxlength="24" required />
+      <button type="submit" id="profile-setup-submit" data-i18n="getStarted">开始使用</button>
       <p id="profile-setup-msg" class="form-msg" hidden></p>
     </form>
   </div>
@@ -1210,8 +1210,8 @@
       <img src="/icon.png" alt="" />
     </div>
     <div>
-      <h1>上海甜品指南</h1>
-      <p>巧克力・蛋糕・意式冰淇淋・更多甜品</p>
+      <h1 data-i18n="appName">上海甜品指南</h1>
+      <p data-i18n="appTagline">巧克力・蛋糕・意式冰淇淋・更多甜品</p>
     </div>
     <button type="button" id="exit-demo-btn" title="退出访客模式">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -1235,22 +1235,22 @@
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
           </div>
         </div>
-        <p>问我关于上海甜品店的问题，也可以拍照识别、查路线。</p>
+        <p data-i18n="chatEmptyHint">问我关于上海甜品店的问题，也可以拍照识别、查路线。</p>
         <div class="chips">
-          <button type="button" class="chip" data-q="麻布屋有哪些口味的gelato？">麻布屋有哪些口味？</button>
-          <button type="button" class="chip" data-q="Drunk Baker的招牌蛋糕是什么？">Drunk Baker的招牌蛋糕</button>
-          <button type="button" class="chip" data-q="从静安寺地铁站怎么去麻布屋？">怎么去麻布屋？</button>
+          <button type="button" class="chip" data-q="麻布屋有哪些口味的gelato？" data-q-en="What gelato flavors does Azabuya have?" data-i18n="chipAzabuya">麻布屋有哪些口味？</button>
+          <button type="button" class="chip" data-q="Drunk Baker的招牌蛋糕是什么？" data-q-en="What's Drunk Baker's signature cake?" data-i18n="chipDrunkBaker">Drunk Baker的招牌蛋糕</button>
+          <button type="button" class="chip" data-q="从静安寺地铁站怎么去麻布屋？" data-q-en="How do I get to Azabuya from Jing'an Temple station?" data-i18n="chipDirections">怎么去麻布屋？</button>
         </div>
       </div>
     </div>
 
     <form id="chat-form">
       <input type="file" id="photo-input" accept="image/*" hidden />
-      <button type="button" id="photo-btn" class="icon-btn" title="拍照识别甜品店">
+      <button type="button" id="photo-btn" class="icon-btn" title="拍照识别甜品店" data-i18n-title="photoBtnTitle">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
       </button>
-      <textarea id="message" rows="1" placeholder="想问点什么甜品店的事？" autocomplete="off"></textarea>
-      <button type="submit" id="send-btn" title="发送">
+      <textarea id="message" rows="1" placeholder="想问点什么甜品店的事？" data-i18n-ph="chatPlaceholder" autocomplete="off"></textarea>
+      <button type="submit" id="send-btn" title="发送" data-i18n-title="send">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
     </form>
@@ -1260,15 +1260,15 @@
     <div class="segmented" id="collection-subnav">
       <button type="button" class="seg-btn active" data-pane="log">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        记录新甜品
+        <span data-i18n="tabLogNew">记录新甜品</span>
       </button>
       <button type="button" class="seg-btn" data-pane="view">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M2 5.5c3-1.6 6.5-1.6 9.5 0v14c-3-1.6-6.5-1.6-9.5 0z"/><path d="M22 5.5c-3-1.6-6.5-1.6-9.5 0v14c3-1.6 6.5-1.6 9.5 0z"/></svg>
-        我的记录
+        <span data-i18n="tabMyRecords">我的记录</span>
       </button>
       <button type="button" class="seg-btn" data-pane="wishlist">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" width="15" height="15"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg>
-        想吃清单
+        <span data-i18n="tabWishlist">想吃清单</span>
       </button>
     </div>
 
@@ -1281,10 +1281,10 @@
           <h3 id="log-form-heading">记录一份甜品</h3>
         </div>
         <form id="log-form">
-          <input type="text" id="log-dessert" placeholder="你吃了什么？例如 抹茶#3" required />
-          <input type="text" id="log-store" placeholder="在哪里吃的？（选填）例如 麻布屋 兴业太古汇店" />
+          <input type="text" id="log-dessert" placeholder="你吃了什么？例如 抹茶#3" data-i18n-ph="logDessertPh" required />
+          <input type="text" id="log-store" placeholder="在哪里吃的？（选填）例如 麻布屋 兴业太古汇店" data-i18n-ph="logStorePh" />
           <div id="log-planned-date-field" hidden>
-            <label for="log-planned-date" class="field-label">计划哪天去？（选填）</label>
+            <label for="log-planned-date" class="field-label" data-i18n="logPlannedDateLabel">计划哪天去？（选填）</label>
             <input type="date" id="log-planned-date" />
           </div>
           <div class="star-picker" id="log-stars">
@@ -1294,12 +1294,12 @@
             <button type="button" data-star="4"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
             <button type="button" data-star="5"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
           </div>
-          <textarea id="log-note" placeholder="有什么想法？（选填）"></textarea>
+          <textarea id="log-note" placeholder="有什么想法？（选填）" data-i18n-ph="thoughtsPh"></textarea>
           <input type="file" id="log-photo-input" accept="image/*" hidden />
           <div id="log-photo-row">
             <button type="button" id="log-photo-btn">
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-              添加照片
+              <span data-i18n="addPhoto">添加照片</span>
             </button>
             <div id="log-photo-preview" hidden>
               <img id="log-photo-preview-img" alt="预览" />
@@ -1309,7 +1309,7 @@
             </div>
           </div>
           <button type="submit" id="log-form-submit">加入我的甜品记录</button>
-          <button type="button" id="log-form-cancel-edit" hidden>取消编辑</button>
+          <button type="button" id="log-form-cancel-edit" hidden data-i18n="cancelEdit">取消编辑</button>
           <p id="log-form-msg" class="form-msg" hidden></p>
         </form>
       </div>
@@ -1321,11 +1321,11 @@
           <div class="icon-badge gold">
             <svg class="icon" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2.5l1.9 6.6 6.6 1.9-6.6 1.9-1.9 6.6-1.9-6.6-6.6-1.9 6.6-1.9z"/></svg>
           </div>
-          <h3>口味总结</h3>
+          <h3 data-i18n="tasteSummaryTitle">口味总结</h3>
         </div>
         <button type="button" id="summary-btn">
           <svg class="icon" viewBox="0 0 24 24" fill="currentColor" width="13" height="13"><path d="M12 2.5l1.9 6.6 6.6 1.9-6.6 1.9-1.9 6.6-1.9-6.6-6.6-1.9 6.6-1.9z"/></svg>
-          生成我的口味总结
+          <span data-i18n="generateSummary">生成我的口味总结</span>
         </button>
         <div id="summary-text"></div>
       </div>
@@ -1333,11 +1333,11 @@
       <div id="notebook">
         <div id="notebook-page"></div>
         <div id="notebook-nav">
-          <button type="button" id="notebook-prev" title="上一页">
+          <button type="button" id="notebook-prev" title="上一页" data-i18n-title="prevPage">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
           <span id="notebook-page-indicator"></span>
-          <button type="button" id="notebook-next" title="下一页">
+          <button type="button" id="notebook-next" title="下一页" data-i18n-title="nextPage">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         </div>
@@ -1350,8 +1350,8 @@
           <div class="icon-badge gold">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" width="14" height="14"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg>
           </div>
-          <h3>想吃清单</h3>
-          <button type="button" id="wishlist-add-btn" class="card-heading-add">+ 想吃新甜品</button>
+          <h3 data-i18n="tabWishlist">想吃清单</h3>
+          <button type="button" id="wishlist-add-btn" class="card-heading-add" data-i18n="wishlistAddBtn">+ 想吃新甜品</button>
         </div>
         <div id="wishlist-list"></div>
       </div>
@@ -1362,25 +1362,25 @@
     <div class="segmented" id="community-subnav">
       <button type="button" class="seg-btn active" data-pane="browse">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><circle cx="8.3" cy="6.3" r="0.9" fill="currentColor" stroke="none"/><circle cx="12.2" cy="4.4" r="0.9" fill="currentColor" stroke="none"/><circle cx="15.9" cy="6.4" r="0.9" fill="currentColor" stroke="none"/></svg>
-        浏览分享
+        <span data-i18n="tabBrowse">浏览分享</span>
       </button>
       <button type="button" class="seg-btn" data-pane="publish">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        我要分享
+        <span data-i18n="tabPublish">我要分享</span>
       </button>
     </div>
 
     <div id="community-pane-browse">
       <div class="disclaimer">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        来自其他访客的分享 — 未经本指南核实。
+        <span data-i18n="communityDisclaimer">来自其他访客的分享 — 未经本指南核实。</span>
       </div>
       <div class="card">
         <div class="card-heading">
           <div class="icon-badge gold">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><circle cx="8.3" cy="6.3" r="0.9" fill="currentColor" stroke="none"/><circle cx="12.2" cy="4.4" r="0.9" fill="currentColor" stroke="none"/><circle cx="15.9" cy="6.4" r="0.9" fill="currentColor" stroke="none"/></svg>
           </div>
-          <h3>社区分享</h3>
+          <h3 data-i18n="communityFeedTitle">社区分享</h3>
         </div>
         <div id="community-feed"></div>
       </div>
@@ -1392,17 +1392,17 @@
           <div class="icon-badge">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><circle cx="8.3" cy="6.3" r="0.9" fill="currentColor" stroke="none"/><circle cx="12.2" cy="4.4" r="0.9" fill="currentColor" stroke="none"/><circle cx="15.9" cy="6.4" r="0.9" fill="currentColor" stroke="none"/></svg>
           </div>
-          <h3>留下一条分享</h3>
+          <h3 id="note-form-heading" data-i18n="leaveNoteTitle">留下一条分享</h3>
         </div>
         <form id="note-form">
-          <input type="text" id="note-place" placeholder="哪家店？例如 麻布屋 兴业太古汇店" required />
-          <textarea id="note-text" placeholder="想让其他访客知道什么？比如打烊、菜单变化、小贴士…" required></textarea>
-          <input type="text" id="note-author" placeholder="你的称呼（选填）" />
+          <input type="text" id="note-place" placeholder="哪家店？例如 麻布屋 兴业太古汇店" data-i18n-ph="notePlacePh" required />
+          <textarea id="note-text" placeholder="想让其他访客知道什么？比如打烊、菜单变化、小贴士…" data-i18n-ph="noteTextPh" required></textarea>
+          <input type="text" id="note-author" placeholder="你的称呼（选填）" data-i18n-ph="noteAuthorPh" />
           <input type="file" id="note-photo-input" accept="image/*" hidden />
           <div id="note-photo-row">
             <button type="button" id="note-photo-btn">
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-              添加照片
+              <span data-i18n="addPhoto">添加照片</span>
             </button>
             <div id="note-photo-preview" hidden>
               <img id="note-photo-preview-img" alt="预览" />
@@ -1412,7 +1412,7 @@
             </div>
           </div>
           <button type="submit" id="note-form-submit">发布分享</button>
-          <button type="button" id="note-form-cancel-edit" hidden>取消编辑</button>
+          <button type="button" id="note-form-cancel-edit" hidden data-i18n="cancelEdit">取消编辑</button>
           <p id="note-form-msg" class="form-msg" hidden></p>
         </form>
       </div>
@@ -1425,16 +1425,16 @@
         <div class="icon-badge">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </div>
-        <h3>个人资料</h3>
+        <h3 data-i18n="profileTitle">个人资料</h3>
       </div>
       <form id="profile-form">
-        <p class="field-label">选择头像</p>
+        <p class="field-label" data-i18n="chooseAvatar">选择头像</p>
         <div class="avatar-grid" id="settings-avatar-grid"></div>
         <input type="file" id="settings-avatar-photo-input" accept="image/*" hidden />
         <div class="avatar-photo-row">
           <button type="button" id="settings-avatar-photo-btn" class="avatar-photo-btn">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            从相册选择
+            <span data-i18n="choosePhoto">从相册选择</span>
           </button>
           <div id="settings-avatar-photo-preview" class="avatar-photo-preview" hidden>
             <img id="settings-avatar-photo-preview-img" alt="预览" />
@@ -1443,8 +1443,8 @@
             </button>
           </div>
         </div>
-        <input type="text" id="settings-name-input" placeholder="你的昵称" maxlength="24" required />
-        <button type="submit" id="profile-save-btn">保存</button>
+        <input type="text" id="settings-name-input" placeholder="你的昵称" data-i18n-ph="yourNickname" maxlength="24" required />
+        <button type="submit" id="profile-save-btn" data-i18n="save">保存</button>
         <p id="profile-saved-msg" class="form-msg" hidden></p>
       </form>
     </div>
@@ -1454,21 +1454,21 @@
         <div class="icon-badge gold">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         </div>
-        <h3>账户</h3>
+        <h3 data-i18n="accountTitle">账户</h3>
       </div>
       <div id="settings-account-signedin" hidden>
         <div class="settings-account-row">
           <div>
-            <p class="hint">已登录</p>
+            <p class="hint" data-i18n="signedIn">已登录</p>
             <p class="email" id="settings-email"></p>
           </div>
-          <button type="button" id="logout-btn" class="settings-btn danger">退出登录</button>
+          <button type="button" id="logout-btn" class="settings-btn danger" data-i18n="logout">退出登录</button>
         </div>
         <form id="password-form">
-          <p class="field-label">修改密码</p>
+          <p class="field-label" data-i18n="changePassword">修改密码</p>
           <div class="pw-field">
-            <input type="password" id="new-password" placeholder="新密码" autocomplete="new-password" required />
-            <button type="button" class="pw-toggle" data-target="new-password" aria-label="显示密码">
+            <input type="password" id="new-password" placeholder="新密码" data-i18n-ph="newPassword" autocomplete="new-password" required />
+            <button type="button" class="pw-toggle" data-target="new-password" aria-label="显示密码" data-i18n-aria="showPassword">
               <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
                 <g class="eye-open"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></g>
                 <g class="eye-closed"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></g>
@@ -1476,21 +1476,34 @@
             </button>
           </div>
           <div class="pw-field">
-            <input type="password" id="new-password-confirm" placeholder="确认新密码" autocomplete="new-password" required />
-            <button type="button" class="pw-toggle" data-target="new-password-confirm" aria-label="显示密码">
+            <input type="password" id="new-password-confirm" placeholder="确认新密码" data-i18n-ph="confirmNewPassword" autocomplete="new-password" required />
+            <button type="button" class="pw-toggle" data-target="new-password-confirm" aria-label="显示密码" data-i18n-aria="showPassword">
               <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
                 <g class="eye-open"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></g>
                 <g class="eye-closed"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></g>
               </svg>
             </button>
           </div>
-          <button type="submit" id="password-save-btn">更新密码</button>
+          <button type="submit" id="password-save-btn" data-i18n="updatePassword">更新密码</button>
           <p id="password-msg" hidden></p>
         </form>
       </div>
       <div id="settings-account-guest" hidden class="settings-account-row">
-        <p class="hint">访客模式 — 数据仅保存在本机，登录后可跨设备同步</p>
-        <button type="button" id="go-login-btn" class="settings-btn">登录 / 注册</button>
+        <p class="hint" data-i18n="guestHint">访客模式 — 数据仅保存在本机，登录后可跨设备同步</p>
+        <button type="button" id="go-login-btn" class="settings-btn" data-i18n="loginOrSignup">登录 / 注册</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-heading">
+        <div class="icon-badge gold">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <h3 data-i18n="languageTitle">语言</h3>
+      </div>
+      <div class="segmented" id="language-toggle">
+        <button type="button" class="seg-btn" data-lang="zh">中文</button>
+        <button type="button" class="seg-btn" data-lang="en">English</button>
       </div>
     </div>
   </div>
@@ -1498,19 +1511,19 @@
   <nav id="bottom-nav">
     <button type="button" id="tab-chat" class="active" data-view="chat-view">
       <span class="nav-icon-wrap"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>
-      <span class="nav-label">聊天</span>
+      <span class="nav-label" data-i18n="navChat">聊天</span>
     </button>
     <button type="button" id="tab-collection" data-view="collection-view">
       <span class="nav-icon-wrap"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="9" cy="9.3" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.2" cy="10" r="1.1" fill="currentColor" stroke="none"/><circle cx="10.3" cy="14.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="14.8" cy="15" r="1.1" fill="currentColor" stroke="none"/></svg></span>
-      <span class="nav-label">我的甜品</span>
+      <span class="nav-label" data-i18n="navMyDesserts">我的甜品</span>
     </button>
     <button type="button" id="tab-community" data-view="community-view">
       <span class="nav-icon-wrap"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><circle cx="8.3" cy="6.3" r="0.9" fill="currentColor" stroke="none"/><circle cx="12.2" cy="4.4" r="0.9" fill="currentColor" stroke="none"/><circle cx="15.9" cy="6.4" r="0.9" fill="currentColor" stroke="none"/></svg></span>
-      <span class="nav-label">社区</span>
+      <span class="nav-label" data-i18n="navCommunity">社区</span>
     </button>
     <button type="button" id="tab-settings" data-view="settings-view">
       <span class="nav-icon-wrap"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
-      <span class="nav-label">设置</span>
+      <span class="nav-label" data-i18n="navSettings">设置</span>
     </button>
   </nav>
   </div>
@@ -1518,6 +1531,160 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// --- i18n: language toggle (中文/English) ---
+// Every translatable string lives here as { zh, en }. Static chrome
+// (buttons/labels/placeholders marked data-i18n[-ph/-title/-aria] in the
+// HTML) is swapped by applyLanguage() below; code that builds its own
+// strings (dynamic messages, rendered list items) calls t(key, vars)
+// directly. A key missing its `en` entry just stays in Chinese — this is
+// a deliberate soft-fail so a future feature that forgets to add a
+// translation degrades instead of breaking.
+const T = {
+  appName: { zh: '上海甜品指南', en: 'Shanghai Dessert Guide' },
+  authSub: { zh: '登录后可以保存你的甜品记录，跨设备同步', en: 'Sign in to save your dessert log and sync it across devices' },
+  login: { zh: '登录', en: 'Log in' },
+  signup: { zh: '注册', en: 'Sign up' },
+  continueAsGuest: { zh: '以访客身份继续，无需注册', en: 'Continue as guest, no sign-up needed' },
+  profileSetupTitle: { zh: '欢迎！设置你的资料', en: 'Welcome! Set up your profile' },
+  profileSetupSub: { zh: '给自己起个昵称，选一个喜欢的头像', en: 'Pick a nickname and an avatar you like' },
+  choosePhoto: { zh: '从相册选择', en: 'Choose from photos' },
+  getStarted: { zh: '开始使用', en: 'Get started' },
+  appTagline: { zh: '巧克力・蛋糕・意式冰淇淋・更多甜品', en: 'Chocolate · Cakes · Gelato · More desserts' },
+  chatEmptyHint: { zh: '问我关于上海甜品店的问题，也可以拍照识别、查路线。', en: "Ask me about Shanghai dessert shops — you can also send a photo to identify, or ask for directions." },
+  chipAzabuya: { zh: '麻布屋有哪些口味？', en: 'What flavors does Azabuya have?' },
+  chipDrunkBaker: { zh: 'Drunk Baker的招牌蛋糕', en: "Drunk Baker's signature cake" },
+  chipDirections: { zh: '怎么去麻布屋？', en: 'How do I get to Azabuya?' },
+  addPhoto: { zh: '添加照片', en: 'Add photo' },
+  tabLogNew: { zh: '记录新甜品', en: 'Log a dessert' },
+  tabMyRecords: { zh: '我的记录', en: 'My records' },
+  tabWishlist: { zh: '想吃清单', en: 'Wishlist' },
+  logDessertPh: { zh: '你吃了什么？例如 抹茶#3', en: 'What did you have? e.g. Matcha #3' },
+  logStorePh: { zh: '在哪里吃的？（选填）例如 麻布屋 兴业太古汇店', en: 'Where? (optional) e.g. Azabuya Taikoo Hui' },
+  logPlannedDateLabel: { zh: '计划哪天去？（选填）', en: 'When are you planning to go? (optional)' },
+  thoughtsPh: { zh: '有什么想法？（选填）', en: 'Any thoughts? (optional)' },
+  tasteSummaryTitle: { zh: '口味总结', en: 'Taste summary' },
+  generateSummary: { zh: '生成我的口味总结', en: 'Generate my taste summary' },
+  prevPage: { zh: '上一页', en: 'Previous' },
+  nextPage: { zh: '下一页', en: 'Next' },
+  wishlistAddBtn: { zh: '+ 想吃新甜品', en: '+ Add to wishlist' },
+  tabBrowse: { zh: '浏览分享', en: 'Browse' },
+  tabPublish: { zh: '我要分享', en: 'Post' },
+  publishNote: { zh: '发布分享', en: 'Post' },
+  communityDisclaimer: { zh: '来自其他访客的分享 — 未经本指南核实。', en: 'Shared by other visitors — not verified by this guide.' },
+  communityFeedTitle: { zh: '社区分享', en: 'Community posts' },
+  leaveNoteTitle: { zh: '留下一条分享', en: 'Leave a post' },
+  notePlacePh: { zh: '哪家店？例如 麻布屋 兴业太古汇店', en: 'Which shop? e.g. Azabuya Taikoo Hui' },
+  noteTextPh: { zh: '想让其他访客知道什么？比如打烊、菜单变化、小贴士…', en: "What should other visitors know? Closures, menu changes, tips…" },
+  noteAuthorPh: { zh: '你的称呼（选填）', en: 'Your name (optional)' },
+  profileTitle: { zh: '个人资料', en: 'Profile' },
+  chooseAvatar: { zh: '选择头像', en: 'Choose an avatar' },
+  yourNickname: { zh: '你的昵称', en: 'Your nickname' },
+  save: { zh: '保存', en: 'Save' },
+  accountTitle: { zh: '账户', en: 'Account' },
+  signedIn: { zh: '已登录', en: 'Signed in' },
+  logout: { zh: '退出登录', en: 'Log out' },
+  changePassword: { zh: '修改密码', en: 'Change password' },
+  newPassword: { zh: '新密码', en: 'New password' },
+  confirmNewPassword: { zh: '确认新密码', en: 'Confirm new password' },
+  updatePassword: { zh: '更新密码', en: 'Update password' },
+  guestHint: { zh: '访客模式 — 数据仅保存在本机，登录后可跨设备同步', en: "Guest mode — your data stays on this device only; sign in to sync across devices" },
+  loginOrSignup: { zh: '登录 / 注册', en: 'Log in / Sign up' },
+  languageTitle: { zh: '语言', en: 'Language' },
+  navChat: { zh: '聊天', en: 'Chat' },
+  navMyDesserts: { zh: '我的甜品', en: 'My desserts' },
+  navCommunity: { zh: '社区', en: 'Community' },
+  navSettings: { zh: '设置', en: 'Settings' },
+  cancelEdit: { zh: '取消编辑', en: 'Cancel edit' },
+  email: { zh: '邮箱', en: 'Email' },
+  password: { zh: '密码', en: 'Password' },
+  confirmPassword: { zh: '确认密码', en: 'Confirm password' },
+  photoBtnTitle: { zh: '拍照识别甜品店', en: 'Send a photo to identify a shop' },
+  send: { zh: '发送', en: 'Send' },
+  chatPlaceholder: { zh: '想问点什么甜品店的事？', en: 'Ask something about dessert shops…' },
+  showPassword: { zh: '显示密码', en: 'Show password' },
+  hidePassword: { zh: '隐藏密码', en: 'Hide password' },
+  exitGuestMode: { zh: '退出访客模式', en: 'Exit guest mode' },
+
+  httpError: { zh: '服务器返回了 {status}', en: 'Server returned {status}' },
+  saveFailed: { zh: '保存失败 — {msg}', en: 'Save failed — {msg}' },
+  publishFailed: { zh: '发布失败 — {msg}', en: 'Post failed — {msg}' },
+  passwordMismatch: { zh: '两次输入的密码不一致', en: "Passwords don't match" },
+  passwordTooShort: { zh: '密码至少需要6位', en: 'Password must be at least 6 characters' },
+  passwordUpdated: { zh: '密码已更新！', en: 'Password updated!' },
+  signupSuccess: { zh: '注册成功！请查收邮箱并点击确认链接，然后回来登录。', en: 'Signed up! Check your email for a confirmation link, then come back and log in.' },
+  playNarration: { zh: '播放讲解', en: 'Play narration' },
+  confidenceHigh: { zh: '比较确定', en: 'fairly confident' },
+  confidenceMedium: { zh: '不太确定', en: 'not very confident' },
+  ambiguousName: { zh: '看起来像{brand}，但看不出是哪家分店', en: "Looks like {brand}, but can't tell which branch" },
+  unknownName: { zh: '知识库里没有直接匹配', en: "No direct match in the knowledge base" },
+  ambiguousSub: { zh: '{count}家分店都有可能', en: 'Could be any of {count} branches' },
+  guessSub: { zh: '不在知识库里，AI的推测 · {label}', en: "Not in the knowledge base — AI's guess · {label}" },
+  unknownSubFallback: { zh: '试试拍一张更清晰的门头或包装照片', en: 'Try a clearer photo of the storefront or packaging' },
+  identifyFailed: { zh: '无法识别这张照片 — {msg}。', en: "Couldn't identify this photo — {msg}." },
+  introduceBrand: { zh: '介绍一下{name}', en: 'Tell me about {name}' },
+  askAmbiguousBranches: { zh: '我拍了一张{brand}的照片，但看不出是哪家分店，能告诉我这个品牌在上海的所有分店吗？', en: "I took a photo of {brand} but can't tell which branch it is — can you tell me all of this brand's branches in Shanghai?" },
+  askUnmatchedPhoto: { zh: '我拍了一张照片，知识库里没有直接匹配到。AI从照片上读到的信息是：{desc}（这只是照片识别的初步结果，可能不完全准确）。你知道这是哪里吗，或者上海有没有类似的地方？', en: "I took a photo that didn't directly match anything in the knowledge base. What the AI read from the photo is: {desc} (this is just an initial scan, may not be fully accurate). Do you know what this is, or is there somewhere similar in Shanghai?" },
+  connectAgentFailed: { zh: '连接向导时出了点问题 — {msg}。请再试一次。', en: 'Something went wrong connecting to the guide — {msg}. Please try again.' },
+  editingRecordTitle: { zh: '编辑这条记录', en: 'Edit this record' },
+  saveChanges: { zh: '保存修改', en: 'Save changes' },
+  planNewDessertTitle: { zh: '记一个想吃的甜品', en: 'Add something to your wishlist' },
+  addToWishlist: { zh: '加入想吃清单', en: 'Add to wishlist' },
+  recordDessertTitle: { zh: '记录一份甜品', en: 'Log a dessert' },
+  addToMyRecords: { zh: '加入我的甜品记录', en: 'Add to my records' },
+  edit: { zh: '编辑', en: 'Edit' },
+  delete: { zh: '删除', en: 'Delete' },
+  notebookEmpty: { zh: '还没有记录任何甜品，去"记录新甜品"添加一个吧。', en: 'No desserts logged yet — add one from "Log a dessert".' },
+  plannedDateLabel: { zh: '计划：{date}', en: 'Planned: {date}' },
+  previewAlt: { zh: '预览', en: 'Preview' },
+  wishlistEmpty: { zh: '还没有想吃的甜品，点上面的"+ 想吃新甜品"加一个吧。', en: 'Nothing on your wishlist yet — tap "+ Add to wishlist" above to add one.' },
+  loadLogsFailed: { zh: '无法加载你的甜品记录 — {msg}。', en: "Couldn't load your dessert records — {msg}." },
+  thinking: { zh: '思考中…', en: 'Thinking…' },
+  summaryFailed: { zh: '无法生成总结 — {msg}。', en: "Couldn't generate a summary — {msg}." },
+  anonymous: { zh: '匿名', en: 'Anonymous' },
+  communityEmpty: { zh: '还没有人分享，来做第一个吧。', en: 'No posts yet — be the first to share one.' },
+  loadNotesFailed: { zh: '无法加载社区分享 — {msg}', en: "Couldn't load community posts — {msg}" },
+  savedToast: { zh: '已保存！', en: 'Saved!' },
+  markAsTried: { zh: '标记为已尝试', en: 'Mark as tried' },
+  confirmTried: { zh: '确认已尝试', en: 'Confirm tried' },
+};
+
+let currentLang = (function () {
+  try {
+    return localStorage.getItem('lang') === 'en' ? 'en' : 'zh';
+  } catch {
+    return 'zh';
+  }
+})();
+
+function t(key, vars) {
+  const entry = T[key];
+  let str = entry ? (entry[currentLang] || entry.zh) : key;
+  if (vars) {
+    for (const k in vars) str = str.replace(`{${k}}`, vars[k]);
+  }
+  return str;
+}
+
+function applyStaticI18n() {
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach((el) => {
+    el.placeholder = t(el.dataset.i18nPh);
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach((el) => {
+    el.title = t(el.dataset.i18nTitle);
+  });
+  document.querySelectorAll('[data-i18n-aria]').forEach((el) => {
+    el.setAttribute('aria-label', t(el.dataset.i18nAria));
+  });
+  document.querySelectorAll('.chip[data-q-en]').forEach((el) => {
+    if (!el.dataset.qZh) el.dataset.qZh = el.dataset.q;
+    el.dataset.q = currentLang === 'en' ? el.dataset.qEn : el.dataset.qZh;
+  });
+  document.documentElement.lang = currentLang;
+}
+
 // --- Auth (Supabase) ---
 const authView = document.getElementById('auth-view');
 const mainApp = document.getElementById('main-app');
@@ -1575,11 +1742,19 @@ function setAuthFormMode(mode) {
   authPasswordConfirmField.hidden = mode !== 'signup';
   authPasswordConfirm.required = mode === 'signup';
   authPassword.autocomplete = mode === 'signup' ? 'new-password' : 'current-password';
-  authSubmit.textContent = mode === 'signup' ? '注册' : '登录';
+  authSubmit.textContent = mode === 'signup' ? t('signup') : t('login');
   authError.hidden = true;
 }
 tabLogin.addEventListener('click', () => setAuthFormMode('login'));
 tabSignup.addEventListener('click', () => setAuthFormMode('signup'));
+
+function syncPasswordToggleLabels() {
+  document.querySelectorAll('.pw-toggle').forEach((btn) => {
+    const showing = btn.classList.contains('showing');
+    btn.setAttribute('aria-label', showing ? t('hidePassword') : t('showPassword'));
+  });
+}
+syncPasswordToggleLabels();
 
 document.querySelectorAll('.pw-toggle').forEach((btn) => {
   const input = document.getElementById(btn.dataset.target);
@@ -1587,7 +1762,7 @@ document.querySelectorAll('.pw-toggle').forEach((btn) => {
     const showing = input.type === 'text';
     input.type = showing ? 'password' : 'text';
     btn.classList.toggle('showing', !showing);
-    btn.setAttribute('aria-label', showing ? '显示密码' : '隐藏密码');
+    btn.setAttribute('aria-label', showing ? t('showPassword') : t('hidePassword'));
   });
 });
 
@@ -1664,7 +1839,7 @@ async function saveProfile(displayName, avatar, photoFile) {
   body.append('avatar', avatar || '');
   if (photoFile) body.append('photo', photoFile);
   const res = await fetch('/profile', { method: 'POST', body, headers: authHeaders() });
-  if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
+  if (!res.ok) throw new Error(t('httpError', { status: res.status }));
   return res.json();
 }
 
@@ -1720,7 +1895,7 @@ profileSetupForm.addEventListener('submit', async (e) => {
     myProfile = await saveProfile(name, selectedSetupAvatar, profileSetupAvatarPhoto.getFile());
     showApp();
   } catch (err) {
-    showFormMsg(profileSetupMsg, `保存失败 — ${err.message}`);
+    showFormMsg(profileSetupMsg, t('saveFailed', { msg: err.message }));
   } finally {
     profileSetupSubmit.disabled = false;
   }
@@ -1738,7 +1913,7 @@ authForm.addEventListener('submit', async (e) => {
   const email = authEmail.value.trim();
   const password = authPassword.value;
   if (authFormMode === 'signup' && password !== authPasswordConfirm.value) {
-    showAuthMessage('两次输入的密码不一致');
+    showAuthMessage(t('passwordMismatch'));
     return;
   }
   authSubmit.disabled = true;
@@ -1751,7 +1926,7 @@ authForm.addEventListener('submit', async (e) => {
         // account is created, but signing in has to wait until they click
         // the link Supabase just emailed them.
         setAuthFormMode('login');
-        showAuthMessage('注册成功！请查收邮箱并点击确认链接，然后回来登录。', false);
+        showAuthMessage(t('signupSuccess'), false);
       }
       // If confirmation is disabled on the project, signUp already returns
       // a session and onAuthStateChange below handles showing the app.
@@ -1886,7 +2061,7 @@ function addReplayButton(col, audioUrl) {
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'replay-btn';
-  btn.innerHTML = `${SPEAKER_ICON} 播放讲解`;
+  btn.innerHTML = `${SPEAKER_ICON} ${t('playNarration')}`;
   btn.addEventListener('click', () => new Audio(audioUrl).play());
   col.appendChild(btn);
 }
@@ -1900,15 +2075,17 @@ function addIdCard(entry) {
     : entry && entry.id && entry.id !== 'unknown' ? 'known'
     : hasGuess ? 'guess'
     : 'unknown';
-  const confidenceLabel = { high: '比较确定', medium: '不太确定' }[entry && entry.confidence] || '';
-  const name = status === 'known' ? (entry.name_zh || entry.name_en)
-    : status === 'ambiguous' ? `看起来像${entry.brand_zh || entry.brand_en}，但看不出是哪家分店`
+  const confidenceLabel = { high: t('confidenceHigh'), medium: t('confidenceMedium') }[entry && entry.confidence] || '';
+  const knownPrimary = entry && (currentLang === 'en' ? (entry.name_en || entry.name_zh) : (entry.name_zh || entry.name_en));
+  const knownSecondary = entry && (currentLang === 'en' ? (entry.name_zh || '') : (entry.name_en || ''));
+  const name = status === 'known' ? knownPrimary
+    : status === 'ambiguous' ? t('ambiguousName', { brand: entry.brand_zh || entry.brand_en })
     : status === 'guess' ? entry.description
-    : '知识库里没有直接匹配';
-  const sub = status === 'known' ? (entry.name_en || '')
-    : status === 'ambiguous' ? `${entry.options.length}家分店都有可能`
-    : status === 'guess' ? `不在知识库里，AI的推测 · ${confidenceLabel}`
-    : (entry.description || '试试拍一张更清晰的门头或包装照片');
+    : t('unknownName');
+  const sub = status === 'known' ? knownSecondary
+    : status === 'ambiguous' ? t('ambiguousSub', { count: entry.options.length })
+    : status === 'guess' ? t('guessSub', { label: confidenceLabel })
+    : (entry.description || t('unknownSubFallback'));
   row.innerHTML = `
     <div class="avatar pin">${PIN_ICON}</div>
     <div class="id-card">
@@ -1940,7 +2117,7 @@ async function sendMessage(message) {
     body.append('session_id', sessionId);
     body.append('user_id', userId);
     const res = await fetch('/chat', { method: 'POST', body, headers: authHeaders() });
-    if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
+    if (!res.ok) throw new Error(t('httpError', { status: res.status }));
     const data = await res.json();
     typingRow.remove();
     const col = addRow(data.reply, 'agent');
@@ -1950,7 +2127,7 @@ async function sendMessage(message) {
     }
   } catch (err) {
     typingRow.remove();
-    addRow(`连接向导时出了点问题 — ${err.message}。请再试一次。`, 'agent', { isError: true });
+    addRow(t('connectAgentFailed', { msg: err.message }), 'agent', { isError: true });
   } finally {
     sendBtn.disabled = input.value.trim().length === 0;
   }
@@ -2006,21 +2183,21 @@ photoInput.addEventListener('change', async () => {
     const body = new FormData();
     body.append('image', file);
     const res = await fetch('/identify', { method: 'POST', body });
-    if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
+    if (!res.ok) throw new Error(t('httpError', { status: res.status }));
     const entry = await res.json();
     typingRow.remove();
     const status = addIdCard(entry);
     if (status === 'known') {
-      const name = entry.name_zh || entry.name_en;
-      sendMessage(`介绍一下${name}`);
+      const name = currentLang === 'en' ? (entry.name_en || entry.name_zh) : (entry.name_zh || entry.name_en);
+      sendMessage(t('introduceBrand', { name }));
     } else if (status === 'ambiguous') {
-      sendMessage(`我拍了一张${entry.brand_zh || entry.brand_en}的照片，但看不出是哪家分店，能告诉我这个品牌在上海的所有分店吗？`);
+      sendMessage(t('askAmbiguousBranches', { brand: entry.brand_zh || entry.brand_en }));
     } else if (entry.description) {
-      sendMessage(`我拍了一张照片，知识库里没有直接匹配到。AI从照片上读到的信息是：${entry.description}（这只是照片识别的初步结果，可能不完全准确）。你知道这是哪里吗，或者上海有没有类似的地方？`);
+      sendMessage(t('askUnmatchedPhoto', { desc: entry.description }));
     }
   } catch (err) {
     typingRow.remove();
-    addRow(`无法识别这张照片 — ${err.message}。`, 'agent', { isError: true });
+    addRow(t('identifyFailed', { msg: err.message }), 'agent', { isError: true });
   }
 });
 
@@ -2143,14 +2320,14 @@ let logStatus = 'eaten';
 
 function updateLogFormLabels() {
   if (editingLogId) {
-    logFormHeading.textContent = '编辑这条记录';
-    logFormSubmit.textContent = '保存修改';
+    logFormHeading.textContent = t('editingRecordTitle');
+    logFormSubmit.textContent = t('saveChanges');
   } else if (logStatus === 'planned') {
-    logFormHeading.textContent = '记一个想吃的甜品';
-    logFormSubmit.textContent = '加入想吃清单';
+    logFormHeading.textContent = t('planNewDessertTitle');
+    logFormSubmit.textContent = t('addToWishlist');
   } else {
-    logFormHeading.textContent = '记录一份甜品';
-    logFormSubmit.textContent = '加入我的甜品记录';
+    logFormHeading.textContent = t('recordDessertTitle');
+    logFormSubmit.textContent = t('addToMyRecords');
   }
 }
 
@@ -2227,7 +2404,7 @@ function buildNotebookEntryPage(entry) {
   const page = document.createElement('div');
   page.className = 'notebook-page-content';
   const photoSrc = entry.photo_url;
-  const dateLabel = new Date(entry.created_at).toLocaleDateString('zh-CN');
+  const dateLabel = new Date(entry.created_at).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'zh-CN');
 
   page.innerHTML = `
     ${photoSrc ? `<div class="notebook-photo-frame"><img src="${photoSrc}" alt="" /></div>` : ''}
@@ -2237,8 +2414,8 @@ function buildNotebookEntryPage(entry) {
     ${renderNotebookStars(entry.rating)}
     ${entry.note ? `<div class="notebook-note">${escapeHtml(entry.note)}</div>` : ''}
     <div class="notebook-actions">
-      <button type="button" class="notebook-edit-btn" title="编辑">${EDIT_ICON}</button>
-      <button type="button" class="notebook-del-btn" title="删除">${X_ICON}</button>
+      <button type="button" class="notebook-edit-btn" title="${t('edit')}">${EDIT_ICON}</button>
+      <button type="button" class="notebook-del-btn" title="${t('delete')}">${X_ICON}</button>
     </div>
   `;
   page.querySelector('.notebook-edit-btn').addEventListener('click', () => enterEditLogMode(entry));
@@ -2254,7 +2431,7 @@ function buildNotebookEmptyPage() {
   const page = document.createElement('div');
   page.className = 'notebook-page-content centered';
   page.innerHTML = `
-    <div class="notebook-heading">还没有记录任何甜品，去"记录新甜品"添加一个吧。</div>
+    <div class="notebook-heading">${t('notebookEmpty')}</div>
   `;
   return page;
 }
@@ -2315,7 +2492,7 @@ function renderWishlistEntry(entry) {
   const div = document.createElement('div');
   div.className = 'wishlist-entry';
   const dateLabel = entry.planned_date
-    ? new Date(`${entry.planned_date}T00:00:00`).toLocaleDateString('zh-CN')
+    ? new Date(`${entry.planned_date}T00:00:00`).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'zh-CN')
     : '';
   div.innerHTML = `
     <div class="wishlist-entry-head">
@@ -2323,29 +2500,29 @@ function renderWishlistEntry(entry) {
         <div class="place">${escapeHtml(entry.dessert_name)}</div>
         ${entry.store_name ? `<div class="text">${escapeHtml(entry.store_name)}</div>` : ''}
         ${entry.note ? `<div class="text">${escapeHtml(entry.note)}</div>` : ''}
-        ${dateLabel ? `<div class="meta">计划：${dateLabel}</div>` : ''}
+        ${dateLabel ? `<div class="meta">${t('plannedDateLabel', { date: dateLabel })}</div>` : ''}
       </div>
       <div class="wishlist-actions">
-        <button type="button" class="edit-btn" title="编辑">${EDIT_ICON}</button>
-        <button type="button" class="del-btn" title="删除">${X_ICON}</button>
+        <button type="button" class="edit-btn" title="${t('edit')}">${EDIT_ICON}</button>
+        <button type="button" class="del-btn" title="${t('delete')}">${X_ICON}</button>
       </div>
     </div>
-    <button type="button" class="wishlist-complete-btn">标记为已尝试</button>
+    <button type="button" class="wishlist-complete-btn">${t('markAsTried')}</button>
     <div class="wishlist-complete-form" hidden>
       <div class="star-picker"></div>
-      <textarea placeholder="有什么想法？（选填）"></textarea>
+      <textarea placeholder="${t('thoughtsPh')}"></textarea>
       <div class="wishlist-photo-row">
         <button type="button" class="wishlist-photo-btn">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          添加照片
+          ${t('addPhoto')}
         </button>
         <input type="file" accept="image/*" hidden />
         <div class="wishlist-photo-preview" hidden>
-          <img alt="预览" />
+          <img alt="${t('previewAlt')}" />
           <button type="button" class="wishlist-photo-remove">${X_ICON}</button>
         </div>
       </div>
-      <button type="button" class="wishlist-confirm-btn">确认已尝试</button>
+      <button type="button" class="wishlist-confirm-btn">${t('confirmTried')}</button>
       <p class="form-msg wishlist-complete-msg" hidden></p>
     </div>
   `;
@@ -2391,11 +2568,11 @@ function renderWishlistEntry(entry) {
       body.append('note', completeNote.value.trim());
       if (completePhoto.getFile()) body.append('photo', completePhoto.getFile());
       const res = await fetch(`/log/${entry.id}/complete`, { method: 'POST', body, headers: authHeaders() });
-      if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
+      if (!res.ok) throw new Error(t('httpError', { status: res.status }));
       summaryText.textContent = '';
       loadEntries();
     } catch (err) {
-      showFormMsg(confirmMsg, `保存失败 — ${err.message}`);
+      showFormMsg(confirmMsg, t('saveFailed', { msg: err.message }));
     } finally {
       confirmBtn.disabled = false;
     }
@@ -2414,7 +2591,7 @@ function renderWishlistList() {
   const entries = getWishlistEntries();
   wishlistList.innerHTML = '';
   if (entries.length === 0) {
-    wishlistList.innerHTML = '<div class="collection-empty">还没有想吃的甜品，点上面的"+ 想吃新甜品"加一个吧。</div>';
+    wishlistList.innerHTML = `<div class="collection-empty">${t('wishlistEmpty')}</div>`;
     return;
   }
   entries.forEach((entry) => wishlistList.appendChild(renderWishlistEntry(entry)));
@@ -2427,7 +2604,7 @@ async function loadEntries() {
     renderNotebook();
     renderWishlistList();
   } catch (err) {
-    notebookPageEl.innerHTML = `<div class="notebook-page-content centered"><div class="notebook-heading">无法加载你的甜品记录 — ${escapeHtml(err.message)}。</div></div>`;
+    notebookPageEl.innerHTML = `<div class="notebook-page-content centered"><div class="notebook-heading">${escapeHtml(t('loadLogsFailed', { msg: err.message }))}</div></div>`;
   }
 }
 
@@ -2458,7 +2635,7 @@ logForm.addEventListener('submit', async (e) => {
       if (logPhoto.getFile()) body.append('photo', logPhoto.getFile());
       res = await fetch('/log', { method: 'POST', body, headers: authHeaders() });
     }
-    if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
+    if (!res.ok) throw new Error(t('httpError', { status: res.status }));
 
     resetLogForm();
     summaryText.textContent = '';
@@ -2466,7 +2643,7 @@ logForm.addEventListener('submit', async (e) => {
     loadEntries();
     setCollectionPane(targetPane);
   } catch (err) {
-    showFormMsg(logFormMsg, `保存失败 — ${err.message}`);
+    showFormMsg(logFormMsg, t('saveFailed', { msg: err.message }));
   } finally {
     logFormSubmit.disabled = false;
   }
@@ -2474,14 +2651,14 @@ logForm.addEventListener('submit', async (e) => {
 
 summaryBtn.addEventListener('click', async () => {
   summaryBtn.disabled = true;
-  summaryText.textContent = '思考中…';
+  summaryText.textContent = t('thinking');
   try {
     const res = await fetch(`/log/summary?user_id=${encodeURIComponent(userId)}`, { headers: authHeaders() });
-    if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
+    if (!res.ok) throw new Error(t('httpError', { status: res.status }));
     const data = await res.json();
     summaryText.textContent = data.summary;
   } catch (err) {
-    summaryText.textContent = `无法生成总结 — ${err.message}。`;
+    summaryText.textContent = t('summaryFailed', { msg: err.message });
   } finally {
     summaryBtn.disabled = false;
   }
@@ -2523,7 +2700,7 @@ function resetNoteForm() {
   notePhotoRow.hidden = false;
   noteFormCancelEdit.hidden = true;
   noteFormMsg.hidden = true;
-  noteFormSubmit.textContent = '发布分享';
+  noteFormSubmit.textContent = t('publishNote');
 }
 
 function enterEditNoteMode(entry) {
@@ -2535,7 +2712,7 @@ function enterEditNoteMode(entry) {
   notePhotoRow.hidden = true;
   noteFormCancelEdit.hidden = false;
   noteFormMsg.hidden = true;
-  noteFormSubmit.textContent = '保存修改';
+  noteFormSubmit.textContent = t('saveChanges');
   setCommunityPane('publish');
   notePlace.focus();
 }
@@ -2548,8 +2725,8 @@ noteFormCancelEdit.addEventListener('click', () => {
 function renderNoteEntry(entry) {
   const div = document.createElement('div');
   div.className = 'note-entry';
-  const date = new Date(entry.created_at).toLocaleDateString('zh-CN');
-  const author = entry.author_name ? escapeHtml(entry.author_name) : '匿名';
+  const date = new Date(entry.created_at).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'zh-CN');
+  const author = entry.author_name ? escapeHtml(entry.author_name) : t('anonymous');
   const isOwn = entry.user_id === userId;
   div.innerHTML = `
     <div class="entry-body">
@@ -2562,8 +2739,8 @@ function renderNoteEntry(entry) {
     </div>
     ${isOwn ? `
     <div class="entry-actions">
-      <button type="button" class="edit-btn" title="编辑">${EDIT_ICON}</button>
-      <button type="button" class="del-btn" title="删除">${X_ICON}</button>
+      <button type="button" class="edit-btn" title="${t('edit')}">${EDIT_ICON}</button>
+      <button type="button" class="del-btn" title="${t('delete')}">${X_ICON}</button>
     </div>` : ''}
   `;
   if (isOwn) {
@@ -2582,12 +2759,12 @@ async function loadNotes() {
     const notes = await res.json();
     communityFeed.innerHTML = '';
     if (notes.length === 0) {
-      communityFeed.innerHTML = '<div class="collection-empty">还没有人分享，来做第一个吧。</div>';
+      communityFeed.innerHTML = `<div class="collection-empty">${t('communityEmpty')}</div>`;
       return;
     }
     notes.forEach((entry) => communityFeed.appendChild(renderNoteEntry(entry)));
   } catch (err) {
-    communityFeed.innerHTML = `<div class="collection-empty">无法加载社区分享 — ${escapeHtml(err.message)}。</div>`;
+    communityFeed.innerHTML = `<div class="collection-empty">${escapeHtml(t('loadNotesFailed', { msg: err.message }))}</div>`;
   }
 }
 
@@ -2614,13 +2791,13 @@ noteForm.addEventListener('submit', async (e) => {
       if (notePhoto.getFile()) body.append('photo', notePhoto.getFile());
       res = await fetch('/notes', { method: 'POST', body, headers: authHeaders() });
     }
-    if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
+    if (!res.ok) throw new Error(t('httpError', { status: res.status }));
 
     resetNoteForm();
     loadNotes();
     setCommunityPane('browse');
   } catch (err) {
-    showFormMsg(noteFormMsg, `发布失败 — ${err.message}`);
+    showFormMsg(noteFormMsg, t('publishFailed', { msg: err.message }));
   } finally {
     noteFormSubmit.disabled = false;
   }
@@ -2632,7 +2809,7 @@ function updateSettingsAccountView() {
   settingsAccountSignedin.hidden = !signedIn;
   settingsAccountGuest.hidden = signedIn;
   if (signedIn) settingsEmail.textContent = currentUserEmail || '';
-  const exitLabel = signedIn ? '退出登录' : '退出访客模式';
+  const exitLabel = signedIn ? t('logout') : t('exitGuestMode');
   exitDemoBtnLabel.textContent = exitLabel;
   exitDemoBtn.title = exitLabel;
 }
@@ -2680,9 +2857,9 @@ profileForm.addEventListener('submit', async (e) => {
   try {
     myProfile = await saveProfile(name, selectedSettingsAvatar, settingsAvatarPhoto.getFile());
     await renderSettingsProfileForm();
-    showFormMsg(profileSavedMsg, '已保存！', true);
+    showFormMsg(profileSavedMsg, t('savedToast'), true);
   } catch (err) {
-    showFormMsg(profileSavedMsg, `保存失败 — ${err.message}`);
+    showFormMsg(profileSavedMsg, t('saveFailed', { msg: err.message }));
   } finally {
     profileSaveBtn.disabled = false;
   }
@@ -2703,11 +2880,11 @@ passwordForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const password = newPasswordInput.value;
   if (password !== newPasswordConfirmInput.value) {
-    showPasswordMsg('两次输入的密码不一致');
+    showPasswordMsg(t('passwordMismatch'));
     return;
   }
   if (password.length < 6) {
-    showPasswordMsg('密码至少需要6位');
+    showPasswordMsg(t('passwordTooShort'));
     return;
   }
   passwordSaveBtn.disabled = true;
@@ -2715,13 +2892,54 @@ passwordForm.addEventListener('submit', async (e) => {
     const { error } = await supabaseClient.auth.updateUser({ password });
     if (error) throw error;
     passwordForm.reset();
-    showPasswordMsg('密码已更新！', true);
+    showPasswordMsg(t('passwordUpdated'), true);
   } catch (err) {
     showPasswordMsg(err.message);
   } finally {
     passwordSaveBtn.disabled = false;
   }
 });
+
+// --- Language toggle ---
+const languageToggle = document.getElementById('language-toggle');
+
+// Re-runs the handful of places that set their own text based on runtime
+// state (auth mode, password-visibility, edit-mode, signed-in-ness) —
+// applyStaticI18n() only knows about static data-i18n chrome, not these.
+function refreshDynamicChrome() {
+  setAuthFormMode(authFormMode);
+  syncPasswordToggleLabels();
+  updateLogFormLabels();
+  updateSettingsAccountView();
+}
+
+function setLanguage(lang) {
+  currentLang = lang === 'en' ? 'en' : 'zh';
+  try {
+    localStorage.setItem('lang', currentLang);
+  } catch {
+    // localStorage unavailable (private window etc.) — language choice just won't persist
+  }
+  languageToggle.querySelectorAll('.seg-btn').forEach((b) => {
+    b.classList.toggle('active', b.dataset.lang === currentLang);
+  });
+  applyStaticI18n();
+  refreshDynamicChrome();
+  // Re-render already-loaded lists (notebook/wishlist/community feed) so
+  // their embedded strings and date formatting pick up the new language too.
+  loadEntries();
+  loadNotes();
+}
+
+languageToggle.querySelectorAll('.seg-btn').forEach((btn) => {
+  btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+});
+
+languageToggle.querySelectorAll('.seg-btn').forEach((b) => {
+  b.classList.toggle('active', b.dataset.lang === currentLang);
+});
+applyStaticI18n();
+refreshDynamicChrome();
 </script>
 </body>
 </html>
