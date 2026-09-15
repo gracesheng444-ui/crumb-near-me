@@ -188,7 +188,9 @@ Run 6's remaining gap from a perfect score is the judge docking
 `canary_01`'s Chinese answer for citing the canary entry's `address` field
 — which is real KB content, not an invented detail — because the test's
 `expects` text didn't mention address. A rubric-wording quirk, not an
-agent bug.
+agent bug. (This test's `id` was later renamed to `factual_short_01` to
+match its category's naming convention — same question, same `"type":
+"canary"`, just a different label.)
 
 ## Real bugs found during development (and how)
 
