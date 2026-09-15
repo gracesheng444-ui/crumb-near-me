@@ -458,6 +458,19 @@
     color: var(--text);
     font-weight: 400;
   }
+  .card-heading-add {
+    margin-left: auto;
+    border: none;
+    background: none;
+    color: var(--accent-2);
+    font-family: var(--font-display);
+    font-size: 12.5px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 8px;
+  }
+  .card-heading-add:hover { background: var(--accent-2-dim); }
+  .card-heading-add:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 1px; }
   #log-form { display: flex; flex-direction: column; gap: 8px; }
   #log-form input, #log-form textarea {
     border: 1px solid var(--border);
@@ -1262,13 +1275,9 @@
           <div class="icon-badge">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="8"/><circle cx="9" cy="9.3" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.2" cy="10" r="1.1" fill="currentColor" stroke="none"/><circle cx="10.3" cy="14.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="14.8" cy="15" r="1.1" fill="currentColor" stroke="none"/></svg>
           </div>
-          <h3>记录一份甜品</h3>
+          <h3 id="log-form-heading">记录一份甜品</h3>
         </div>
         <form id="log-form">
-          <div class="segmented" id="log-status-toggle">
-            <button type="button" class="seg-btn active" data-status="eaten">已经吃过</button>
-            <button type="button" class="seg-btn" data-status="planned">还没吃，先想着</button>
-          </div>
           <input type="text" id="log-dessert" placeholder="你吃了什么？例如 抹茶#3" required />
           <input type="text" id="log-store" placeholder="在哪里吃的？（选填）例如 麻布屋 兴业太古汇店" />
           <div id="log-planned-date-field" hidden>
@@ -1345,6 +1354,7 @@
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" width="14" height="14"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg>
             </div>
             <h3>想吃清单</h3>
+            <button type="button" id="wishlist-add-btn" class="card-heading-add">+ 想吃新甜品</button>
           </div>
           <div id="wishlist-list"></div>
         </div>
@@ -2091,7 +2101,7 @@ function getUserId() {
 let userId = getUserId();
 
 const logForm = document.getElementById('log-form');
-const logStatusToggle = document.getElementById('log-status-toggle');
+const logFormHeading = document.getElementById('log-form-heading');
 const logDessert = document.getElementById('log-dessert');
 const logStore = document.getElementById('log-store');
 const logPlannedDateField = document.getElementById('log-planned-date-field');
@@ -2133,26 +2143,27 @@ let editingLogId = null;
 let editingLogStatus = null;
 let logStatus = 'eaten';
 
-function updateLogFormSubmitLabel() {
+function updateLogFormLabels() {
   if (editingLogId) {
+    logFormHeading.textContent = '编辑这条记录';
     logFormSubmit.textContent = '保存修改';
+  } else if (logStatus === 'planned') {
+    logFormHeading.textContent = '记一个想吃的甜品';
+    logFormSubmit.textContent = '加入想吃清单';
   } else {
-    logFormSubmit.textContent = logStatus === 'planned' ? '加入想吃清单' : '加入我的甜品记录';
+    logFormHeading.textContent = '记录一份甜品';
+    logFormSubmit.textContent = '加入我的甜品记录';
   }
 }
 
 function setLogStatus(status) {
   logStatus = status;
-  logStatusToggle.querySelectorAll('.seg-btn').forEach((b) => b.classList.toggle('active', b.dataset.status === status));
   const planned = status === 'planned';
   logPlannedDateField.hidden = !planned;
   logStars.hidden = planned;
   logPhotoRow.hidden = planned;
-  updateLogFormSubmitLabel();
+  updateLogFormLabels();
 }
-logStatusToggle.querySelectorAll('.seg-btn').forEach((btn) => {
-  btn.addEventListener('click', () => setLogStatus(btn.dataset.status));
-});
 
 function resetLogForm() {
   logDessert.value = '';
@@ -2164,7 +2175,6 @@ function resetLogForm() {
   logPhoto.reset();
   editingLogId = null;
   editingLogStatus = null;
-  logStatusToggle.hidden = false;
   logFormCancelEdit.hidden = true;
   logFormMsg.hidden = true;
   setLogStatus('eaten');
@@ -2182,13 +2192,19 @@ function enterEditLogMode(entry) {
   });
   logPlannedDate.value = entry.planned_date || '';
   logPhoto.reset();
-  logStatusToggle.hidden = true;
   logPlannedDateField.hidden = entry.status !== 'planned';
   logStars.hidden = entry.status === 'planned';
   logPhotoRow.hidden = true;
   logFormCancelEdit.hidden = false;
   logFormMsg.hidden = true;
-  updateLogFormSubmitLabel();
+  updateLogFormLabels();
+  setCollectionPane('log');
+  logDessert.focus();
+}
+
+function startNewWishlistEntry() {
+  resetLogForm();
+  setLogStatus('planned');
   setCollectionPane('log');
   logDessert.focus();
 }
@@ -2302,6 +2318,8 @@ viewSubnavBtns.forEach((btn) => {
 
 // --- Wishlist (planned entries not yet eaten) ---
 const wishlistList = document.getElementById('wishlist-list');
+const wishlistAddBtn = document.getElementById('wishlist-add-btn');
+wishlistAddBtn.addEventListener('click', startNewWishlistEntry);
 
 function getWishlistEntries() {
   return allEntries.filter((e) => e.status === 'planned');
