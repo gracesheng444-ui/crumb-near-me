@@ -654,10 +654,16 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 10px;
     min-width: 0;
   }
   .notebook-page-content.centered { justify-content: center; align-items: center; }
+  .notebook-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+  }
   #notebook-page.flip-next { transform: translateX(-18px); opacity: 0; }
   #notebook-page.flip-prev { transform: translateX(18px); opacity: 0; }
 
@@ -684,10 +690,31 @@
     background: rgba(220, 146, 87, 0.35);
     border: 1px solid rgba(220, 146, 87, 0.5);
   }
+  .notebook-photo-frame.placeholder {
+    border-style: dashed;
+    border-color: var(--border);
+  }
+  .notebook-photo-frame.placeholder img {
+    opacity: 0.32;
+    object-fit: contain;
+    padding: 26px;
+    box-sizing: border-box;
+    background: var(--bg-accent);
+  }
 
   .notebook-title { font-family: var(--font-display); font-weight: 400; font-size: 18px; text-align: center; margin: 2px 0 0; }
-  .notebook-store { text-align: center; color: var(--text-dim); font-size: 12.5px; }
-  .notebook-date { text-align: center; color: var(--text-dim); font-size: 11px; }
+  .notebook-store {
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+    text-align: center; color: var(--text-dim); font-size: 12.5px;
+  }
+  .notebook-store svg { width: 11px; height: 11px; flex-shrink: 0; }
+  .notebook-date {
+    width: fit-content; margin: 0 auto;
+    color: var(--text-dim); font-size: 10.5px;
+    background: var(--bg-accent);
+    border-radius: 999px;
+    padding: 2px 10px;
+  }
   .notebook-stars { display: flex; justify-content: center; gap: 2px; color: var(--accent-2); }
   .notebook-stars svg.icon { width: 15px; height: 15px; }
   .notebook-note {
@@ -699,12 +726,15 @@
     color: var(--text);
     margin: 0 6px;
   }
-  .notebook-actions { display: flex; justify-content: center; align-items: center; gap: 14px; margin-top: auto; padding-top: 8px; }
+  .notebook-actions { display: flex; justify-content: center; align-items: center; gap: 10px; padding-top: 10px; }
   .notebook-del-btn, .notebook-edit-btn {
-    border: none; background: none; color: var(--text-dim);
-    cursor: pointer; font-size: 14px; padding: 0; display: flex;
+    border: none; background: var(--bg-accent); color: var(--text-dim);
+    cursor: pointer; font-size: 14px; padding: 7px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
   }
-  .notebook-del-btn:hover, .notebook-edit-btn:hover { color: var(--accent); }
+  .notebook-edit-btn:hover { background: var(--accent-2-dim); color: var(--accent-2); }
+  .notebook-del-btn:hover { background: var(--accent-dim); color: var(--accent); }
   .notebook-del-btn:focus-visible, .notebook-edit-btn:focus-visible {
     outline: 2px solid var(--accent); outline-offset: 2px;
   }
@@ -730,7 +760,9 @@
     display: flex; align-items: center; justify-content: center;
     cursor: pointer;
   }
-  #notebook-nav button:hover:not(:disabled) { border-color: var(--accent-2); color: var(--accent-2); }
+  #notebook-nav button:hover:not(:disabled) {
+    border-color: var(--accent-2); color: var(--accent-2); background: var(--accent-2-dim);
+  }
   #notebook-nav button:disabled { opacity: 0.35; cursor: default; }
   #notebook-page-indicator { font-size: 12px; color: var(--text-dim); min-width: 56px; text-align: center; }
 
@@ -1567,6 +1599,7 @@ const T = {
   chipDrunkBaker: { zh: 'Drunk Baker的招牌蛋糕', en: "Drunk Baker's signature cake" },
   chipDirections: { zh: '怎么去麻布屋？', en: 'How do I get to Azabuya?' },
   addPhoto: { zh: '添加照片', en: 'Add photo' },
+  photoRequired: { zh: '请给这份甜品添加一张照片', en: 'Please add a photo of this dessert' },
   tabLogNew: { zh: '记录新甜品', en: 'Log a dessert' },
   tabMyRecords: { zh: '我的记录', en: 'My records' },
   tabWishlist: { zh: '想吃清单', en: 'Wishlist' },
@@ -2419,12 +2452,16 @@ function buildNotebookEntryPage(entry) {
   const dateLabel = new Date(entry.created_at).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'zh-CN');
 
   page.innerHTML = `
-    ${photoSrc ? `<div class="notebook-photo-frame"><img src="${photoSrc}" alt="" /></div>` : ''}
-    <div class="notebook-title">${escapeHtml(entry.dessert_name)}</div>
-    ${entry.store_name ? `<div class="notebook-store">${escapeHtml(entry.store_name)}</div>` : ''}
-    <div class="notebook-date">${dateLabel}</div>
-    ${renderNotebookStars(entry.rating)}
-    ${entry.note ? `<div class="notebook-note">${escapeHtml(entry.note)}</div>` : ''}
+    <div class="notebook-body">
+      ${photoSrc
+        ? `<div class="notebook-photo-frame"><img src="${photoSrc}" alt="" /></div>`
+        : `<div class="notebook-photo-frame placeholder"><img src="/icon.png" alt="" /></div>`}
+      <div class="notebook-title">${escapeHtml(entry.dessert_name)}</div>
+      ${entry.store_name ? `<div class="notebook-store">${PIN_ICON}${escapeHtml(entry.store_name)}</div>` : ''}
+      <div class="notebook-date">${dateLabel}</div>
+      ${renderNotebookStars(entry.rating)}
+      ${entry.note ? `<div class="notebook-note">${escapeHtml(entry.note)}</div>` : ''}
+    </div>
     <div class="notebook-actions">
       <button type="button" class="notebook-edit-btn" title="${t('edit')}">${EDIT_ICON}</button>
       <button type="button" class="notebook-del-btn" title="${t('delete')}">${X_ICON}</button>
@@ -2624,6 +2661,10 @@ logForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const dessertName = logDessert.value.trim();
   if (!dessertName) return;
+  if (!editingLogId && logStatus === 'eaten' && !logPhoto.getFile()) {
+    showFormMsg(logFormMsg, t('photoRequired'));
+    return;
+  }
   logFormSubmit.disabled = true;
   logFormMsg.hidden = true;
 

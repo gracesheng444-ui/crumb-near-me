@@ -117,6 +117,8 @@ async def create_log(
     authorization: str | None = Header(None),
 ):
     user_id = _resolve_user_id(authorization, user_id)
+    if status == "eaten" and (photo is None or not photo.filename):
+        raise HTTPException(status_code=422, detail="a photo is required for an eaten log")
     photo_url = None
     if photo is not None and photo.filename:
         contents = await photo.read()
