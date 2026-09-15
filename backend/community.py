@@ -11,7 +11,7 @@ docstring for why.
 """
 from datetime import datetime, timezone
 
-from supabase_db import delete_rows, insert_row, select_rows
+from supabase_db import delete_rows, insert_row, select_rows, update_rows
 from tools import _tokenize
 
 TABLE = "community_notes"
@@ -36,6 +36,23 @@ def add_note(
             "created_at": created_at,
         },
     )
+
+
+def update_note(
+    user_id: str,
+    note_id: int,
+    place_name: str | None = None,
+    note: str | None = None,
+) -> dict | None:
+    patch = {}
+    if place_name is not None:
+        patch["place_name"] = place_name
+    if note is not None:
+        patch["note"] = note
+    if not patch:
+        return None
+    rows = update_rows(TABLE, {"id": f"eq.{note_id}", "user_id": f"eq.{user_id}"}, patch)
+    return rows[0] if rows else None
 
 
 def list_notes(limit: int = 100) -> list[dict]:

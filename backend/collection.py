@@ -78,6 +78,34 @@ def mark_log_eaten(
     return rows[0] if rows else None
 
 
+def update_log(
+    user_id: str,
+    log_id: int,
+    dessert_name: str | None = None,
+    store_name: str | None = None,
+    rating: int | None = None,
+    note: str | None = None,
+    planned_date: str | None = None,
+) -> dict | None:
+    """Edit an existing entry's own fields (not a status change — see mark_log_eaten
+    for graduating a planned entry to eaten)."""
+    patch = {}
+    if dessert_name is not None:
+        patch["dessert_name"] = dessert_name
+    if store_name is not None:
+        patch["store_name"] = store_name or None
+    if rating is not None:
+        patch["rating"] = rating
+    if note is not None:
+        patch["note"] = note or None
+    if planned_date is not None:
+        patch["planned_date"] = planned_date or None
+    if not patch:
+        return None
+    rows = update_rows(TABLE, {"id": f"eq.{log_id}", "user_id": f"eq.{user_id}"}, patch)
+    return rows[0] if rows else None
+
+
 def list_logs(user_id: str) -> list[dict]:
     return select_rows(TABLE, {"user_id": f"eq.{user_id}", "order": "created_at.desc"})
 

@@ -19,8 +19,9 @@ from collection import (
     mark_log_eaten,
     save_photo,
     summarize_taste,
+    update_log,
 )
-from community import add_note, delete_note, list_notes
+from community import add_note, delete_note, list_notes, update_note
 from profile import get_profile, save_avatar_photo, save_profile
 from tools import AUDIO_DIR, describe_unmatched_photo, identify_exhibit
 
@@ -143,6 +144,32 @@ def remove_log(log_id: int, user_id: str, authorization: str | None = Header(Non
     return {"deleted": deleted}
 
 
+@app.patch("/log/{log_id}")
+def edit_log(
+    log_id: int,
+    user_id: str = Form(...),
+    dessert_name: str = Form(...),
+    store_name: str = Form(""),
+    rating: int | None = Form(None),
+    note: str = Form(""),
+    planned_date: str = Form(""),
+    authorization: str | None = Header(None),
+):
+    user_id = _resolve_user_id(authorization, user_id)
+    updated = update_log(
+        user_id=user_id,
+        log_id=log_id,
+        dessert_name=dessert_name,
+        store_name=store_name,
+        rating=rating,
+        note=note,
+        planned_date=planned_date,
+    )
+    if updated is None:
+        raise HTTPException(status_code=404, detail="log entry not found")
+    return updated
+
+
 @app.post("/log/{log_id}/complete")
 async def complete_log(
     log_id: int,
@@ -207,6 +234,21 @@ def get_notes():
 def remove_note(note_id: int, user_id: str, authorization: str | None = Header(None)):
     deleted = delete_note(_resolve_user_id(authorization, user_id), note_id)
     return {"deleted": deleted}
+
+
+@app.patch("/notes/{note_id}")
+def edit_note(
+    note_id: int,
+    user_id: str = Form(...),
+    place_name: str = Form(...),
+    note: str = Form(...),
+    authorization: str | None = Header(None),
+):
+    user_id = _resolve_user_id(authorization, user_id)
+    updated = update_note(user_id=user_id, note_id=note_id, place_name=place_name, note=note)
+    if updated is None:
+        raise HTTPException(status_code=404, detail="note not found")
+    return updated
 
 
 @app.get("/profile")
