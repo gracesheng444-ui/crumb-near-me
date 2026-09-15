@@ -100,16 +100,19 @@
     background: none;
     color: var(--text-dim);
     cursor: pointer;
-    padding: 7px;
-    border-radius: 50%;
+    padding: 6px 10px;
+    border-radius: 999px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 5px;
+    font-size: 12.5px;
+    white-space: nowrap;
     transition: background 0.15s ease, color 0.15s ease;
   }
   #exit-demo-btn:hover { background: var(--accent-dim); color: var(--accent); }
+  #exit-demo-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-  #chat-view, #collection-view, #community-view {
+  #chat-view, #collection-view, #community-view, #settings-view {
     flex: 1;
     min-height: 0;
     display: flex;
@@ -340,6 +343,7 @@
   }
   .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
   .icon-btn:disabled { opacity: 0.5; cursor: default; }
+  .icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   #message {
     flex: 1;
@@ -422,7 +426,7 @@
   #tab-chat { --tab-color: var(--accent); --tab-color-dim: var(--accent-dim); }
   #tab-collection { --tab-color: var(--accent-2); --tab-color-dim: var(--accent-2-dim); }
   #tab-community { --tab-color: #d6588f; --tab-color-dim: #f9e0ea; }
-  #tab-settings { --tab-color: #6f8fd6; --tab-color-dim: #e3e9fa; }
+  #tab-settings { --tab-color: #c9852e; --tab-color-dim: #f5e6cd; }
 
   #collection-view {
     overflow-y: auto;
@@ -947,6 +951,18 @@
     color: var(--text);
   }
   #auth-form input:focus { outline: none; border-color: var(--accent); }
+  .pw-field { position: relative; }
+  .pw-field input { width: 100%; box-sizing: border-box; padding-right: 42px !important; }
+  .pw-toggle {
+    position: absolute; right: 2px; top: 50%; transform: translateY(-50%);
+    border: none; background: none; cursor: pointer; padding: 8px;
+    color: var(--text-dim); display: flex; align-items: center; justify-content: center;
+  }
+  .pw-toggle:hover { color: var(--accent); }
+  .pw-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .pw-toggle .eye-closed { display: none; }
+  .pw-toggle.showing .eye-open { display: none; }
+  .pw-toggle.showing .eye-closed { display: block; }
   #auth-submit {
     border: none;
     background: linear-gradient(135deg, var(--accent), #ff9470);
@@ -1053,8 +1069,24 @@
     </div>
     <form id="auth-form">
       <input type="email" id="auth-email" placeholder="邮箱" autocomplete="email" required />
-      <input type="password" id="auth-password" placeholder="密码" autocomplete="current-password" required />
-      <input type="password" id="auth-password-confirm" placeholder="确认密码" autocomplete="new-password" hidden />
+      <div class="pw-field">
+        <input type="password" id="auth-password" placeholder="密码" autocomplete="current-password" required />
+        <button type="button" class="pw-toggle" data-target="auth-password" aria-label="显示密码">
+          <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+            <g class="eye-open"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></g>
+            <g class="eye-closed"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></g>
+          </svg>
+        </button>
+      </div>
+      <div class="pw-field" id="auth-password-confirm-field" hidden>
+        <input type="password" id="auth-password-confirm" placeholder="确认密码" autocomplete="new-password" />
+        <button type="button" class="pw-toggle" data-target="auth-password-confirm" aria-label="显示密码">
+          <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+            <g class="eye-open"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></g>
+            <g class="eye-closed"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></g>
+          </svg>
+        </button>
+      </div>
       <button type="submit" id="auth-submit">登录</button>
     </form>
     <p id="auth-error" hidden></p>
@@ -1096,8 +1128,9 @@
       <h1>上海甜品指南</h1>
       <p>巧克力・蛋糕・意式冰淇淋・更多甜品</p>
     </div>
-    <button type="button" id="exit-demo-btn" title="退出演示">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    <button type="button" id="exit-demo-btn" title="退出访客模式">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <span id="exit-demo-btn-label">退出访客模式</span>
     </button>
   </header>
 
@@ -1323,8 +1356,24 @@
         </div>
         <form id="password-form">
           <p class="field-label">修改密码</p>
-          <input type="password" id="new-password" placeholder="新密码" autocomplete="new-password" required />
-          <input type="password" id="new-password-confirm" placeholder="确认新密码" autocomplete="new-password" required />
+          <div class="pw-field">
+            <input type="password" id="new-password" placeholder="新密码" autocomplete="new-password" required />
+            <button type="button" class="pw-toggle" data-target="new-password" aria-label="显示密码">
+              <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+                <g class="eye-open"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></g>
+                <g class="eye-closed"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></g>
+              </svg>
+            </button>
+          </div>
+          <div class="pw-field">
+            <input type="password" id="new-password-confirm" placeholder="确认新密码" autocomplete="new-password" required />
+            <button type="button" class="pw-toggle" data-target="new-password-confirm" aria-label="显示密码">
+              <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+                <g class="eye-open"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></g>
+                <g class="eye-closed"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></g>
+              </svg>
+            </button>
+          </div>
           <button type="submit" id="password-save-btn">更新密码</button>
           <p id="password-msg" hidden></p>
         </form>
@@ -1368,11 +1417,13 @@ const authForm = document.getElementById('auth-form');
 const authEmail = document.getElementById('auth-email');
 const authPassword = document.getElementById('auth-password');
 const authPasswordConfirm = document.getElementById('auth-password-confirm');
+const authPasswordConfirmField = document.getElementById('auth-password-confirm-field');
 const authSubmit = document.getElementById('auth-submit');
 const authError = document.getElementById('auth-error');
 const guestBtn = document.getElementById('guest-btn');
 const logoutBtn = document.getElementById('logout-btn');
 const exitDemoBtn = document.getElementById('exit-demo-btn');
+const exitDemoBtnLabel = document.getElementById('exit-demo-btn-label');
 const profileSetupView = document.getElementById('profile-setup-view');
 const profileSetupForm = document.getElementById('profile-setup-form');
 const profileSetupNameInput = document.getElementById('profile-setup-name');
@@ -1403,7 +1454,6 @@ const newPasswordConfirmInput = document.getElementById('new-password-confirm');
 const passwordSaveBtn = document.getElementById('password-save-btn');
 const passwordMsg = document.getElementById('password-msg');
 let selectedSettingsAvatar = null;
-let settingsAvatarPhotoFile = null;
 
 let authFormMode = 'login'; // 'login' | 'signup'
 
@@ -1411,7 +1461,7 @@ function setAuthFormMode(mode) {
   authFormMode = mode;
   tabLogin.classList.toggle('active', mode === 'login');
   tabSignup.classList.toggle('active', mode === 'signup');
-  authPasswordConfirm.hidden = mode !== 'signup';
+  authPasswordConfirmField.hidden = mode !== 'signup';
   authPasswordConfirm.required = mode === 'signup';
   authPassword.autocomplete = mode === 'signup' ? 'new-password' : 'current-password';
   authSubmit.textContent = mode === 'signup' ? '注册' : '登录';
@@ -1419,6 +1469,16 @@ function setAuthFormMode(mode) {
 }
 tabLogin.addEventListener('click', () => setAuthFormMode('login'));
 tabSignup.addEventListener('click', () => setAuthFormMode('signup'));
+
+document.querySelectorAll('.pw-toggle').forEach((btn) => {
+  const input = document.getElementById(btn.dataset.target);
+  btn.addEventListener('click', () => {
+    const showing = input.type === 'text';
+    input.type = showing ? 'password' : 'text';
+    btn.classList.toggle('showing', !showing);
+    btn.setAttribute('aria-label', showing ? '显示密码' : '隐藏密码');
+  });
+});
 
 // authToken/userId are `let`, not `const` — Supabase's session check is
 // async, and its background token refresh can update authToken again later,
@@ -1444,6 +1504,29 @@ function renderAvatarGrid(container, selected, onSelect) {
     });
     container.appendChild(btn);
   });
+}
+
+// Shared by every photo-upload picker (profile-setup avatar, settings
+// avatar, dessert-log photo, community-note photo) — they all stage a
+// chosen file the same way: hidden <input type="file">, a trigger button,
+// a preview <img>, and a reset.
+function setupPhotoPicker({ input, btn, preview, previewImg, onChange }) {
+  function reset() {
+    input.value = '';
+    preview.hidden = true;
+    btn.hidden = false;
+    previewImg.src = '';
+  }
+  btn.addEventListener('click', () => input.click());
+  input.addEventListener('change', () => {
+    const file = input.files[0];
+    if (!file) return;
+    previewImg.src = URL.createObjectURL(file);
+    preview.hidden = false;
+    btn.hidden = true;
+    onChange?.(file);
+  });
+  return { reset, getFile: () => input.files[0] || null };
 }
 
 async function fetchProfile() {
@@ -1482,27 +1565,14 @@ function showProfileSetup() {
 }
 
 let selectedSetupAvatar = AVATAR_OPTIONS[0];
-let profileSetupAvatarPhotoFile = null;
-
-function resetProfileSetupAvatarPhoto() {
-  profileSetupAvatarPhotoFile = null;
-  profileSetupAvatarPhotoInput.value = '';
-  profileSetupAvatarPhotoPreview.hidden = true;
-  profileSetupAvatarPhotoBtn.hidden = false;
-  profileSetupAvatarPhotoPreviewImg.src = '';
-}
-
-profileSetupAvatarPhotoBtn.addEventListener('click', () => profileSetupAvatarPhotoInput.click());
-profileSetupAvatarPhotoInput.addEventListener('change', () => {
-  const file = profileSetupAvatarPhotoInput.files[0];
-  if (!file) return;
-  profileSetupAvatarPhotoFile = file;
-  profileSetupAvatarPhotoPreviewImg.src = URL.createObjectURL(file);
-  profileSetupAvatarPhotoPreview.hidden = false;
-  profileSetupAvatarPhotoBtn.hidden = true;
-  profileSetupAvatarGrid.querySelectorAll('.avatar-option').forEach((b) => b.classList.remove('selected'));
+const profileSetupAvatarPhoto = setupPhotoPicker({
+  input: profileSetupAvatarPhotoInput,
+  btn: profileSetupAvatarPhotoBtn,
+  preview: profileSetupAvatarPhotoPreview,
+  previewImg: profileSetupAvatarPhotoPreviewImg,
+  onChange: () => profileSetupAvatarGrid.querySelectorAll('.avatar-option').forEach((b) => b.classList.remove('selected')),
 });
-profileSetupAvatarPhotoRemove.addEventListener('click', resetProfileSetupAvatarPhoto);
+profileSetupAvatarPhotoRemove.addEventListener('click', profileSetupAvatarPhoto.reset);
 
 // Guests skip this entirely (see the instant guest-mode branch below) — a
 // profile only gets asked for once a real Supabase session exists, and only
@@ -1514,11 +1584,11 @@ async function enterApp() {
     return;
   }
   selectedSetupAvatar = AVATAR_OPTIONS[0];
-  resetProfileSetupAvatarPhoto();
+  profileSetupAvatarPhoto.reset();
   profileSetupNameInput.value = (currentUserEmail || '').split('@')[0];
   renderAvatarGrid(profileSetupAvatarGrid, selectedSetupAvatar, (a) => {
     selectedSetupAvatar = a;
-    resetProfileSetupAvatarPhoto();
+    profileSetupAvatarPhoto.reset();
   });
   showProfileSetup();
 }
@@ -1529,7 +1599,7 @@ profileSetupForm.addEventListener('submit', async (e) => {
   if (!name) return;
   profileSetupSubmit.disabled = true;
   try {
-    myProfile = await saveProfile(name, selectedSetupAvatar, profileSetupAvatarPhotoFile);
+    myProfile = await saveProfile(name, selectedSetupAvatar, profileSetupAvatarPhoto.getFile());
     showApp();
   } catch (err) {
     alert(`保存失败 — ${err.message}`);
@@ -1925,22 +1995,13 @@ logStars.querySelectorAll('button').forEach((btn) => {
   });
 });
 
-function clearPhotoPicker() {
-  logPhotoInput.value = '';
-  logPhotoPreview.hidden = true;
-  logPhotoBtn.hidden = false;
-  logPhotoPreviewImg.src = '';
-}
-
-logPhotoBtn.addEventListener('click', () => logPhotoInput.click());
-logPhotoInput.addEventListener('change', () => {
-  const file = logPhotoInput.files[0];
-  if (!file) return;
-  logPhotoPreviewImg.src = URL.createObjectURL(file);
-  logPhotoPreview.hidden = false;
-  logPhotoBtn.hidden = true;
+const logPhoto = setupPhotoPicker({
+  input: logPhotoInput,
+  btn: logPhotoBtn,
+  preview: logPhotoPreview,
+  previewImg: logPhotoPreviewImg,
 });
-logPhotoRemove.addEventListener('click', clearPhotoPicker);
+logPhotoRemove.addEventListener('click', logPhoto.reset);
 
 function renderNotebookStars(rating) {
   if (!rating) return '';
@@ -2052,7 +2113,7 @@ logForm.addEventListener('submit', async (e) => {
     body.append('store_name', logStore.value.trim());
     if (selectedRating) body.append('rating', String(selectedRating));
     body.append('note', logNote.value.trim());
-    if (logPhotoInput.files[0]) body.append('photo', logPhotoInput.files[0]);
+    if (logPhoto.getFile()) body.append('photo', logPhoto.getFile());
     const res = await fetch('/log', { method: 'POST', body, headers: authHeaders() });
     if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
 
@@ -2061,7 +2122,7 @@ logForm.addEventListener('submit', async (e) => {
     logNote.value = '';
     selectedRating = 0;
     logStars.querySelectorAll('button').forEach((b) => b.classList.remove('filled'));
-    clearPhotoPicker();
+    logPhoto.reset();
     summaryText.textContent = '';
     notebookIndex = 0;
     loadEntries();
@@ -2101,22 +2162,13 @@ const notePhotoPreview = document.getElementById('note-photo-preview');
 const notePhotoPreviewImg = document.getElementById('note-photo-preview-img');
 const notePhotoRemove = document.getElementById('note-photo-remove');
 
-function clearNotePhotoPicker() {
-  notePhotoInput.value = '';
-  notePhotoPreview.hidden = true;
-  notePhotoBtn.hidden = false;
-  notePhotoPreviewImg.src = '';
-}
-
-notePhotoBtn.addEventListener('click', () => notePhotoInput.click());
-notePhotoInput.addEventListener('change', () => {
-  const file = notePhotoInput.files[0];
-  if (!file) return;
-  notePhotoPreviewImg.src = URL.createObjectURL(file);
-  notePhotoPreview.hidden = false;
-  notePhotoBtn.hidden = true;
+const notePhoto = setupPhotoPicker({
+  input: notePhotoInput,
+  btn: notePhotoBtn,
+  preview: notePhotoPreview,
+  previewImg: notePhotoPreviewImg,
 });
-notePhotoRemove.addEventListener('click', clearNotePhotoPicker);
+notePhotoRemove.addEventListener('click', notePhoto.reset);
 
 function renderNoteEntry(entry) {
   const div = document.createElement('div');
@@ -2172,14 +2224,14 @@ noteForm.addEventListener('submit', async (e) => {
     body.append('note', text);
     body.append('author_name', noteAuthor.value.trim());
     body.append('user_id', userId);
-    if (notePhotoInput.files[0]) body.append('photo', notePhotoInput.files[0]);
+    if (notePhoto.getFile()) body.append('photo', notePhoto.getFile());
     const res = await fetch('/notes', { method: 'POST', body, headers: authHeaders() });
     if (!res.ok) throw new Error(`服务器返回了 ${res.status}`);
 
     notePlace.value = '';
     noteText.value = '';
     noteAuthor.value = '';
-    clearNotePhotoPicker();
+    notePhoto.reset();
     loadNotes();
     setCommunityPane('browse');
   } catch (err) {
@@ -2195,32 +2247,24 @@ function updateSettingsAccountView() {
   settingsAccountSignedin.hidden = !signedIn;
   settingsAccountGuest.hidden = signedIn;
   if (signedIn) settingsEmail.textContent = currentUserEmail || '';
+  const exitLabel = signedIn ? '退出登录' : '退出访客模式';
+  exitDemoBtnLabel.textContent = exitLabel;
+  exitDemoBtn.title = exitLabel;
 }
 
-function resetSettingsAvatarPhoto() {
-  settingsAvatarPhotoFile = null;
-  settingsAvatarPhotoInput.value = '';
-  settingsAvatarPhotoPreview.hidden = true;
-  settingsAvatarPhotoBtn.hidden = false;
-  settingsAvatarPhotoPreviewImg.src = '';
-}
-
-settingsAvatarPhotoBtn.addEventListener('click', () => settingsAvatarPhotoInput.click());
-settingsAvatarPhotoInput.addEventListener('change', () => {
-  const file = settingsAvatarPhotoInput.files[0];
-  if (!file) return;
-  settingsAvatarPhotoFile = file;
-  settingsAvatarPhotoPreviewImg.src = URL.createObjectURL(file);
-  settingsAvatarPhotoPreview.hidden = false;
-  settingsAvatarPhotoBtn.hidden = true;
-  settingsAvatarGrid.querySelectorAll('.avatar-option').forEach((b) => b.classList.remove('selected'));
+const settingsAvatarPhoto = setupPhotoPicker({
+  input: settingsAvatarPhotoInput,
+  btn: settingsAvatarPhotoBtn,
+  preview: settingsAvatarPhotoPreview,
+  previewImg: settingsAvatarPhotoPreviewImg,
+  onChange: () => settingsAvatarGrid.querySelectorAll('.avatar-option').forEach((b) => b.classList.remove('selected')),
 });
 settingsAvatarPhotoRemove.addEventListener('click', () => {
-  resetSettingsAvatarPhoto();
+  settingsAvatarPhoto.reset();
   selectedSettingsAvatar = AVATAR_OPTIONS[0];
   renderAvatarGrid(settingsAvatarGrid, selectedSettingsAvatar, (a) => {
     selectedSettingsAvatar = a;
-    resetSettingsAvatarPhoto();
+    settingsAvatarPhoto.reset();
   });
 });
 
@@ -2228,12 +2272,12 @@ async function renderSettingsProfileForm() {
   const current = myProfile || (await fetchProfile()) || {};
   myProfile = current.display_name ? current : myProfile;
   settingsNameInput.value = current.display_name || '';
-  resetSettingsAvatarPhoto();
+  settingsAvatarPhoto.reset();
   const isPhoto = (current.avatar || '').startsWith('http');
   selectedSettingsAvatar = isPhoto ? current.avatar : (current.avatar || AVATAR_OPTIONS[0]);
   renderAvatarGrid(settingsAvatarGrid, isPhoto ? null : selectedSettingsAvatar, (a) => {
     selectedSettingsAvatar = a;
-    resetSettingsAvatarPhoto();
+    settingsAvatarPhoto.reset();
   });
   if (isPhoto) {
     settingsAvatarPhotoPreviewImg.src = current.avatar;
@@ -2249,7 +2293,7 @@ profileForm.addEventListener('submit', async (e) => {
   if (!name) return;
   profileSaveBtn.disabled = true;
   try {
-    myProfile = await saveProfile(name, selectedSettingsAvatar, settingsAvatarPhotoFile);
+    myProfile = await saveProfile(name, selectedSettingsAvatar, settingsAvatarPhoto.getFile());
     await renderSettingsProfileForm();
     profileSavedMsg.hidden = false;
   } catch (err) {
