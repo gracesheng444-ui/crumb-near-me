@@ -548,7 +548,6 @@
     padding: 20px;
   }
 
-  #view-subpane-tried, #view-subpane-wishlist { display: flex; flex-direction: column; gap: 14px; }
   #wishlist-list { display: flex; flex-direction: column; gap: 10px; }
   .wishlist-entry {
     background: var(--card);
@@ -769,7 +768,7 @@
   }
   #community-view .segmented { --seg-color: #d6588f; }
   #community-pane-browse, #community-pane-publish,
-  #collection-pane-log, #collection-pane-view {
+  #collection-pane-log, #collection-pane-view, #collection-pane-wishlist {
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -1267,6 +1266,10 @@
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M2 5.5c3-1.6 6.5-1.6 9.5 0v14c-3-1.6-6.5-1.6-9.5 0z"/><path d="M22 5.5c-3-1.6-6.5-1.6-9.5 0v14c3-1.6 6.5-1.6 9.5 0z"/></svg>
         我的记录
       </button>
+      <button type="button" class="seg-btn" data-pane="wishlist">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" width="15" height="15"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg>
+        想吃清单
+      </button>
     </div>
 
     <div id="collection-pane-log">
@@ -1313,51 +1316,44 @@
     </div>
 
     <div id="collection-pane-view" hidden>
-      <div class="segmented" id="view-subnav">
-        <button type="button" class="seg-btn active" data-view="tried">已尝试</button>
-        <button type="button" class="seg-btn" data-view="wishlist">想吃清单</button>
+      <div class="card">
+        <div class="card-heading">
+          <div class="icon-badge gold">
+            <svg class="icon" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2.5l1.9 6.6 6.6 1.9-6.6 1.9-1.9 6.6-1.9-6.6-6.6-1.9 6.6-1.9z"/></svg>
+          </div>
+          <h3>口味总结</h3>
+        </div>
+        <button type="button" id="summary-btn">
+          <svg class="icon" viewBox="0 0 24 24" fill="currentColor" width="13" height="13"><path d="M12 2.5l1.9 6.6 6.6 1.9-6.6 1.9-1.9 6.6-1.9-6.6-6.6-1.9 6.6-1.9z"/></svg>
+          生成我的口味总结
+        </button>
+        <div id="summary-text"></div>
       </div>
 
-      <div id="view-subpane-tried">
-        <div class="card">
-          <div class="card-heading">
-            <div class="icon-badge gold">
-              <svg class="icon" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2.5l1.9 6.6 6.6 1.9-6.6 1.9-1.9 6.6-1.9-6.6-6.6-1.9 6.6-1.9z"/></svg>
-            </div>
-            <h3>口味总结</h3>
-          </div>
-          <button type="button" id="summary-btn">
-            <svg class="icon" viewBox="0 0 24 24" fill="currentColor" width="13" height="13"><path d="M12 2.5l1.9 6.6 6.6 1.9-6.6 1.9-1.9 6.6-1.9-6.6-6.6-1.9 6.6-1.9z"/></svg>
-            生成我的口味总结
+      <div id="notebook">
+        <div id="notebook-page"></div>
+        <div id="notebook-nav">
+          <button type="button" id="notebook-prev" title="上一页">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
-          <div id="summary-text"></div>
-        </div>
-
-        <div id="notebook">
-          <div id="notebook-page"></div>
-          <div id="notebook-nav">
-            <button type="button" id="notebook-prev" title="上一页">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>
-            </button>
-            <span id="notebook-page-indicator"></span>
-            <button type="button" id="notebook-next" title="下一页">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-          </div>
+          <span id="notebook-page-indicator"></span>
+          <button type="button" id="notebook-next" title="下一页">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
         </div>
       </div>
+    </div>
 
-      <div id="view-subpane-wishlist" hidden>
-        <div class="card">
-          <div class="card-heading">
-            <div class="icon-badge gold">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" width="14" height="14"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg>
-            </div>
-            <h3>想吃清单</h3>
-            <button type="button" id="wishlist-add-btn" class="card-heading-add">+ 想吃新甜品</button>
+    <div id="collection-pane-wishlist" hidden>
+      <div class="card">
+        <div class="card-heading">
+          <div class="icon-badge gold">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" width="14" height="14"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg>
           </div>
-          <div id="wishlist-list"></div>
+          <h3>想吃清单</h3>
+          <button type="button" id="wishlist-add-btn" class="card-heading-add">+ 想吃新甜品</button>
         </div>
+        <div id="wishlist-list"></div>
       </div>
     </div>
   </div>
@@ -2067,14 +2063,16 @@ communitySubnavBtns.forEach((btn) => {
   });
 });
 
-// --- Collection sub-tabs: log new vs view records ---
+// --- Collection sub-tabs: log new / view records / wishlist ---
 const collectionSubnavBtns = document.querySelectorAll('#collection-subnav .seg-btn');
 const collectionPaneLog = document.getElementById('collection-pane-log');
 const collectionPaneView = document.getElementById('collection-pane-view');
+const collectionPaneWishlist = document.getElementById('collection-pane-wishlist');
 function setCollectionPane(pane) {
   collectionSubnavBtns.forEach((b) => b.classList.toggle('active', b.dataset.pane === pane));
   collectionPaneLog.hidden = pane !== 'log';
   collectionPaneView.hidden = pane !== 'view';
+  collectionPaneWishlist.hidden = pane !== 'wishlist';
 }
 collectionSubnavBtns.forEach((btn) => {
   btn.addEventListener('click', () => {
@@ -2210,8 +2208,9 @@ function startNewWishlistEntry() {
 }
 
 logFormCancelEdit.addEventListener('click', () => {
+  const returnPane = editingLogStatus === 'planned' ? 'wishlist' : 'view';
   resetLogForm();
-  setCollectionPane('view');
+  setCollectionPane(returnPane);
 });
 
 function renderNotebookStars(rating) {
@@ -2301,19 +2300,6 @@ notebookPrevBtn.addEventListener('click', () => {
 });
 notebookNextBtn.addEventListener('click', () => {
   if (notebookIndex < getNotebookEntries().length - 1) flipNotebook(1);
-});
-
-// --- View sub-tabs: already-tried notebook vs. wishlist ---
-const viewSubnavBtns = document.querySelectorAll('#view-subnav .seg-btn');
-const viewSubpaneTried = document.getElementById('view-subpane-tried');
-const viewSubpaneWishlist = document.getElementById('view-subpane-wishlist');
-function setViewSubpane(view) {
-  viewSubnavBtns.forEach((b) => b.classList.toggle('active', b.dataset.view === view));
-  viewSubpaneTried.hidden = view !== 'tried';
-  viewSubpaneWishlist.hidden = view !== 'wishlist';
-}
-viewSubnavBtns.forEach((btn) => {
-  btn.addEventListener('click', () => setViewSubpane(btn.dataset.view));
 });
 
 // --- Wishlist (planned entries not yet eaten) ---
@@ -2428,7 +2414,7 @@ function renderWishlistList() {
   const entries = getWishlistEntries();
   wishlistList.innerHTML = '';
   if (entries.length === 0) {
-    wishlistList.innerHTML = '<div class="collection-empty">还没有想吃的甜品，去"记录新甜品"加一个吧。</div>';
+    wishlistList.innerHTML = '<div class="collection-empty">还没有想吃的甜品，点上面的"+ 想吃新甜品"加一个吧。</div>';
     return;
   }
   entries.forEach((entry) => wishlistList.appendChild(renderWishlistEntry(entry)));
@@ -2453,7 +2439,7 @@ logForm.addEventListener('submit', async (e) => {
   logFormMsg.hidden = true;
 
   const wasEditing = editingLogId;
-  const targetView = wasEditing ? (editingLogStatus === 'planned' ? 'wishlist' : 'tried') : (logStatus === 'planned' ? 'wishlist' : 'tried');
+  const targetPane = wasEditing ? (editingLogStatus === 'planned' ? 'wishlist' : 'view') : (logStatus === 'planned' ? 'wishlist' : 'view');
 
   try {
     const body = new FormData();
@@ -2478,8 +2464,7 @@ logForm.addEventListener('submit', async (e) => {
     summaryText.textContent = '';
     notebookIndex = 0;
     loadEntries();
-    setCollectionPane('view');
-    setViewSubpane(targetView);
+    setCollectionPane(targetPane);
   } catch (err) {
     showFormMsg(logFormMsg, `保存失败 — ${err.message}`);
   } finally {
