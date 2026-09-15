@@ -646,22 +646,10 @@
     gap: 10px;
     min-height: 440px;
     position: relative;
-    background-image: repeating-linear-gradient(
-      to bottom, transparent 0px, transparent 27px, var(--border) 27px, var(--border) 28px
-    );
-    background-position: 0 66px;
-  }
-  #notebook::before {
-    content: "";
-    position: absolute;
-    left: 36px; top: 14px; bottom: 14px;
-    width: 1px;
-    background: var(--accent-2-dim);
   }
   #notebook-page {
     flex: 1;
     display: flex;
-    padding-left: 16px;
     transition: transform 0.2s ease, opacity 0.2s ease;
   }
   .notebook-page-content {
@@ -687,52 +675,42 @@
     position: relative;
   }
   .notebook-photo-frame {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 8px 8px 20px;
-    box-shadow: var(--shadow-lg);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 22px -8px rgba(90, 58, 30, 0.35);
     position: relative;
     z-index: 2;
   }
+  .notebook-photo-frame.tilt-left { transform: rotate(-2.2deg); }
+  .notebook-photo-frame.tilt-right { transform: rotate(2deg); }
   .notebook-photo-carousel.has-multiple .notebook-photo-frame { cursor: pointer; }
   .notebook-photo-frame img {
-    width: 148px; height: 148px; object-fit: cover; border-radius: 2px;
+    width: min(72vw, 232px); height: min(72vw, 232px); object-fit: cover;
     display: block; background: var(--bg-accent);
   }
-  .notebook-photo-frame::before {
-    content: "";
-    position: absolute;
-    top: -9px; left: 50%;
-    transform: translateX(-50%);
-    width: 44px; height: 16px;
-    background: rgba(220, 146, 87, 0.35);
-    border: 1px solid rgba(220, 146, 87, 0.5);
-  }
   .notebook-photo-frame.placeholder {
-    border-style: dashed;
-    border-color: var(--border);
+    border: 2px dashed var(--border);
+    background: var(--bg-accent);
+    box-shadow: none;
   }
   .notebook-photo-frame.placeholder img {
     opacity: 0.32;
     object-fit: contain;
-    padding: 26px;
+    padding: 36px;
     box-sizing: border-box;
-    background: var(--bg-accent);
   }
   .notebook-photo-stack-peek {
     position: absolute;
     top: 6px; left: 6px; right: -6px; bottom: -6px;
     background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    box-shadow: var(--shadow-lg);
-    transform: rotate(2deg);
+    border-radius: 16px;
+    box-shadow: 0 8px 18px -10px rgba(90, 58, 30, 0.3);
+    transform: rotate(2.4deg);
     z-index: 0;
   }
   .notebook-photo-stack-peek.second {
     top: 3px; left: 3px; right: -3px; bottom: -3px;
-    transform: rotate(-1.5deg);
+    transform: rotate(-1.8deg);
     z-index: 1;
   }
   .notebook-photo-dots {
@@ -2528,13 +2506,14 @@ function buildNotebookEntryPage(entry) {
   const multi = photos.length > 1;
   const dateLabel = new Date(entry.created_at).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'zh-CN');
 
+  const tiltClass = entry.id % 2 === 0 ? 'tilt-left' : 'tilt-right';
   const photoBlock = photos.length
     ? `<div class="notebook-photo-carousel${multi ? ' has-multiple' : ''}">
         ${multi ? '<div class="notebook-photo-stack-peek second"></div><div class="notebook-photo-stack-peek"></div>' : ''}
-        <div class="notebook-photo-frame"><img src="${photos[0]}" alt="" /></div>
+        <div class="notebook-photo-frame ${tiltClass}"><img src="${photos[0]}" alt="" /></div>
         ${multi ? `<div class="notebook-photo-dots">${photos.map((_, i) => `<button type="button" class="dot${i === 0 ? ' active' : ''}" data-i="${i}" aria-label="${t('photoNum', { n: i + 1 })}"></button>`).join('')}</div>` : ''}
       </div>`
-    : `<div class="notebook-photo-carousel"><div class="notebook-photo-frame placeholder"><img src="/icon.png" alt="" /></div></div>`;
+    : `<div class="notebook-photo-carousel"><div class="notebook-photo-frame placeholder ${tiltClass}"><img src="/icon.png" alt="" /></div></div>`;
 
   page.innerHTML = `
     <div class="notebook-body">
