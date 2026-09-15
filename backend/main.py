@@ -111,25 +111,27 @@ async def create_log(
     store_name: str = Form(""),
     rating: int | None = Form(None),
     note: str = Form(""),
-    photo: UploadFile | None = File(None),
+    photos: list[UploadFile] = File(default=[]),
     status: str = Form("eaten"),
     planned_date: str = Form(""),
     authorization: str | None = Header(None),
 ):
     user_id = _resolve_user_id(authorization, user_id)
-    if status == "eaten" and (photo is None or not photo.filename):
-        raise HTTPException(status_code=422, detail="a photo is required for an eaten log")
-    photo_url = None
-    if photo is not None and photo.filename:
-        contents = await photo.read()
-        photo_url = save_photo(contents, Path(photo.filename).suffix)
+    valid_photos = [p for p in photos if p.filename]
+    if status == "eaten" and not valid_photos:
+        raise HTTPException(status_code=422, detail="at least one photo is required for an eaten log")
+    photo_urls = []
+    for p in valid_photos:
+        contents = await p.read()
+        photo_urls.append(save_photo(contents, Path(p.filename).suffix))
     return add_log(
         user_id=user_id,
         dessert_name=dessert_name,
         store_name=store_name or None,
         rating=rating,
         note=note or None,
-        photo_url=photo_url,
+        photo_url=photo_urls[0] if photo_urls else None,
+        photo_urls=photo_urls or None,
         status=status,
         planned_date=planned_date or None,
     )

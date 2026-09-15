@@ -621,6 +621,20 @@
   #log-photo-remove:focus-visible, #note-photo-remove:focus-visible, .wishlist-photo-remove:focus-visible {
     outline: 2px solid var(--accent); outline-offset: 2px;
   }
+  #log-photo-row { flex-wrap: wrap; }
+  .log-photo-thumb { position: relative; display: inline-block; }
+  .log-photo-thumb img {
+    width: 44px; height: 44px; border-radius: 10px;
+    object-fit: cover; display: block; border: 1px solid var(--border);
+  }
+  .log-photo-thumb-remove {
+    position: absolute; top: -6px; right: -6px;
+    width: 18px; height: 18px; border-radius: 50%;
+    border: none; background: var(--accent); color: #fff;
+    font-size: 9px; display: flex; align-items: center; justify-content: center;
+    padding: 0; cursor: pointer;
+  }
+  .log-photo-thumb-remove:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   #notebook {
     background: var(--card);
     border: 1px solid var(--border);
@@ -667,16 +681,21 @@
   #notebook-page.flip-next { transform: translateX(-18px); opacity: 0; }
   #notebook-page.flip-prev { transform: translateX(18px); opacity: 0; }
 
-  .notebook-photo-frame {
+  .notebook-photo-carousel {
     align-self: center;
+    margin-top: 2px;
+    position: relative;
+  }
+  .notebook-photo-frame {
     background: #fff;
     border: 1px solid var(--border);
     border-radius: 4px;
     padding: 8px 8px 20px;
     box-shadow: var(--shadow-lg);
     position: relative;
-    margin-top: 2px;
+    z-index: 2;
   }
+  .notebook-photo-carousel.has-multiple .notebook-photo-frame { cursor: pointer; }
   .notebook-photo-frame img {
     width: 148px; height: 148px; object-fit: cover; border-radius: 2px;
     display: block; background: var(--bg-accent);
@@ -701,6 +720,31 @@
     box-sizing: border-box;
     background: var(--bg-accent);
   }
+  .notebook-photo-stack-peek {
+    position: absolute;
+    top: 6px; left: 6px; right: -6px; bottom: -6px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-shadow: var(--shadow-lg);
+    transform: rotate(2deg);
+    z-index: 0;
+  }
+  .notebook-photo-stack-peek.second {
+    top: 3px; left: 3px; right: -3px; bottom: -3px;
+    transform: rotate(-1.5deg);
+    z-index: 1;
+  }
+  .notebook-photo-dots {
+    position: relative; z-index: 3;
+    display: flex; justify-content: center; gap: 5px; margin-top: 8px;
+  }
+  .notebook-photo-dots .dot {
+    width: 6px; height: 6px; border-radius: 50%; padding: 0;
+    border: none; background: var(--border); cursor: pointer;
+  }
+  .notebook-photo-dots .dot.active { background: var(--accent-2); }
+  .notebook-photo-dots .dot:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   .notebook-title { font-family: var(--font-display); font-weight: 400; font-size: 18px; text-align: center; margin: 2px 0 0; }
   .notebook-store {
@@ -1339,18 +1383,12 @@
             <button type="button" data-star="5"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
           </div>
           <textarea id="log-note" placeholder="有什么想法？（选填）" data-i18n-ph="thoughtsPh"></textarea>
-          <input type="file" id="log-photo-input" accept="image/*" hidden />
+          <input type="file" id="log-photo-input" accept="image/*" multiple hidden />
           <div id="log-photo-row">
             <button type="button" id="log-photo-btn">
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
               <span data-i18n="addPhoto">添加照片</span>
             </button>
-            <div id="log-photo-preview" hidden>
-              <img id="log-photo-preview-img" alt="预览" />
-              <button type="button" id="log-photo-remove">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="9" height="9"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
-            </div>
           </div>
           <button type="submit" id="log-form-submit">加入我的甜品记录</button>
           <button type="button" id="log-form-cancel-edit" hidden data-i18n="cancelEdit">取消编辑</button>
@@ -1600,6 +1638,7 @@ const T = {
   chipDirections: { zh: '怎么去麻布屋？', en: 'How do I get to Azabuya?' },
   addPhoto: { zh: '添加照片', en: 'Add photo' },
   photoRequired: { zh: '请给这份甜品添加一张照片', en: 'Please add a photo of this dessert' },
+  photoNum: { zh: '第{n}张照片', en: 'Photo {n}' },
   tabLogNew: { zh: '记录新甜品', en: 'Log a dessert' },
   tabMyRecords: { zh: '我的记录', en: 'My records' },
   tabWishlist: { zh: '想吃清单', en: 'Wishlist' },
@@ -2336,9 +2375,6 @@ const summaryText = document.getElementById('summary-text');
 const logPhotoRow = document.getElementById('log-photo-row');
 const logPhotoInput = document.getElementById('log-photo-input');
 const logPhotoBtn = document.getElementById('log-photo-btn');
-const logPhotoPreview = document.getElementById('log-photo-preview');
-const logPhotoPreviewImg = document.getElementById('log-photo-preview-img');
-const logPhotoRemove = document.getElementById('log-photo-remove');
 
 let selectedRating = 0;
 logStars.querySelectorAll('button').forEach((btn) => {
@@ -2350,13 +2386,53 @@ logStars.querySelectorAll('button').forEach((btn) => {
   });
 });
 
-const logPhoto = setupPhotoPicker({
+// Multiple photos per log entry: unlike setupPhotoPicker (single file), this
+// keeps its own file array across repeated picks, since <input multiple>
+// replaces input.files wholesale on every selection rather than appending.
+function setupMultiPhotoPicker({ input, btn, row, maxFiles = 6 }) {
+  let files = [];
+  function renderThumbs() {
+    row.querySelectorAll('.log-photo-thumb').forEach((el) => el.remove());
+    files.forEach((file, i) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'log-photo-thumb';
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      img.alt = '';
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'log-photo-thumb-remove';
+      removeBtn.innerHTML = X_ICON;
+      removeBtn.addEventListener('click', () => {
+        files.splice(i, 1);
+        renderThumbs();
+      });
+      wrap.appendChild(img);
+      wrap.appendChild(removeBtn);
+      row.insertBefore(wrap, btn);
+    });
+    btn.hidden = files.length >= maxFiles;
+  }
+  btn.addEventListener('click', () => input.click());
+  input.addEventListener('change', () => {
+    for (const f of input.files) {
+      if (files.length < maxFiles) files.push(f);
+    }
+    input.value = '';
+    renderThumbs();
+  });
+  function reset() {
+    files = [];
+    renderThumbs();
+  }
+  return { reset, getFiles: () => files };
+}
+
+const logPhoto = setupMultiPhotoPicker({
   input: logPhotoInput,
   btn: logPhotoBtn,
-  preview: logPhotoPreview,
-  previewImg: logPhotoPreviewImg,
+  row: logPhotoRow,
 });
-logPhotoRemove.addEventListener('click', logPhoto.reset);
 
 // --- Log form: eaten vs. planned (wishlist) status, and edit mode ---
 let editingLogId = null;
@@ -2448,14 +2524,21 @@ function renderNotebookStars(rating) {
 function buildNotebookEntryPage(entry) {
   const page = document.createElement('div');
   page.className = 'notebook-page-content';
-  const photoSrc = entry.photo_url;
+  const photos = entry.photo_urls && entry.photo_urls.length ? entry.photo_urls : (entry.photo_url ? [entry.photo_url] : []);
+  const multi = photos.length > 1;
   const dateLabel = new Date(entry.created_at).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'zh-CN');
+
+  const photoBlock = photos.length
+    ? `<div class="notebook-photo-carousel${multi ? ' has-multiple' : ''}">
+        ${multi ? '<div class="notebook-photo-stack-peek second"></div><div class="notebook-photo-stack-peek"></div>' : ''}
+        <div class="notebook-photo-frame"><img src="${photos[0]}" alt="" /></div>
+        ${multi ? `<div class="notebook-photo-dots">${photos.map((_, i) => `<button type="button" class="dot${i === 0 ? ' active' : ''}" data-i="${i}" aria-label="${t('photoNum', { n: i + 1 })}"></button>`).join('')}</div>` : ''}
+      </div>`
+    : `<div class="notebook-photo-carousel"><div class="notebook-photo-frame placeholder"><img src="/icon.png" alt="" /></div></div>`;
 
   page.innerHTML = `
     <div class="notebook-body">
-      ${photoSrc
-        ? `<div class="notebook-photo-frame"><img src="${photoSrc}" alt="" /></div>`
-        : `<div class="notebook-photo-frame placeholder"><img src="/icon.png" alt="" /></div>`}
+      ${photoBlock}
       <div class="notebook-title">${escapeHtml(entry.dessert_name)}</div>
       ${entry.store_name ? `<div class="notebook-store">${PIN_ICON}${escapeHtml(entry.store_name)}</div>` : ''}
       <div class="notebook-date">${dateLabel}</div>
@@ -2467,6 +2550,23 @@ function buildNotebookEntryPage(entry) {
       <button type="button" class="notebook-del-btn" title="${t('delete')}">${X_ICON}</button>
     </div>
   `;
+
+  if (multi) {
+    let photoIndex = 0;
+    const frameImg = page.querySelector('.notebook-photo-frame img');
+    const dots = page.querySelectorAll('.notebook-photo-dots .dot');
+    const showPhoto = (i) => {
+      photoIndex = i;
+      frameImg.src = photos[photoIndex];
+      dots.forEach((d, di) => d.classList.toggle('active', di === photoIndex));
+    };
+    page.querySelector('.notebook-photo-frame').addEventListener('click', () => showPhoto((photoIndex + 1) % photos.length));
+    dots.forEach((d) => d.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showPhoto(Number(d.dataset.i));
+    }));
+  }
+
   page.querySelector('.notebook-edit-btn').addEventListener('click', () => enterEditLogMode(entry));
   page.querySelector('.notebook-del-btn').addEventListener('click', async () => {
     await fetch(`/log/${entry.id}?user_id=${encodeURIComponent(userId)}`, { method: 'DELETE', headers: authHeaders() });
@@ -2661,7 +2761,7 @@ logForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const dessertName = logDessert.value.trim();
   if (!dessertName) return;
-  if (!editingLogId && logStatus === 'eaten' && !logPhoto.getFile()) {
+  if (!editingLogId && logStatus === 'eaten' && logPhoto.getFiles().length === 0) {
     showFormMsg(logFormMsg, t('photoRequired'));
     return;
   }
@@ -2685,7 +2785,7 @@ logForm.addEventListener('submit', async (e) => {
     } else {
       body.append('status', logStatus);
       if (logStatus === 'planned') body.append('planned_date', logPlannedDate.value);
-      if (logPhoto.getFile()) body.append('photo', logPhoto.getFile());
+      logPhoto.getFiles().forEach((f) => body.append('photos', f));
       res = await fetch('/log', { method: 'POST', body, headers: authHeaders() });
     }
     if (!res.ok) throw new Error(t('httpError', { status: res.status }));

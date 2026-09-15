@@ -39,6 +39,7 @@ def add_log(
     rating: int | None = None,
     note: str | None = None,
     photo_url: str | None = None,
+    photo_urls: list[str] | None = None,
     status: str = "eaten",
     planned_date: str | None = None,
 ) -> dict:
@@ -52,6 +53,7 @@ def add_log(
             "rating": rating,
             "note": note,
             "photo_url": photo_url,
+            "photo_urls": photo_urls,
             "created_at": created_at,
             "status": status,
             "planned_date": planned_date,
@@ -115,6 +117,8 @@ def delete_log(user_id: str, log_id: int) -> bool:
     if rows:
         _delete_photo(rows[0].get("photo_url"))
         _delete_photo(rows[0].get("photo_cutout_url"))
+        for url in rows[0].get("photo_urls") or []:
+            _delete_photo(url)
     return bool(rows)
 
 
