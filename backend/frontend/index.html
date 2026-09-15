@@ -982,12 +982,20 @@
   }
 
   #auth-view {
+    position: relative;
     flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
     padding: 32px 28px 40px;
   }
+  #auth-lang-toggle {
+    position: absolute;
+    top: 18px;
+    right: 20px;
+    width: auto;
+  }
+  #auth-lang-toggle .seg-btn { padding: 5px 10px; font-size: 12px; }
   #auth-view .auth-logo { width: 64px; height: 64px; margin: 0 auto 18px; }
   #auth-view .auth-logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
   #auth-view h1 {
@@ -1144,6 +1152,10 @@
 <body>
 <div class="app">
   <div id="auth-view">
+    <div class="segmented lang-toggle" id="auth-lang-toggle">
+      <button type="button" class="seg-btn" data-lang="zh">中文</button>
+      <button type="button" class="seg-btn" data-lang="en">English</button>
+    </div>
     <div class="auth-logo"><img src="/icon.png" alt="" /></div>
     <h1 data-i18n="appName">上海甜品指南</h1>
     <p class="sub" data-i18n="authSub">登录后可以保存你的甜品记录，跨设备同步</p>
@@ -1501,7 +1513,7 @@
         </div>
         <h3 data-i18n="languageTitle">语言</h3>
       </div>
-      <div class="segmented" id="language-toggle">
+      <div class="segmented lang-toggle" id="language-toggle">
         <button type="button" class="seg-btn" data-lang="zh">中文</button>
         <button type="button" class="seg-btn" data-lang="en">English</button>
       </div>
@@ -2901,7 +2913,9 @@ passwordForm.addEventListener('submit', async (e) => {
 });
 
 // --- Language toggle ---
-const languageToggle = document.getElementById('language-toggle');
+// Two toggle instances share this wiring: one in Settings, one on the
+// auth screen (so an English-speaking visitor can switch before signing in).
+const languageToggles = document.querySelectorAll('.lang-toggle');
 
 // Re-runs the handful of places that set their own text based on runtime
 // state (auth mode, password-visibility, edit-mode, signed-in-ness) —
@@ -2920,8 +2934,10 @@ function setLanguage(lang) {
   } catch {
     // localStorage unavailable (private window etc.) — language choice just won't persist
   }
-  languageToggle.querySelectorAll('.seg-btn').forEach((b) => {
-    b.classList.toggle('active', b.dataset.lang === currentLang);
+  languageToggles.forEach((toggle) => {
+    toggle.querySelectorAll('.seg-btn').forEach((b) => {
+      b.classList.toggle('active', b.dataset.lang === currentLang);
+    });
   });
   applyStaticI18n();
   refreshDynamicChrome();
@@ -2931,12 +2947,16 @@ function setLanguage(lang) {
   loadNotes();
 }
 
-languageToggle.querySelectorAll('.seg-btn').forEach((btn) => {
-  btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+languageToggles.forEach((toggle) => {
+  toggle.querySelectorAll('.seg-btn').forEach((btn) => {
+    btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+  });
 });
 
-languageToggle.querySelectorAll('.seg-btn').forEach((b) => {
-  b.classList.toggle('active', b.dataset.lang === currentLang);
+languageToggles.forEach((toggle) => {
+  toggle.querySelectorAll('.seg-btn').forEach((b) => {
+    b.classList.toggle('active', b.dataset.lang === currentLang);
+  });
 });
 applyStaticI18n();
 refreshDynamicChrome();
