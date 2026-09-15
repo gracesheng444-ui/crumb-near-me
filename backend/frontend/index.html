@@ -554,6 +554,9 @@
     font-size: 9px; display: flex; align-items: center; justify-content: center;
     padding: 0; cursor: pointer;
   }
+  #log-photo-remove:focus-visible, #note-photo-remove:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
   #notebook {
     background: var(--card);
     border: 1px solid var(--border);
@@ -821,6 +824,9 @@
     padding: 0;
     cursor: pointer;
   }
+  .avatar-photo-remove:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
   #profile-form { display: flex; flex-direction: column; gap: 10px; }
   #profile-form input {
     border: 1px solid var(--border);
@@ -844,7 +850,8 @@
     box-shadow: var(--shadow);
   }
   #profile-save-btn:disabled { opacity: 0.5; cursor: default; box-shadow: none; }
-  #profile-saved-msg { font-size: 12.5px; color: var(--accent-2); text-align: center; margin: -2px 0 0; }
+  .form-msg { font-size: 12.5px; color: var(--accent); text-align: center; margin: -2px 0 0; }
+  .form-msg.success { color: var(--accent-2); }
   #settings-account-signedin { display: flex; flex-direction: column; gap: 14px; }
   .settings-account-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
   .settings-account-row .hint { font-size: 12.5px; color: var(--text-dim); margin: 0; }
@@ -1116,6 +1123,7 @@
       </div>
       <input type="text" id="profile-setup-name" placeholder="你的昵称" maxlength="24" required />
       <button type="submit" id="profile-setup-submit">开始使用</button>
+      <p id="profile-setup-msg" class="form-msg" hidden></p>
     </form>
   </div>
 
@@ -1216,6 +1224,7 @@
             </div>
           </div>
           <button type="submit" id="log-form-submit">加入我的甜品记录</button>
+          <p id="log-form-msg" class="form-msg" hidden></p>
         </form>
       </div>
     </div>
@@ -1304,6 +1313,7 @@
             </div>
           </div>
           <button type="submit" id="note-form-submit">发布分享</button>
+          <p id="note-form-msg" class="form-msg" hidden></p>
         </form>
       </div>
     </div>
@@ -1335,7 +1345,7 @@
         </div>
         <input type="text" id="settings-name-input" placeholder="你的昵称" maxlength="24" required />
         <button type="submit" id="profile-save-btn">保存</button>
-        <p id="profile-saved-msg" hidden>已保存！</p>
+        <p id="profile-saved-msg" class="form-msg" hidden></p>
       </form>
     </div>
 
@@ -1429,6 +1439,7 @@ const profileSetupForm = document.getElementById('profile-setup-form');
 const profileSetupNameInput = document.getElementById('profile-setup-name');
 const profileSetupAvatarGrid = document.getElementById('profile-setup-avatar-grid');
 const profileSetupSubmit = document.getElementById('profile-setup-submit');
+const profileSetupMsg = document.getElementById('profile-setup-msg');
 const profileSetupAvatarPhotoInput = document.getElementById('profile-setup-avatar-photo-input');
 const profileSetupAvatarPhotoBtn = document.getElementById('profile-setup-avatar-photo-btn');
 const profileSetupAvatarPhotoPreview = document.getElementById('profile-setup-avatar-photo-preview');
@@ -1529,6 +1540,12 @@ function setupPhotoPicker({ input, btn, preview, previewImg, onChange }) {
   return { reset, getFile: () => input.files[0] || null };
 }
 
+function showFormMsg(el, message, success = false) {
+  el.textContent = message;
+  el.classList.toggle('success', success);
+  el.hidden = false;
+}
+
 async function fetchProfile() {
   try {
     const res = await fetch(`/profile?user_id=${encodeURIComponent(userId)}`, { headers: authHeaders() });
@@ -1598,11 +1615,12 @@ profileSetupForm.addEventListener('submit', async (e) => {
   const name = profileSetupNameInput.value.trim();
   if (!name) return;
   profileSetupSubmit.disabled = true;
+  profileSetupMsg.hidden = true;
   try {
     myProfile = await saveProfile(name, selectedSetupAvatar, profileSetupAvatarPhoto.getFile());
     showApp();
   } catch (err) {
-    alert(`保存失败 — ${err.message}`);
+    showFormMsg(profileSetupMsg, `保存失败 — ${err.message}`);
   } finally {
     profileSetupSubmit.disabled = false;
   }
@@ -1977,6 +1995,7 @@ const logStore = document.getElementById('log-store');
 const logNote = document.getElementById('log-note');
 const logStars = document.getElementById('log-stars');
 const logFormSubmit = document.getElementById('log-form-submit');
+const logFormMsg = document.getElementById('log-form-msg');
 const summaryBtn = document.getElementById('summary-btn');
 const summaryText = document.getElementById('summary-text');
 const logPhotoInput = document.getElementById('log-photo-input');
@@ -2105,6 +2124,7 @@ logForm.addEventListener('submit', async (e) => {
   const dessertName = logDessert.value.trim();
   if (!dessertName) return;
   logFormSubmit.disabled = true;
+  logFormMsg.hidden = true;
 
   try {
     const body = new FormData();
@@ -2128,7 +2148,7 @@ logForm.addEventListener('submit', async (e) => {
     loadEntries();
     setCollectionPane('view');
   } catch (err) {
-    alert(`保存失败 — ${err.message}`);
+    showFormMsg(logFormMsg, `保存失败 — ${err.message}`);
   } finally {
     logFormSubmit.disabled = false;
   }
@@ -2155,6 +2175,7 @@ const notePlace = document.getElementById('note-place');
 const noteText = document.getElementById('note-text');
 const noteAuthor = document.getElementById('note-author');
 const noteFormSubmit = document.getElementById('note-form-submit');
+const noteFormMsg = document.getElementById('note-form-msg');
 const communityFeed = document.getElementById('community-feed');
 const notePhotoInput = document.getElementById('note-photo-input');
 const notePhotoBtn = document.getElementById('note-photo-btn');
@@ -2217,6 +2238,7 @@ noteForm.addEventListener('submit', async (e) => {
   const text = noteText.value.trim();
   if (!placeName || !text) return;
   noteFormSubmit.disabled = true;
+  noteFormMsg.hidden = true;
 
   try {
     const body = new FormData();
@@ -2235,7 +2257,7 @@ noteForm.addEventListener('submit', async (e) => {
     loadNotes();
     setCommunityPane('browse');
   } catch (err) {
-    alert(`发布失败 — ${err.message}`);
+    showFormMsg(noteFormMsg, `发布失败 — ${err.message}`);
   } finally {
     noteFormSubmit.disabled = false;
   }
@@ -2295,9 +2317,9 @@ profileForm.addEventListener('submit', async (e) => {
   try {
     myProfile = await saveProfile(name, selectedSettingsAvatar, settingsAvatarPhoto.getFile());
     await renderSettingsProfileForm();
-    profileSavedMsg.hidden = false;
+    showFormMsg(profileSavedMsg, '已保存！', true);
   } catch (err) {
-    alert(`保存失败 — ${err.message}`);
+    showFormMsg(profileSavedMsg, `保存失败 — ${err.message}`);
   } finally {
     profileSaveBtn.disabled = false;
   }
