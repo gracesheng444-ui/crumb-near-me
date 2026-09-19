@@ -1635,6 +1635,8 @@ const T = {
   tabWishlist: { zh: '想吃清单', en: 'Wishlist' },
   logDessertPh: { zh: '你吃了什么？例如 抹茶#3', en: 'What did you have? e.g. Matcha #3' },
   logStorePh: { zh: '在哪里吃的？（选填）例如 麻布屋 兴业太古汇店', en: 'Where? (optional) e.g. Azabuya Taikoo Hui' },
+  logDessertPhPlanned: { zh: '想吃什么？例如 抹茶#3', en: 'What do you want to try? e.g. Matcha #3' },
+  logStorePhPlanned: { zh: '想去哪里吃？（选填）例如 麻布屋 兴业太古汇店', en: 'Where? (optional) e.g. Azabuya Taikoo Hui' },
   logPlannedDateLabel: { zh: '计划哪天去？（选填）', en: 'When are you planning to go? (optional)' },
   thoughtsPh: { zh: '有什么想法？（选填）', en: 'Any thoughts? (optional)' },
   tasteSummaryTitle: { zh: '口味总结', en: 'Taste summary' },
@@ -2524,6 +2526,12 @@ function updateLogFormLabels() {
     logFormHeading.textContent = t('recordDessertTitle');
     logFormSubmit.textContent = t('addToMyRecords');
   }
+  // Planned (wishlist) entries haven't been eaten yet, so the eaten-flow's
+  // past-tense placeholders ("what did you eat", "where did you eat it")
+  // don't make sense here — swap in a future-tense phrasing instead.
+  const effectiveStatus = editingLogId ? editingLogStatus : logStatus;
+  logDessert.placeholder = effectiveStatus === 'planned' ? t('logDessertPhPlanned') : t('logDessertPh');
+  logStore.placeholder = effectiveStatus === 'planned' ? t('logStorePhPlanned') : t('logStorePh');
 }
 
 function setLogStatus(status) {
