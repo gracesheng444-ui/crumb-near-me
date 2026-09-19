@@ -481,8 +481,8 @@
   }
   .card-heading-add:hover { background: var(--accent-2-dim); }
   .card-heading-add:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 1px; }
-  #log-form { display: flex; flex-direction: column; gap: 8px; }
-  #log-form input, #log-form textarea {
+  #log-form, .dessert-form { display: flex; flex-direction: column; gap: 8px; }
+  #log-form input, #log-form textarea, .dessert-form input, .dessert-form textarea {
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 9px 11px;
@@ -491,8 +491,9 @@
     background: var(--bg-accent);
     color: var(--text);
   }
-  #log-form input:focus, #log-form textarea:focus { outline: none; border-color: var(--accent); }
-  #log-form textarea { resize: none; min-height: 44px; }
+  #log-form input:focus, #log-form textarea:focus,
+  .dessert-form input:focus, .dessert-form textarea:focus { outline: none; border-color: var(--accent); }
+  #log-form textarea, .dessert-form textarea { resize: none; min-height: 44px; }
   .star-picker { display: flex; gap: 4px; }
   .star-picker button {
     border: none;
@@ -509,7 +510,7 @@
   .star-picker button svg.icon path { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
   .star-picker button.filled { color: var(--accent-2); opacity: 1; }
   .star-picker button.filled svg.icon path { fill: currentColor; stroke: none; }
-  #log-form-submit {
+  #log-form-submit, .dessert-form-submit {
     border: none;
     background: linear-gradient(135deg, var(--accent), #ff9470);
     color: #fff;
@@ -520,14 +521,14 @@
     font-family: var(--font-display);
     box-shadow: var(--shadow);
   }
-  #log-form-submit:disabled { opacity: 0.5; cursor: default; box-shadow: none; }
-  #log-planned-date-field { display: flex; flex-direction: column; gap: 4px; }
-  #log-form-cancel-edit {
+  #log-form-submit:disabled, .dessert-form-submit:disabled { opacity: 0.5; cursor: default; box-shadow: none; }
+  #log-planned-date-field, .field-group { display: flex; flex-direction: column; gap: 4px; }
+  #log-form-cancel-edit, .dessert-form-cancel {
     border: 1px solid var(--border); background: none; color: var(--text-dim);
     border-radius: 10px; padding: 9px; font-size: 13.5px; cursor: pointer;
     font-family: var(--font-display);
   }
-  #log-form-cancel-edit:hover { border-color: var(--accent); color: var(--accent); }
+  #log-form-cancel-edit:hover, .dessert-form-cancel:hover { border-color: var(--accent); color: var(--accent); }
 
   #summary-btn {
     border: 1px solid var(--accent-2);
@@ -1362,10 +1363,6 @@
         <form id="log-form">
           <input type="text" id="log-dessert" placeholder="你吃了什么？例如 抹茶#3" data-i18n-ph="logDessertPh" required />
           <input type="text" id="log-store" placeholder="在哪里吃的？（选填）例如 麻布屋 兴业太古汇店" data-i18n-ph="logStorePh" />
-          <div id="log-planned-date-field" hidden>
-            <label for="log-planned-date" class="field-label" data-i18n="logPlannedDateLabel">计划哪天去？（选填）</label>
-            <input type="date" id="log-planned-date" />
-          </div>
           <div class="star-picker" id="log-stars">
             <button type="button" data-star="1"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
             <button type="button" data-star="2"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg></button>
@@ -1418,7 +1415,7 @@
     </div>
 
     <div id="collection-pane-wishlist" hidden>
-      <div class="card">
+      <div class="card" id="wishlist-list-card">
         <div class="card-heading">
           <div class="icon-badge gold">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" width="14" height="14"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg>
@@ -1427,6 +1424,27 @@
           <button type="button" id="wishlist-add-btn" class="card-heading-add" data-i18n="wishlistAddBtn">+ 想吃新甜品</button>
         </div>
         <div id="wishlist-list"></div>
+      </div>
+
+      <div class="card" id="wishlist-form-card" hidden>
+        <div class="card-heading">
+          <div class="icon-badge gold">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" width="14" height="14"><path d="M12 2.5l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.9l-6.18 3.61L7 14.63l-5-4.87 6.91-1z"/></svg>
+          </div>
+          <h3 id="wishlist-form-heading">记一个想吃的甜品</h3>
+        </div>
+        <form id="wishlist-form" class="dessert-form">
+          <input type="text" id="wishlist-dessert" placeholder="想吃什么？例如 抹茶#3" data-i18n-ph="logDessertPhPlanned" required />
+          <input type="text" id="wishlist-store" placeholder="想去哪里吃？（选填）例如 麻布屋 兴业太古汇店" data-i18n-ph="logStorePhPlanned" />
+          <div class="field-group">
+            <label for="wishlist-planned-date" class="field-label" data-i18n="logPlannedDateLabel">计划哪天去？（选填）</label>
+            <input type="date" id="wishlist-planned-date" />
+          </div>
+          <textarea id="wishlist-note" placeholder="有什么想法？（选填）" data-i18n-ph="thoughtsPh"></textarea>
+          <button type="submit" id="wishlist-form-submit" class="dessert-form-submit">加入想吃清单</button>
+          <button type="button" id="wishlist-form-cancel" class="dessert-form-cancel" data-i18n="cancel">取消</button>
+          <p id="wishlist-form-msg" class="form-msg" hidden></p>
+        </form>
       </div>
     </div>
   </div>
@@ -1672,6 +1690,7 @@ const T = {
   navCommunity: { zh: '社区', en: 'Community' },
   navSettings: { zh: '设置', en: 'Settings' },
   cancelEdit: { zh: '取消编辑', en: 'Cancel edit' },
+  cancel: { zh: '取消', en: 'Cancel' },
   email: { zh: '邮箱', en: 'Email' },
   password: { zh: '密码', en: 'Password' },
   confirmPassword: { zh: '确认密码', en: 'Confirm password' },
@@ -2414,6 +2433,10 @@ function setCollectionPane(pane) {
 collectionSubnavBtns.forEach((btn) => {
   btn.addEventListener('click', () => {
     if (btn.dataset.pane === 'log') resetLogForm();
+    if (btn.dataset.pane === 'wishlist') {
+      resetWishlistForm();
+      hideWishlistForm();
+    }
     setCollectionPane(btn.dataset.pane);
   });
 });
@@ -2439,8 +2462,6 @@ const logForm = document.getElementById('log-form');
 const logFormHeading = document.getElementById('log-form-heading');
 const logDessert = document.getElementById('log-dessert');
 const logStore = document.getElementById('log-store');
-const logPlannedDateField = document.getElementById('log-planned-date-field');
-const logPlannedDate = document.getElementById('log-planned-date');
 const logNote = document.getElementById('log-note');
 const logStars = document.getElementById('log-stars');
 const logFormSubmit = document.getElementById('log-form-submit');
@@ -2510,57 +2531,43 @@ const logPhoto = setupMultiPhotoPicker({
   row: logPhotoRow,
 });
 
-// --- Log form: eaten vs. planned (wishlist) status, and edit mode ---
+// --- Log form: eaten entries only. Wishlist (planned) entries have their
+// own separate form/template further down — see "Wishlist add/edit form".
 let editingLogId = null;
-let editingLogStatus = null;
-let logStatus = 'eaten';
+// A pre-existing planned_date survives editing an eaten entry (e.g. one
+// graduated from the wishlist via "mark as tried" still carries the date it
+// was originally planned for) even though this form has no field for it —
+// silently round-tripped on save instead of exposing a date picker here.
+let editingLogPlannedDate = '';
 
 function updateLogFormLabels() {
   if (editingLogId) {
     logFormHeading.textContent = t('editingRecordTitle');
     logFormSubmit.textContent = t('saveChanges');
-  } else if (logStatus === 'planned') {
-    logFormHeading.textContent = t('planNewDessertTitle');
-    logFormSubmit.textContent = t('addToWishlist');
   } else {
     logFormHeading.textContent = t('recordDessertTitle');
     logFormSubmit.textContent = t('addToMyRecords');
   }
-  // Planned (wishlist) entries haven't been eaten yet, so the eaten-flow's
-  // past-tense placeholders ("what did you eat", "where did you eat it")
-  // don't make sense here — swap in a future-tense phrasing instead.
-  const effectiveStatus = editingLogId ? editingLogStatus : logStatus;
-  logDessert.placeholder = effectiveStatus === 'planned' ? t('logDessertPhPlanned') : t('logDessertPh');
-  logStore.placeholder = effectiveStatus === 'planned' ? t('logStorePhPlanned') : t('logStorePh');
-}
-
-function setLogStatus(status) {
-  logStatus = status;
-  const planned = status === 'planned';
-  logPlannedDateField.hidden = !planned;
-  logStars.hidden = planned;
-  logPhotoRow.hidden = planned;
-  updateLogFormLabels();
 }
 
 function resetLogForm() {
   logDessert.value = '';
   logStore.value = '';
   logNote.value = '';
-  logPlannedDate.value = '';
   selectedRating = 0;
   logStars.querySelectorAll('button').forEach((b) => b.classList.remove('filled'));
   logPhoto.reset();
   editingLogId = null;
-  editingLogStatus = null;
+  editingLogPlannedDate = '';
   logFormCancelEdit.hidden = true;
   logFormMsg.hidden = true;
-  setLogStatus('eaten');
+  logPhotoRow.hidden = false;
+  updateLogFormLabels();
 }
 
 function enterEditLogMode(entry) {
   editingLogId = entry.id;
-  editingLogStatus = entry.status;
+  editingLogPlannedDate = entry.planned_date || '';
   logDessert.value = entry.dessert_name;
   logStore.value = entry.store_name || '';
   logNote.value = entry.note || '';
@@ -2568,11 +2575,8 @@ function enterEditLogMode(entry) {
   logStars.querySelectorAll('button').forEach((b) => {
     b.classList.toggle('filled', Number(b.dataset.star) <= selectedRating);
   });
-  logPlannedDate.value = entry.planned_date || '';
   logPhoto.reset();
-  logPlannedDateField.hidden = entry.status !== 'planned';
-  logStars.hidden = entry.status === 'planned';
-  logPhotoRow.hidden = true;
+  logPhotoRow.hidden = true; // photos aren't editable after the fact
   logFormCancelEdit.hidden = false;
   logFormMsg.hidden = true;
   updateLogFormLabels();
@@ -2580,17 +2584,9 @@ function enterEditLogMode(entry) {
   logDessert.focus();
 }
 
-function startNewWishlistEntry() {
-  resetLogForm();
-  setLogStatus('planned');
-  setCollectionPane('log');
-  logDessert.focus();
-}
-
 logFormCancelEdit.addEventListener('click', () => {
-  const returnPane = editingLogStatus === 'planned' ? 'wishlist' : 'view';
   resetLogForm();
-  setCollectionPane(returnPane);
+  setCollectionPane('view');
 });
 
 function renderNotebookStars(rating) {
@@ -2714,7 +2710,108 @@ notebookNextBtn.addEventListener('click', () => {
 // --- Wishlist (planned entries not yet eaten) ---
 const wishlistList = document.getElementById('wishlist-list');
 const wishlistAddBtn = document.getElementById('wishlist-add-btn');
+const wishlistListCard = document.getElementById('wishlist-list-card');
+const wishlistFormCard = document.getElementById('wishlist-form-card');
+const wishlistForm = document.getElementById('wishlist-form');
+const wishlistFormHeading = document.getElementById('wishlist-form-heading');
+const wishlistDessert = document.getElementById('wishlist-dessert');
+const wishlistStore = document.getElementById('wishlist-store');
+const wishlistPlannedDate = document.getElementById('wishlist-planned-date');
+const wishlistNote = document.getElementById('wishlist-note');
+const wishlistFormSubmit = document.getElementById('wishlist-form-submit');
+const wishlistFormCancel = document.getElementById('wishlist-form-cancel');
+const wishlistFormMsg = document.getElementById('wishlist-form-msg');
+
+// Wishlist entries get their own form, entirely separate from log-form
+// above: planning something you haven't tried yet is a different question
+// from logging what you ate, so it shouldn't reuse the eaten-flow's
+// wording, fields (rating/photo), or state machine.
+let editingWishlistId = null;
+
+function updateWishlistFormLabels() {
+  if (editingWishlistId) {
+    wishlistFormHeading.textContent = t('editingRecordTitle');
+    wishlistFormSubmit.textContent = t('saveChanges');
+  } else {
+    wishlistFormHeading.textContent = t('planNewDessertTitle');
+    wishlistFormSubmit.textContent = t('addToWishlist');
+  }
+}
+
+function resetWishlistForm() {
+  wishlistDessert.value = '';
+  wishlistStore.value = '';
+  wishlistPlannedDate.value = '';
+  wishlistNote.value = '';
+  editingWishlistId = null;
+  wishlistFormMsg.hidden = true;
+  updateWishlistFormLabels();
+}
+
+function showWishlistForm() {
+  wishlistListCard.hidden = true;
+  wishlistFormCard.hidden = false;
+  wishlistDessert.focus();
+}
+
+function hideWishlistForm() {
+  wishlistFormCard.hidden = true;
+  wishlistListCard.hidden = false;
+}
+
+function startNewWishlistEntry() {
+  resetWishlistForm();
+  showWishlistForm();
+}
+
+function enterEditWishlistMode(entry) {
+  editingWishlistId = entry.id;
+  wishlistDessert.value = entry.dessert_name;
+  wishlistStore.value = entry.store_name || '';
+  wishlistPlannedDate.value = entry.planned_date || '';
+  wishlistNote.value = entry.note || '';
+  wishlistFormMsg.hidden = true;
+  updateWishlistFormLabels();
+  setCollectionPane('wishlist');
+  showWishlistForm();
+}
+
 wishlistAddBtn.addEventListener('click', startNewWishlistEntry);
+wishlistFormCancel.addEventListener('click', () => {
+  resetWishlistForm();
+  hideWishlistForm();
+});
+
+wishlistForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const dessertName = wishlistDessert.value.trim();
+  if (!dessertName) return;
+  wishlistFormSubmit.disabled = true;
+  wishlistFormMsg.hidden = true;
+  try {
+    const body = new FormData();
+    body.append('user_id', userId);
+    body.append('dessert_name', dessertName);
+    body.append('store_name', wishlistStore.value.trim());
+    body.append('note', wishlistNote.value.trim());
+    body.append('planned_date', wishlistPlannedDate.value);
+    let res;
+    if (editingWishlistId) {
+      res = await fetch(`/log/${editingWishlistId}`, { method: 'PATCH', body, headers: authHeaders() });
+    } else {
+      body.append('status', 'planned');
+      res = await fetch('/log', { method: 'POST', body, headers: authHeaders() });
+    }
+    if (!res.ok) throw new Error(t('httpError', { status: res.status }));
+    resetWishlistForm();
+    hideWishlistForm();
+    loadEntries();
+  } catch (err) {
+    showFormMsg(wishlistFormMsg, t('saveFailed', { msg: err.message }));
+  } finally {
+    wishlistFormSubmit.disabled = false;
+  }
+});
 
 function getWishlistEntries() {
   return allEntries.filter((e) => e.status === 'planned');
@@ -2810,7 +2907,7 @@ function renderWishlistEntry(entry) {
     }
   });
 
-  div.querySelector('.edit-btn').addEventListener('click', () => enterEditLogMode(entry));
+  div.querySelector('.edit-btn').addEventListener('click', () => enterEditWishlistMode(entry));
   div.querySelector('.del-btn').addEventListener('click', async () => {
     await fetch(`/log/${entry.id}?user_id=${encodeURIComponent(userId)}`, { method: 'DELETE', headers: authHeaders() });
     loadEntries();
@@ -2844,7 +2941,7 @@ logForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const dessertName = logDessert.value.trim();
   if (!dessertName) return;
-  if (!editingLogId && logStatus === 'eaten' && logPhoto.getFiles().length === 0) {
+  if (!editingLogId && logPhoto.getFiles().length === 0) {
     showFormMsg(logFormMsg, t('photoRequired'));
     return;
   }
@@ -2852,7 +2949,6 @@ logForm.addEventListener('submit', async (e) => {
   logFormMsg.hidden = true;
 
   const wasEditing = editingLogId;
-  const targetPane = wasEditing ? (editingLogStatus === 'planned' ? 'wishlist' : 'view') : (logStatus === 'planned' ? 'wishlist' : 'view');
 
   try {
     const body = new FormData();
@@ -2863,11 +2959,10 @@ logForm.addEventListener('submit', async (e) => {
     body.append('note', logNote.value.trim());
     let res;
     if (wasEditing) {
-      body.append('planned_date', logPlannedDate.value);
+      body.append('planned_date', editingLogPlannedDate);
       res = await fetch(`/log/${wasEditing}`, { method: 'PATCH', body, headers: authHeaders() });
     } else {
-      body.append('status', logStatus);
-      if (logStatus === 'planned') body.append('planned_date', logPlannedDate.value);
+      body.append('status', 'eaten');
       logPhoto.getFiles().forEach((f) => body.append('photos', f));
       res = await fetch('/log', { method: 'POST', body, headers: authHeaders() });
     }
@@ -2877,7 +2972,7 @@ logForm.addEventListener('submit', async (e) => {
     summaryText.textContent = '';
     notebookIndex = 0;
     loadEntries();
-    setCollectionPane(targetPane);
+    setCollectionPane('view');
   } catch (err) {
     showFormMsg(logFormMsg, t('saveFailed', { msg: err.message }));
   } finally {
@@ -3148,6 +3243,7 @@ function refreshDynamicChrome() {
   setAuthFormMode(authFormMode);
   syncPasswordToggleLabels();
   updateLogFormLabels();
+  updateWishlistFormLabels();
   updateSettingsAccountView();
 }
 
