@@ -29,6 +29,13 @@ for _p in (HERE, HERE.parent):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
+from dotenv import load_dotenv
+
+# See run_eval.py's comment on the same line — standalone scripts can't
+# rely on main.py's guarantee that dotenv loads before collection/community
+# are imported.
+load_dotenv(HERE.parent.parent / ".env")
+
 from agent import run_agent
 from run_eval import judge
 from tools import describe_unmatched_photo, identify_exhibit

@@ -24,6 +24,15 @@ for _p in (HERE, HERE.parent):  # eval/ (for grade_auto) and backend/ (for agent
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
+from dotenv import load_dotenv
+
+# Must run before agent/collection/community are imported: collection and
+# community both read SUPABASE_URL from os.environ at their own import
+# time (via supabase_db), and main.py normally guarantees load_dotenv()
+# already ran by then — this script is a standalone entry point that
+# doesn't get that guarantee for free.
+load_dotenv(HERE.parent.parent / ".env")
+
 import dashscope
 
 from agent import run_agent
