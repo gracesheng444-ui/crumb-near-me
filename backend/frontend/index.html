@@ -344,6 +344,16 @@
   .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
   .icon-btn:disabled { opacity: 0.5; cursor: default; }
   .icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .icon-btn.recording {
+    background: #e5484d;
+    border-color: transparent;
+    color: #fff;
+    animation: micPulse 1.2s ease-in-out infinite;
+  }
+  @keyframes micPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(229, 72, 77, 0.45); }
+    50% { box-shadow: 0 0 0 6px rgba(229, 72, 77, 0); }
+  }
 
   #message {
     flex: 1;
@@ -1315,6 +1325,9 @@
       <button type="button" id="photo-btn" class="icon-btn" title="拍照识别甜品店" data-i18n-title="photoBtnTitle">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
       </button>
+      <button type="button" id="mic-btn" class="icon-btn" title="录音提问" data-i18n-title="micBtnTitle">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
       <textarea id="message" rows="1" placeholder="想问点什么甜品店的事？" data-i18n-ph="chatPlaceholder" autocomplete="off"></textarea>
       <button type="submit" id="send-btn" title="发送" data-i18n-title="send">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -1661,6 +1674,9 @@ const T = {
   password: { zh: '密码', en: 'Password' },
   confirmPassword: { zh: '确认密码', en: 'Confirm password' },
   photoBtnTitle: { zh: '拍照识别甜品店', en: 'Send a photo to identify a shop' },
+  micBtnTitle: { zh: '录音提问', en: 'Ask by voice' },
+  micStopTitle: { zh: '点击停止录音', en: 'Click to stop recording' },
+  transcribing: { zh: '正在转换为文字…', en: 'Transcribing…' },
   send: { zh: '发送', en: 'Send' },
   chatPlaceholder: { zh: '想问点什么甜品店的事？', en: 'Ask something about dessert shops…' },
   showPassword: { zh: '显示密码', en: 'Show password' },
@@ -1683,6 +1699,8 @@ const T = {
   guessSub: { zh: '不在知识库里，AI的推测 · {label}', en: "Not in the knowledge base — AI's guess · {label}" },
   unknownSubFallback: { zh: '试试拍一张更清晰的门头或包装照片', en: 'Try a clearer photo of the storefront or packaging' },
   identifyFailed: { zh: '无法识别这张照片 — {msg}。', en: "Couldn't identify this photo — {msg}." },
+  micPermissionDenied: { zh: '无法访问麦克风 — {msg}', en: "Couldn't access the microphone — {msg}" },
+  transcribeFailed: { zh: '语音转文字失败 — {msg}。请再试一次，或直接打字。', en: "Couldn't transcribe that — {msg}. Please try again, or just type instead." },
   introduceBrand: { zh: '介绍一下{name}', en: 'Tell me about {name}' },
   askAmbiguousBranches: { zh: '我拍了一张{brand}的照片，但看不出是哪家分店，能告诉我这个品牌在上海的所有分店吗？', en: "I took a photo of {brand} but can't tell which branch it is — can you tell me all of this brand's branches in Shanghai?" },
   askUnmatchedPhoto: { zh: '我拍了一张照片，知识库里没有直接匹配到。AI从照片上读到的信息是：{desc}（这只是照片识别的初步结果，可能不完全准确）。你知道这是哪里吗，或者上海有没有类似的地方？', en: "I took a photo that didn't directly match anything in the knowledge base. What the AI read from the photo is: {desc} (this is just an initial scan, may not be fully accurate). Do you know what this is, or is there somewhere similar in Shanghai?" },
@@ -2066,6 +2084,7 @@ const input = document.getElementById('message');
 const sendBtn = document.getElementById('send-btn');
 const photoInput = document.getElementById('photo-input');
 const photoBtn = document.getElementById('photo-btn');
+const micBtn = document.getElementById('mic-btn');
 const sessionId = crypto.randomUUID();
 
 const AGENT_AVATAR = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><circle cx="8" cy="15" r="5"/><circle cx="16" cy="15" r="5" opacity="0.65"/><circle cx="12" cy="7.5" r="4" opacity="0.85"/></svg>';
@@ -2262,6 +2281,83 @@ photoInput.addEventListener('change', async () => {
     addRow(t('identifyFailed', { msg: err.message }), 'agent', { isError: true });
   }
 });
+
+// --- Voice input: record with MediaRecorder, transcribe server-side, fill
+// the message box for the user to review/edit before sending. Never
+// auto-sends — the transcript is just text in the input like anything typed.
+// Qwen3-ASR-Flash accepts whatever container/codec the browser produces
+// directly as a base64 data URI, so no client-side PCM capture/resampling
+// is needed — MediaRecorder's default output (audio/webm) works as-is.
+let mediaRecorder = null;
+let recordedChunks = [];
+let isRecording = false;
+
+micBtn.addEventListener('click', () => {
+  if (isRecording) stopRecording();
+  else startRecording();
+});
+
+async function startRecording() {
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (err) {
+    addRow(t('micPermissionDenied', { msg: err.message }), 'agent', { isError: true });
+    return;
+  }
+  recordedChunks = [];
+  mediaRecorder = new MediaRecorder(stream);
+  mediaRecorder.ondataavailable = (e) => {
+    if (e.data.size > 0) recordedChunks.push(e.data);
+  };
+  mediaRecorder.onstop = function () {
+    // `this`, not the outer `mediaRecorder` variable: stopRecording() below
+    // sets that to null right after calling .stop(), and this handler only
+    // runs later, asynchronously, once the recorder has actually finished.
+    stream.getTracks().forEach((track) => track.stop());
+    const blob = new Blob(recordedChunks, { type: this.mimeType });
+    recordedChunks = [];
+    sendRecording(blob);
+  };
+  mediaRecorder.start();
+
+  isRecording = true;
+  micBtn.classList.add('recording');
+  micBtn.title = t('micStopTitle');
+  photoBtn.disabled = true;
+}
+
+function stopRecording() {
+  isRecording = false;
+  micBtn.classList.remove('recording');
+  micBtn.title = t('micBtnTitle');
+  photoBtn.disabled = false;
+  mediaRecorder.stop();
+  mediaRecorder = null;
+}
+
+async function sendRecording(blob) {
+  const previousPlaceholder = input.placeholder;
+  micBtn.disabled = true;
+  input.placeholder = t('transcribing');
+  try {
+    const body = new FormData();
+    body.append('audio', blob, 'recording.webm');
+    const res = await fetch('/transcribe', { method: 'POST', body });
+    if (!res.ok) throw new Error(t('httpError', { status: res.status }));
+    const data = await res.json();
+    if (data.text) {
+      input.value = input.value ? (input.value.trimEnd() + ' ' + data.text) : data.text;
+      input.dispatchEvent(new Event('input'));
+      input.focus();
+    }
+  } catch (err) {
+    addRow(t('transcribeFailed', { msg: err.message }), 'agent', { isError: true });
+  } finally {
+    micBtn.disabled = false;
+    input.placeholder = previousPlaceholder;
+  }
+}
 
 sendBtn.disabled = true;
 

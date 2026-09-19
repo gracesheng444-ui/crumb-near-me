@@ -1,5 +1,8 @@
 """
 Tool implementations the agent can call: retrieve_info, identify_exhibit, speak.
+transcribe_speech is a standalone ASR helper for the chat page's voice input —
+not an agent tool, since transcription happens before the agent ever sees a
+message, not as a step inside its own reasoning loop.
 
 retrieve_info uses plain keyword overlap for now (v0) — swap in embedding
 similarity once the knowledge base is big enough that keyword matching starts
@@ -24,11 +27,11 @@ DASHSCOPE_API_KEY = os.environ.get("DASHSCOPE_API_KEY")
 # International (Singapore) DashScope accounts need a workspace-scoped
 # endpoint instead of the flat mainland one — set only when that env var is
 # present, so a mainland account (no workspace id needed) is unaffected.
+# set_region (rather than setting base_http_api_url by hand) also correctly
+# points base_compatible_api_url at the same workspace.
 _DASHSCOPE_WORKSPACE_ID = os.environ.get("DASHSCOPE_WORKSPACE_ID")
 if _DASHSCOPE_WORKSPACE_ID:
-    dashscope.base_http_api_url = (
-        f"https://{_DASHSCOPE_WORKSPACE_ID}.ap-southeast-1.maas.aliyuncs.com/api/v1"
-    )
+    dashscope.set_region("ap-southeast-1", _DASHSCOPE_WORKSPACE_ID)
 
 KNOWLEDGE_DIR = Path(__file__).parent / "knowledge"
 AUDIO_DIR = Path(__file__).parent.parent / "audio_output"
@@ -387,6 +390,32 @@ def speak(text: str, lang: str = "zh") -> str:
     out_path = AUDIO_DIR / f"reply_{abs(hash(text))}.mp3"
     out_path.write_bytes(resp.content)
     return str(out_path)
+
+
+def transcribe_speech(audio_bytes: bytes, media_type: str = "audio/webm") -> str:
+    """Transcribe a short voice-input recording via Qwen3-ASR-Flash — same
+    MultiModalConversation.call shape as identify_exhibit's vision calls,
+    just with an "audio" content item instead of "image". Paraformer
+    (dashscope.audio.asr.Recognition, a websocket-streaming API) was tried
+    first, but Paraformer isn't available on an international workspace at
+    all; Qwen3-ASR-Flash is, and it's simpler besides — one HTTP call with a
+    base64 data URI, no local transcoding, no temp file, whatever container/
+    codec the browser's MediaRecorder produced (typically audio/webm)
+    accepted as-is. 5-minute/10MB limit on this synchronous model, far above
+    a spoken question.
+    """
+    audio_b64 = base64.b64encode(audio_bytes).decode()
+    data_uri = f"data:{media_type};base64,{audio_b64}"
+    response = dashscope.MultiModalConversation.call(
+        api_key=DASHSCOPE_API_KEY,
+        model="qwen3-asr-flash",
+        messages=[{"role": "user", "content": [{"audio": data_uri}]}],
+        result_format="message",
+        asr_options={"enable_itn": False},
+    )
+    if response.status_code != 200:
+        raise RuntimeError(f"Qwen3-ASR error {response.status_code}: {response.message}")
+    return response.output.choices[0].message.content[0]["text"].strip()
 
 
 def _resolve_place(query: str) -> tuple[str | None, list[str] | None]:

@@ -23,7 +23,7 @@ from collection import (
 )
 from community import add_note, delete_note, list_notes, update_note
 from profile import get_profile, save_avatar_photo, save_profile
-from tools import AUDIO_DIR, describe_unmatched_photo, identify_exhibit
+from tools import AUDIO_DIR, describe_unmatched_photo, identify_exhibit, transcribe_speech
 
 app = FastAPI(title="Shanghai Dessert Guide Agent")
 
@@ -89,6 +89,21 @@ def chat(
         if result["audio_path"]
         else None,
     }
+
+
+@app.post("/transcribe")
+async def transcribe(audio: UploadFile = File(...)):
+    """Transcribe a voice-input recording (whatever container/codec the
+    frontend's MediaRecorder produced — see index.html) into text for the
+    user to review before it's sent as a chat message. Never touches
+    run_agent: transcription happens before the agent loop, not as a step
+    inside it."""
+    audio_bytes = await audio.read()
+    try:
+        text = transcribe_speech(audio_bytes, media_type=audio.content_type or "audio/webm")
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=str(e))
+    return {"text": text}
 
 
 @app.post("/identify")
