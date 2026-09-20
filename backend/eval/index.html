@@ -9,15 +9,11 @@
   body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f6f5f3; color: #2b2a28; }
   #layout { display: flex; height: 100vh; }
   #sidebar { width: 300px; flex-shrink: 0; overflow-y: auto; background: #fff; border-right: 1px solid #e2e0dc; padding: 10px; }
-  #suite-picker { padding: 4px; margin-bottom: 4px; }
+  #suite-picker { padding: 4px 4px 12px; margin-bottom: 8px; border-bottom: 1px solid #e2e0dc; }
   #suite-picker label { font-size: 12px; color: #6b6659; display: block; margin-bottom: 4px; }
   #suite-picker select { width: 100%; }
   #last-run { font-size: 11px; color: #8a8578; margin-top: 6px; }
-  #suite-description { font-size: 12px; color: #6b6659; margin-top: 6px; line-height: 1.4; }
-  #kb-summary { margin-top: 8px; font-size: 12px; color: #6b6659; }
-  #kb-summary summary { cursor: pointer; font-weight: 600; color: #2b2a28; }
-  #kb-summary ul { margin: 6px 0 0; padding-left: 18px; }
-  #kb-summary li { margin-bottom: 2px; }
+  #overview-link { font-size: 12px; margin-top: 8px; background: none; border: none; color: #6b6659; text-decoration: underline; cursor: pointer; padding: 0; }
   #sidebar h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #8a8578; margin: 16px 4px 6px; }
   .q-item { padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; display: flex; justify-content: space-between; gap: 6px; }
   .q-item:hover { background: #f0eee9; }
@@ -50,6 +46,15 @@
   .score-line { font-size: 13px; font-weight: 600; margin-top: 6px; }
   .note { font-size: 12px; color: #6b6659; margin-top: 4px; }
   #empty { color: #8a8578; padding: 40px; }
+  .overview-title { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+  .overview-desc { font-size: 14px; line-height: 1.6; color: #4a4740; margin: 0 0 10px; }
+  .kb-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .kb-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; color: #8a8578; padding: 4px 8px 6px; border-bottom: 1px solid #e2e0dc; white-space: nowrap; }
+  .kb-table td { padding: 6px 8px; border-bottom: 1px solid #f0eee9; }
+  .kb-table tfoot td { color: #8a8578; border-bottom: none; padding-top: 8px; }
+  .cap-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
+  .cap-table td { padding: 3px 8px; }
+  .cap-table td:last-child { text-align: right; color: #6b6659; }
 </style>
 </head>
 <body>
@@ -58,16 +63,12 @@
     <div id="suite-picker">
       <label>Eval suite</label>
       <select id="suite-select" onchange="switchSuite(this.value)"><option>Loading…</option></select>
-      <div id="suite-description"></div>
       <div id="last-run"></div>
-      <details id="kb-summary">
-        <summary>Knowledge base contents</summary>
-        <ul id="kb-list"><li>Loading…</li></ul>
-      </details>
+      <button id="overview-link" onclick="showOverview()">‹ Suite overview</button>
     </div>
     <div id="sidebar-content">Loading…</div>
   </div>
-  <div id="main"><div id="empty">Pick a question from the sidebar.</div></div>
+  <div id="main"><div id="empty">Loading…</div></div>
 </div>
 
 <script>
@@ -86,18 +87,63 @@ function formatRunTimestamp(ts) {
   return d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 }
 
+let KB_BRANDS = null;
+
 async function loadKnowledgeBase() {
+  if (KB_BRANDS) return KB_BRANDS;
   const res = await fetch("/api/knowledge_base");
   const data = await res.json();
-  const list = document.getElementById("kb-list");
-  if (!data.brands.length) {
-    list.innerHTML = "<li>No knowledge-base entries found.</li>";
-    return;
+  KB_BRANDS = data.brands;
+  return KB_BRANDS;
+}
+
+function kbTableHtml(brands) {
+  if (!brands.length) return `<div class="note">No knowledge-base entries found.</div>`;
+  const totalBranches = brands.reduce((sum, b) => sum + b.branch_count, 0);
+  const rows = brands
+    .map((b) => `<tr><td>${escapeHtml(b.brand)}</td><td>${escapeHtml(b.category)}</td><td>${b.branch_count}</td></tr>`)
+    .join("");
+  return `
+    <table class="kb-table">
+      <thead><tr><th>Brand</th><th>Category</th><th>Count</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr><td colspan="3">${brands.length} brands, ${totalBranches} branches total</td></tr></tfoot>
+    </table>
+  `;
+}
+
+function capabilityCountsHtml() {
+  const counts = {};
+  for (const q of QUESTIONS) {
+    if (q.lang !== "en") continue; // count each question once, not once per language
+    counts[q.capability] = (counts[q.capability] || 0) + 1;
   }
-  const totalBranches = data.brands.reduce((sum, b) => sum + b.branch_count, 0);
-  list.innerHTML = data.brands
-    .map((b) => `<li>${escapeHtml(b.brand)} — ${escapeHtml(b.category)} — ${b.branch_count} branch${b.branch_count === 1 ? "" : "es"}</li>`)
-    .join("") + `<li style="margin-top:6px;color:#8a8578">${data.brands.length} brands, ${totalBranches} branches total</li>`;
+  const rows = Object.keys(counts).sort()
+    .map((cap) => `<tr><td>${escapeHtml(cap)}</td><td>${counts[cap]}</td></tr>`)
+    .join("");
+  return `<table class="cap-table"><tbody>${rows}</tbody></table>`;
+}
+
+async function showOverview() {
+  ACTIVE = null;
+  renderSidebar();
+  const suite = SUITES.find((s) => s.file === CURRENT_SUITE);
+  const brands = await loadKnowledgeBase();
+  document.getElementById("main").innerHTML = `
+    <div class="panel">
+      <div class="overview-title">${escapeHtml(suite?.label || CURRENT_SUITE || "")}</div>
+      <div class="overview-desc">${escapeHtml(suite?.description || "")}</div>
+      <div class="note">${LAST_RUN_LABEL ? "Last full eval run: " + escapeHtml(LAST_RUN_LABEL) : "No full eval run saved yet."}</div>
+    </div>
+    <div class="panel">
+      <h4>Questions by capability</h4>
+      ${capabilityCountsHtml()}
+    </div>
+    <div class="panel">
+      <h4>Knowledge base contents</h4>
+      ${kbTableHtml(brands)}
+    </div>
+  `;
 }
 
 async function loadSuites() {
@@ -113,24 +159,17 @@ async function loadSuites() {
   const saved = localStorage.getItem("eval-review-suite");
   CURRENT_SUITE = fileNames.includes(saved) ? saved : data.default;
   select.innerHTML = SUITES.map((s) => `<option value="${s.file}" ${s.file === CURRENT_SUITE ? "selected" : ""}>${escapeHtml(s.label)}</option>`).join("");
-  renderSuiteDescription();
   LAST_RUN_LABEL = formatRunTimestamp(data.last_run_timestamp);
   document.getElementById("last-run").textContent = LAST_RUN_LABEL ? `Last full eval run: ${LAST_RUN_LABEL}` : "No full eval run saved yet.";
   await loadQuestions();
+  await showOverview();
 }
 
-function renderSuiteDescription() {
-  const suite = SUITES.find((s) => s.file === CURRENT_SUITE);
-  document.getElementById("suite-description").textContent = suite?.description || "";
-}
-
-function switchSuite(suite) {
+async function switchSuite(suite) {
   CURRENT_SUITE = suite;
   localStorage.setItem("eval-review-suite", suite);
-  renderSuiteDescription();
-  ACTIVE = null;
-  document.getElementById("main").innerHTML = `<div id="empty">Pick a question from the sidebar.</div>`;
-  loadQuestions();
+  await loadQuestions();
+  await showOverview();
 }
 
 function scoreBadgeClass(entry) {
@@ -340,7 +379,6 @@ async function saveManualGrade() {
 }
 
 loadSuites();
-loadKnowledgeBase();
 </script>
 </body>
 </html>
