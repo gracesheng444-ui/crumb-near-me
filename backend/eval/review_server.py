@@ -38,8 +38,50 @@ from run_eval import judge
 
 RESULTS_DIR = HERE / "results"
 SUITE_NAMES_PATH = HERE / "suite_names.json"
+KNOWLEDGE_DIR = HERE.parent / "knowledge"
 
 app = FastAPI()
+
+
+_BRANCH_COUNT_RE = re.compile(r"共(?:有)?\s*(\d+)\s*家|has\s*(\d+)\s*locations?", re.IGNORECASE)
+
+
+def _knowledge_base_summary() -> list[dict]:
+    """What's actually in the RAG knowledge base every eval question is
+    grounded against — read live from knowledge/*.json rather than
+    hand-described, so this can't drift out of sync as entries are added,
+    removed, or gain/lose branches. Groups per-branch files (e.g.
+    azabuya_wulumuqi.json, azabuya_yongkang.json, ...) under one brand by
+    stripping the "(branch name)" suffix off name_en. branch_count prefers
+    a stated "共有N家门店"/"has N locations" fact from the entry's own text
+    over just counting files, since a brand can list every branch inside a
+    single file (drunk_baker.json alone covers 44 real locations)."""
+    brands: dict[str, dict] = {}
+    for path in sorted(KNOWLEDGE_DIR.glob("*.json")):
+        try:
+            entry = json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            continue
+        if entry.get("canary"):
+            continue
+        name_en = entry.get("name_en") or entry.get("id", path.stem)
+        brand = name_en.split(" (")[0].strip()
+        b = brands.setdefault(brand, {"brand": brand, "category": entry.get("category", ""), "file_count": 0})
+        b["file_count"] += 1
+        haystack = " ".join([entry.get("address", ""), entry.get("description_zh", ""), entry.get("description_en", "")])
+        m = _BRANCH_COUNT_RE.search(haystack)
+        if m:
+            stated = int(m.group(1) or m.group(2))
+            b["stated_branch_count"] = max(b.get("stated_branch_count", 0), stated)
+    result = [
+        {
+            "brand": b["brand"],
+            "category": b["category"],
+            "branch_count": b.get("stated_branch_count") or b["file_count"],
+        }
+        for b in brands.values()
+    ]
+    return sorted(result, key=lambda x: x["brand"])
 
 
 def _suite_names() -> dict:
@@ -158,6 +200,11 @@ def get_suites():
         "default": suites[0]["file"] if suites else None,
         "last_run_timestamp": _latest_run_timestamp(),
     }
+
+
+@app.get("/api/knowledge_base")
+def get_knowledge_base():
+    return {"brands": _knowledge_base_summary()}
 
 
 @app.get("/api/questions")
