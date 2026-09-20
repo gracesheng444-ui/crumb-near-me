@@ -13,6 +13,7 @@
   #suite-picker label { font-size: 12px; color: #6b6659; display: block; margin-bottom: 4px; }
   #suite-picker select { width: 100%; }
   #last-run { font-size: 11px; color: #8a8578; margin-top: 6px; }
+  #suite-description { font-size: 12px; color: #6b6659; margin-top: 6px; line-height: 1.4; }
   #sidebar h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #8a8578; margin: 16px 4px 6px; }
   .q-item { padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; display: flex; justify-content: space-between; gap: 6px; }
   .q-item:hover { background: #f0eee9; }
@@ -53,6 +54,7 @@
     <div id="suite-picker">
       <label>Eval suite</label>
       <select id="suite-select" onchange="switchSuite(this.value)"><option>Loading…</option></select>
+      <div id="suite-description"></div>
       <div id="last-run"></div>
     </div>
     <div id="sidebar-content">Loading…</div>
@@ -65,6 +67,7 @@ let QUESTIONS = [];
 let ACTIVE = null; // {id, lang}
 let CURRENT_SUITE = null;
 let LAST_RUN_LABEL = null;
+let SUITES = [];
 
 function formatRunTimestamp(ts) {
   // ts is "YYYYMMDDTHHMMSSZ" (run_eval.py's eval_<ts>.json naming)
@@ -78,23 +81,31 @@ function formatRunTimestamp(ts) {
 async function loadSuites() {
   const res = await fetch("/api/suites");
   const data = await res.json();
+  SUITES = data.suites;
   const select = document.getElementById("suite-select");
-  if (!data.suites.length) {
+  if (!SUITES.length) {
     select.innerHTML = `<option>No suites found</option>`;
     return;
   }
-  const fileNames = data.suites.map((s) => s.file);
+  const fileNames = SUITES.map((s) => s.file);
   const saved = localStorage.getItem("eval-review-suite");
   CURRENT_SUITE = fileNames.includes(saved) ? saved : data.default;
-  select.innerHTML = data.suites.map((s) => `<option value="${s.file}" ${s.file === CURRENT_SUITE ? "selected" : ""}>${escapeHtml(s.label)}</option>`).join("");
+  select.innerHTML = SUITES.map((s) => `<option value="${s.file}" ${s.file === CURRENT_SUITE ? "selected" : ""}>${escapeHtml(s.label)}</option>`).join("");
+  renderSuiteDescription();
   LAST_RUN_LABEL = formatRunTimestamp(data.last_run_timestamp);
   document.getElementById("last-run").textContent = LAST_RUN_LABEL ? `Last full eval run: ${LAST_RUN_LABEL}` : "No full eval run saved yet.";
   await loadQuestions();
 }
 
+function renderSuiteDescription() {
+  const suite = SUITES.find((s) => s.file === CURRENT_SUITE);
+  document.getElementById("suite-description").textContent = suite?.description || "";
+}
+
 function switchSuite(suite) {
   CURRENT_SUITE = suite;
   localStorage.setItem("eval-review-suite", suite);
+  renderSuiteDescription();
   ACTIVE = null;
   document.getElementById("main").innerHTML = `<div id="empty">Pick a question from the sidebar.</div>`;
   loadQuestions();

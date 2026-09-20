@@ -1,3 +1,6 @@
 {
-  "test_questions.json": "Eval suite 1"
+  "test_questions.json": {
+    "label": "Eval suite 1",
+    "description": "Text-based chat eval across 8 capabilities — factual lookup, Amap transit directions, knowledge-base boundary refusals, adversarial probing, chit-chat, recommendations, synthesis, and multi-turn context. Every question runs in both English and Chinese."
+  }
 }

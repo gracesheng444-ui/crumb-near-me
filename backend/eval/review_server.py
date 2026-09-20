@@ -43,11 +43,11 @@ app = FastAPI()
 
 
 def _suite_names() -> dict:
-    """Filename -> display label (e.g. "test_questions.json" -> "Eval suite
-    1"), kept in a small hand-edited file so a suite's label can change
-    without renaming the file itself (and everything else, like run_eval.py,
-    that already hardcodes eval-suite filenames). A suite with no entry here
-    just displays under its filename."""
+    """Filename -> {"label": ..., "description": ...}, kept in a small
+    hand-edited file so a suite's label/description can change without
+    renaming the file itself (and everything else, like run_eval.py, that
+    already hardcodes eval-suite filenames). A suite with no entry here just
+    displays under its filename with no description."""
     if not SUITE_NAMES_PATH.exists():
         return {}
     return json.loads(SUITE_NAMES_PATH.read_text(encoding="utf-8"))
@@ -69,7 +69,12 @@ def _discover_suites() -> list[dict]:
         except (json.JSONDecodeError, OSError):
             continue
         if data and isinstance(data, list) and any("question_en" in q or "turns_en" in q for q in data):
-            suites.append({"file": path.name, "label": names.get(path.name, path.name)})
+            meta = names.get(path.name, {})
+            suites.append({
+                "file": path.name,
+                "label": meta.get("label", path.name),
+                "description": meta.get("description", ""),
+            })
     return suites
 
 
