@@ -12,6 +12,7 @@
   #suite-picker { padding: 4px 4px 12px; margin-bottom: 8px; border-bottom: 1px solid #e2e0dc; }
   #suite-picker label { font-size: 12px; color: #6b6659; display: block; margin-bottom: 4px; }
   #suite-picker select { width: 100%; }
+  #last-run { font-size: 11px; color: #8a8578; margin-top: 6px; }
   #overview-link { font-size: 12px; margin-top: 8px; background: none; border: none; color: #6b6659; text-decoration: underline; cursor: pointer; padding: 0; }
   #sidebar h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #8a8578; margin: 16px 4px 6px; }
   .q-item { padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; display: flex; justify-content: space-between; gap: 6px; }
@@ -62,6 +63,7 @@
     <div id="suite-picker">
       <label>Eval suite</label>
       <select id="suite-select" onchange="switchSuite(this.value)"><option>Loading…</option></select>
+      <div id="last-run"></div>
       <button id="overview-link" onclick="showOverview()">‹ Suite overview</button>
     </div>
     <div id="sidebar-content">Loading…</div>
@@ -131,7 +133,6 @@ async function showOverview() {
     <div class="panel">
       <div class="overview-title">${escapeHtml(suite?.label || CURRENT_SUITE || "")}</div>
       <div class="overview-desc">${escapeHtml(suite?.description || "")}</div>
-      <div class="note">${LAST_RUN_LABEL ? "Last full eval run: " + escapeHtml(LAST_RUN_LABEL) : "No full eval run saved yet."}</div>
     </div>
     <div class="panel">
       <h4>Questions by capability</h4>
@@ -158,6 +159,7 @@ async function loadSuites() {
   CURRENT_SUITE = fileNames.includes(saved) ? saved : data.default;
   select.innerHTML = SUITES.map((s) => `<option value="${s.file}" ${s.file === CURRENT_SUITE ? "selected" : ""}>${escapeHtml(s.label)}</option>`).join("");
   LAST_RUN_LABEL = formatRunTimestamp(data.last_run_timestamp);
+  document.getElementById("last-run").textContent = LAST_RUN_LABEL ? `Last full eval run: ${LAST_RUN_LABEL}` : "No full eval run saved yet.";
   await loadQuestions();
   await showOverview();
 }
