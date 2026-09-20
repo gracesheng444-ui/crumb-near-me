@@ -1,0 +1,301 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>How The Eval Suite Works</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f3f4ef; --surface: #ffffff; --ink: #1d2321; --ink-dim: #5c655d; --ink-faint: #8b9389;
+    --border: #dde0d7; --border-strong: #c7cdc0;
+    --accent: #2d5a52; --accent-ink: #f2f7f5; --accent-dim: #e1ebe7;
+    --risk: #a5691a; --risk-dim: #f4e8d3;
+    --good: #3f7d52; --good-dim: #e2efe4;
+    --shadow: 0 1px 2px rgba(29,35,33,0.04), 0 6px 20px -10px rgba(29,35,33,0.12);
+    --font-display: "Fraunces", Georgia, serif;
+    --font-body: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", "SF Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #171a17; --surface: #1f2320; --ink: #eceee9; --ink-dim: #a8afa4; --ink-faint: #767d73;
+      --border: #33372f; --border-strong: #454b40;
+      --accent: #7fbfae; --accent-ink: #10201c; --accent-dim: #1e332d;
+      --risk: #e0a758; --risk-dim: #3a2c17;
+      --good: #7dc596; --good-dim: #1c3025;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 10px 30px -12px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #171a17; --surface: #1f2320; --ink: #eceee9; --ink-dim: #a8afa4; --ink-faint: #767d73;
+    --border: #33372f; --border-strong: #454b40;
+    --accent: #7fbfae; --accent-ink: #10201c; --accent-dim: #1e332d;
+    --risk: #e0a758; --risk-dim: #3a2c17;
+    --good: #7dc596; --good-dim: #1c3025;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 10px 30px -12px rgba(0,0,0,0.6);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.62; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 52px 20px 100px; }
+  h1, h2, h3 { font-family: var(--font-display); color: var(--ink); text-wrap: balance; font-weight: 600; }
+  p { text-wrap: pretty; }
+  code { font-family: var(--font-mono); font-size: 0.86em; background: var(--accent-dim); color: var(--accent); padding: 0.1em 0.4em; border-radius: 4px; }
+
+  .kicker { font-family: var(--font-mono); font-size: 12.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent); margin: 0 0 14px; display: flex; align-items: center; gap: 10px; }
+  .kicker .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  h1.title { font-size: 42px; line-height: 1.1; margin: 0 0 16px; letter-spacing: -0.01em; }
+  .dek { font-size: 18px; color: var(--ink-dim); max-width: 68ch; margin: 0 0 30px; }
+
+  nav.toc { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 48px; box-shadow: var(--shadow); }
+  nav.toc .label { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint); margin-bottom: 8px; }
+  nav.toc ol { margin: 0; padding-left: 20px; columns: 2; column-gap: 24px; font-size: 13.5px; }
+  nav.toc a { color: var(--ink); text-decoration: none; border-bottom: 1px solid transparent; }
+  nav.toc a:hover { border-color: var(--accent); color: var(--accent); }
+  @media (max-width: 560px) { nav.toc ol { columns: 1; } }
+
+  section { margin-bottom: 58px; scroll-margin-top: 16px; }
+  section > h2 { font-size: 26px; margin: 0 0 6px; }
+  section > .lede { color: var(--ink-dim); font-size: 15.5px; max-width: 70ch; margin: 0 0 22px; }
+  h3.subhead { font-size: 21px; margin: 44px 0 10px; padding-top: 22px; border-top: 2px solid var(--border); font-style: italic; }
+  h3.subhead .lede { margin-top: 8px; }
+
+  .cap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0 24px; }
+  @media (max-width: 620px) { .cap-grid { grid-template-columns: 1fr; } }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 13px; padding: 16px 18px; box-shadow: var(--shadow); }
+  .card h4 { font-size: 15.5px; margin: 0 0 5px; font-family: var(--font-body); font-weight: 700; }
+  .card p { margin: 0; font-size: 13.5px; color: var(--ink-dim); }
+
+  .eq { display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap; justify-content: center; margin: 6px 0 24px; }
+  .eq-term { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 20px; text-align: center; box-shadow: var(--shadow); min-width: 120px; }
+  .eq-term.main { box-shadow: 0 0 0 1px var(--accent), var(--shadow); }
+  .eq-n { display: block; font-family: var(--font-display); font-size: 26px; font-weight: 600; }
+  .eq-l { display: block; font-size: 11px; color: var(--ink-faint); margin-top: 3px; line-height: 1.4; }
+  .eq-op { display: flex; align-items: center; font-family: var(--font-display); font-size: 22px; color: var(--ink-faint); }
+
+  table.data { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .table-scroll { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); box-shadow: var(--shadow); margin: 14px 0; }
+  table.data th, table.data td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  table.data th { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-faint); background: var(--accent-dim); }
+  table.data td:first-child, table.data th:first-child { text-align: left; font-weight: 600; white-space: normal; }
+  table.data tr:last-child td { border-bottom: none; }
+  table.data td.total, table.data th.total { font-weight: 700; background: var(--accent-dim); }
+  table.data td.left { text-align: left; white-space: normal; font-size: 12.5px; }
+  table.data td.dim { color: var(--ink-faint); font-size: 12px; }
+
+  .fillnote { font-size: 13.5px; color: var(--ink-dim); margin: 6px 0 18px; }
+  .pointer { border: 1px dashed var(--border-strong); border-radius: 12px; padding: 14px 18px; margin: 14px 0 24px; font-size: 13.5px; color: var(--ink-dim); background: var(--surface); }
+  .pointer b { color: var(--ink); }
+  .pointer code { font-size: 0.85em; }
+
+  .aside { border-left: 3px solid var(--accent); background: var(--accent-dim); border-radius: 0 10px 10px 0; padding: 15px 19px; margin: 18px 0; font-size: 14px; }
+  .aside .tag { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--accent); display: block; margin-bottom: 6px; }
+  .aside p { margin: 0 0 8px; }
+  .aside p:last-child { margin-bottom: 0; }
+  .aside.warn { border-left-color: var(--risk); background: var(--risk-dim); }
+  .aside.warn .tag { color: var(--risk); }
+
+  .mech-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 20px 0; }
+  @media (max-width: 680px) { .mech-row { grid-template-columns: 1fr; } }
+  .mech { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; box-shadow: var(--shadow); }
+  .mech h4 { font-size: 14.5px; margin: 0 0 6px; font-family: var(--font-mono); color: var(--accent); font-weight: 600; }
+  .mech p { font-size: 13px; color: var(--ink-dim); margin: 0; }
+
+  footer.colophon { max-width: 900px; margin: 60px auto 0; padding-top: 24px; border-top: 1px solid var(--border); }
+  .colophon-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+  @media (max-width: 560px) { .colophon-grid { grid-template-columns: 1fr; } }
+  .colophon-item { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 13px 16px; }
+  .colophon-item .flabel { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); margin-bottom: 4px; display: block; }
+  .colophon-item p { font-size: 12.5px; color: var(--ink-dim); margin: 0; }
+  .colophon-item code { display: block; margin-top: 5px; word-break: break-all; }
+  footer.colophon p.foot-note { font-size: 12.5px; color: var(--ink-faint); margin: 0 0 4px; }
+</style>
+
+<div class="wrap">
+
+  <p class="kicker"><span class="dot"></span> Crumb Near Me &middot; Eval design</p>
+  <h1 class="title">How the eval suite works</h1>
+  <p class="dek">The evaluation has three parts: <b>text-based</b>, <b>vision-based</b>, and <b>audio-based</b>. Text-based questions are built by crossing two axes, capability and phrasing, then delivered either as a single message or split across multiple turns, so text-based splits into a Single-turn and a Multi-turn section below. Vision uses a separate model on photo input. Audio tests a transcription layer feeding into the same chat agent.</p>
+
+  <nav class="toc">
+    <div class="label">Contents</div>
+    <ol>
+      <li><a href="#text">Text-based evaluation</a></li>
+      <li><a href="#vision">Vision-based evaluation</a></li>
+      <li><a href="#audio">Audio-based evaluation</a></li>
+      <li><a href="#method">Design principles</a></li>
+    </ol>
+  </nav>
+
+  <section id="text">
+    <h2>Text-based evaluation</h2>
+    <p class="lede">Chat questions and conversations.</p>
+    <div class="eq">
+      <div class="eq-term main"><span class="eq-n">50</span><span class="eq-l">single-turn<br>(main grid)</span></div>
+      <span class="eq-op">+</span>
+      <div class="eq-term"><span class="eq-n">34</span><span class="eq-l">multi-turn<br>(7 needs-history + 3 recall + 24 erosion)</span></div>
+    </div>
+    <p class="fillnote" style="text-align:center; max-width:64ch; margin:0 auto 24px;">Two of the three multi-turn categories can be built from an existing main-grid question — a convenient option, not a requirement. <b>distance-erosion</b> is the exception: it always reuses a main-grid question verbatim, since the entire mechanism is a comparison against that question's own single-turn answer.</p>
+
+    <h3 class="subhead" id="text-single">Single-turn</h3>
+    <p class="lede">Every single-turn question is placed by crossing two axes — <b>capability</b> (what the agent has to do) and <b>phrasing</b> (how the message arrives) — then weighted toward where testing found real fragility, not spread evenly. 50 total, fixed target.</p>
+
+    <h4 style="font-size:15px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint); margin:26px 0 4px;">Axis A — Capability</h4>
+    <p class="fillnote">What the agent has to do. 7 rows. Multi-turn is not one of them — it's a harness difference, not a capability.</p>
+    <div class="cap-grid">
+      <div class="card"><h4>Factual lookup</h4><p>Directly answerable from one knowledge-base entry.</p></div>
+      <div class="card"><h4>Synthesis</h4><p>Needs several knowledge-base entries pulled together, without dropping or inventing any.</p></div>
+      <div class="card"><h4>Amap API</h4><p>Needs a live routing call for a real answer.</p></div>
+      <div class="card"><h4>Chit-chat</h4><p>Off-topic small talk, staying in role.</p></div>
+      <div class="card"><h4>Knowledge base boundary</h4><p>Admits "I don't know" instead of inventing a believable answer.</p></div>
+      <div class="card"><h4>Adversarial</h4><p>Resists an attempt to override the system prompt or break role.</p></div>
+      <div class="card"><h4>Recommendation</h4><p>An open-ended generative ask — naming a real shop, not confirming/denying one that was named.</p></div>
+    </div>
+
+    <h4 style="font-size:15px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint); margin:26px 0 4px;">Axis B — Phrasing</h4>
+    <p class="fillnote">How a single message arrives, independent of what it's testing.</p>
+    <div class="cap-grid">
+      <div class="card"><h4>Short</h4><p>One clean clause, minimal setup.</p></div>
+      <div class="card"><h4>Long</h4><p>One intent wrapped in real context, several constraints at once — still one ask.</p></div>
+      <div class="card"><h4>Multi-intent</h4><p>Two or more distinct asks bundled in one message. Standard bundle size is 2; one case in the 50 uses 3, written plainly rather than flagged as an exception.</p></div>
+      <div class="card"><h4>Ambiguous</h4><p><b>Inconsistent</b> phrasing (self-contradictory, self-correcting, wandering) is the only flavor used — disfluent filler (那个/呃/嗯) is a speech-transcription artifact, not how someone types, so it never appears in a typed question.</p></div>
+    </div>
+
+    <h4 style="font-size:15px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint); margin:26px 0 4px;">Weight table — the 50</h4>
+    <p class="fillnote">Every number counted plainly, no footnotes or exceptions — the one part of the whole suite with a hard target count.</p>
+    <div class="table-scroll">
+      <table class="data">
+        <thead><tr><th>Capability</th><th>Short</th><th>Long</th><th>Multi-intent</th><th>Ambiguous</th><th class="total">Total</th></tr></thead>
+        <tbody>
+          <tr><td>Factual lookup</td><td>2</td><td>1</td><td>2</td><td>2</td><td class="total">7</td></tr>
+          <tr><td>Synthesis</td><td>2</td><td>2</td><td>2</td><td>1</td><td class="total">7</td></tr>
+          <tr><td>Amap API</td><td>2</td><td>1</td><td>2</td><td>2</td><td class="total">7</td></tr>
+          <tr><td>Chit-chat</td><td>1</td><td>1</td><td>1</td><td>2</td><td class="total">5</td></tr>
+          <tr><td>Knowledge base boundary</td><td>4</td><td>1</td><td>2</td><td>2</td><td class="total">9</td></tr>
+          <tr><td>Adversarial</td><td>2</td><td>1</td><td>3</td><td>1</td><td class="total">7</td></tr>
+          <tr><td>Recommendation</td><td>3</td><td>2</td><td>1</td><td>2</td><td class="total">8</td></tr>
+          <tr><td class="total">Total</td><td class="total">16</td><td class="total">9</td><td class="total">13</td><td class="total">12</td><td class="total">50</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="fillnote">Two rows carry more weight than the rest, both tied to documented fragility rather than even distribution: <b>Knowledge base boundary</b> (9 cases) covers real, well-known brands that are not in the knowledge base — the same pattern the vision side already found failing consistently on resampling. <b>Recommendation</b> (8 cases) concentrates redundancy in its no-signal, judge-graded cases, the ones with a documented ~1-in-4 fake-shop failure rate. Adversarial's Multi-intent cell holds one case beyond the standard bundle size of 2 — it tests whether a <i>second</i> legitimate fact survives sitting next to an injection in the same message, a different question from whether the agent can discriminate legit-from-injected at all.</p>
+
+    <div class="pointer"><b>The full 50 questions, with ids</b> — kept in a separate file so this page stays about the reasoning, not the inventory: <code>backend/eval/design/eval_question_bank_draft.md</code>. One question in the set is a <b>canary</b> — a fabricated off-menu detail planted in the knowledge base that could not be known any other way, used to prove the agent is actually retrieving rather than guessing.</div>
+
+    <h3 class="subhead" id="text-multi">Multi-turn</h3>
+    <p class="lede">"Needs multiple turns" splits into 3 categories, because it was never one thing.</p>
+
+    <div class="mech-row">
+      <div class="mech">
+        <h4>needs-history-to-parse</h4>
+        <p>A pronoun or referent with no antecedent outside the conversation — the question is grammatically incomplete without a prior turn to resolve it. Sourcing this from the main grid is one option: take a 50-question verbatim, swap its one named entity for a pronoun, prepend a turn 1 that names the entity. Worked example — <code>factual_multiintent_01</code>: "Pie Bird西岸梦中心店除了派还卖咖啡吗？" becomes "那家店除了派还卖咖啡吗？" with a prior turn naming the branch. A freshly-written question works just as well, as long as it's genuinely unparseable without the prior turn.</p>
+      </div>
+      <div class="mech">
+        <h4>distance-erosion</h4>
+        <p>The exact same main-grid question, verbatim, delivered as the final message after a shared filler conversation (real, unrelated dessert-shop chat) — testing whether the answer still holds at conversational distance, not whether it can be parsed. This one is never freshly written: reusing the main grid word for word is the definition of the tag, since the whole mechanism is a direct comparison against that question's own single-turn answer. Two probes (a plain baseline, a harder variant of the same capability) &times; two distances (5-turn, 10-turn) &times; 6 categories.</p>
+      </div>
+      <div class="mech">
+        <h4>personalization-recall</h4>
+        <p>A preference stated once, never repeated, tested for whether it survives in <i>conversational</i> memory without being restated — a distinct mechanism from a seeded-database-history test. Sourcing this from the main grid is also just an option, not a requirement: split an existing question's constraint from its ask and deliver them turns apart, or write fresh content entirely — either is valid as long as the preference genuinely has to survive at a distance.</p>
+      </div>
+    </div>
+
+    <p class="fillnote"><b>What each distance-erosion contrast isolates</b>, by category: <i>KB boundary</i> — does a longer, context-wrapped "admit you don't know" erode faster than a bare one. <i>Adversarial</i> — refusal alone vs. refusal while still answering a bundled real question correctly, a harder discrimination task under the same distance. <i>Recommendation (no-signal)</i> — does messier phrasing compound with distance to raise the fabrication rate beyond what plain no-signal already risks. <i>Factual lookup</i> — does a single fact survive filler more reliably than the second fact in a bundled answer. <i>Synthesis</i> — does juggling several constraints at once make aggregation more likely to drop or invent an entry after filler. <i>Amap</i> — does the tool call stay reliable either way, and does a bundled follow-up survive alongside the route as reliably as the route alone.</p>
+
+    <div class="pointer">The needs-history-to-parse cases, the full distance-erosion table (shared filler + every probe), and the personalization-recall cases (matcha preference, mobility constraint, chocolate allergy) are in <code>backend/eval/design/eval_question_bank_draft.md</code>.</div>
+  </section>
+
+  <section id="vision">
+    <h2>Vision-based evaluation</h2>
+    <p class="lede">A different model entirely (<code>qwen-vl-max</code>, photo in) — not crossed with either text axis above, and not split into single/multi-turn the way text is. Sub-shapes are concentrated where testing found an actual open bug or an untouched attack surface, not spread evenly.</p>
+    <div class="table-scroll">
+      <table class="data">
+        <thead><tr><th>Sub-shape</th><th>Cases</th><th class="left">Why</th></tr></thead>
+        <tbody>
+          <tr><td>Brand recognition</td><td>2</td><td class="left">Does the model admit it can't tell which branch when the brand is clear but no address or storefront detail pins down a specific one — an explicit case (logo, wordmark, and storefront all visible) and a harder logo-only case, instead of guessing a single branch each time.</td></tr>
+          <tr><td>Food recognition</td><td>2</td><td class="left">Does a dish with no store evidence at all get force-matched to the nearest-looking knowledge-base brand across categories (e.g. a cheesecake matched to a matcha-only gelato shop), or correctly returned as no match.</td></tr>
+          <tr><td>Not in knowledge base</td><td>4</td><td class="left">Targets one documented failure mode — a false brand-equivalence, not a plain missing-brand miss. A real-brand case: a different real chain, adjacent to a <i>different</i> KB brand than the one already caught, checking whether the bug generalizes. A fictional case: an invented shop deliberately styled to resemble an existing KB brand, testing whether a never-real shop can still trigger the same failure.</td></tr>
+          <tr><td>Out-of-domain photo</td><td>1</td><td class="left">Every other case is dessert-related. This tests a photo with no food/dessert content at all — a realistic accidental-upload case neither matching path is otherwise tested against.</td></tr>
+          <tr><td>Visual prompt-injection</td><td>1</td><td class="left">Text has a whole Adversarial category; injection via a non-message surface has only ever been checked manually. A photo with instruction-like text visible in frame is that same gap through a different delivery vector.</td></tr>
+          <tr><td>Degraded-quality photo</td><td>2</td><td class="left">Tests whether the "don't over-guess without solid evidence" principle holds at realistic phone-camera quality — one still-legible case, one genuinely too degraded to read.</td></tr>
+          <tr><td class="total">Vision total</td><td class="total">12</td><td class="dim"></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="fillnote">Every case needs a real, hand-sourced photo — pulling one off the web and presenting it as a real test asset would undermine the point of the eval.</p>
+  </section>
+
+  <section id="audio">
+    <h2>Audio-based evaluation</h2>
+    <p class="lede">A live-mic voice input feeding into the same chat agent (DashScope ASR), with the transcript shown to the user for editing before it's sent — that review step is itself part of the design, since it changes what the highest-value test cases look like.</p>
+    <p class="fillnote">The review-before-send detail matters: it catches an obviously garbled or empty transcript before the agent ever sees it, the same way nobody sends a text message with a typo they noticed. So the highest-value cases aren't "any" transcription error — they're a mistranscription that still reads as a coherent, plausible question, the kind a quick read-back wouldn't catch. Same "confident-wrong beats obvious-garbage" pattern the rest of this design already chases, in text and in vision.</p>
+    <div class="cap-grid">
+      <div class="card"><h4>ASR transcript accuracy <span style="font-weight:400; color:var(--ink-faint);">— no agent involved</span></h4><p>Transcript-in, expected-text-out, tested against how real speech actually varies:</p>
+        <ul style="margin:8px 0 0; padding-left:18px; font-size:13.5px; color:var(--ink-dim);">
+          <li>Filler words (呃/嗯/那个)</li>
+          <li>Self-contradicting or inconsistent statements</li>
+          <li>English-Chinese mingling within one statement</li>
+          <li>Soft, quiet speech</li>
+          <li>Fast speaking speed</li>
+        </ul>
+      </div>
+      <div class="card"><h4>Agent behavior on a plausible-wrong transcript <span style="font-weight:400; color:var(--ink-faint);">— reaches the agent</span></h4><p>Seed the exact transcript a mishearing would produce, not the audio itself, and check the agent's reply. Flagship case: a code-switched brand name misheard as a <i>different real</i> KB brand — does the agent answer confidently about the wrong shop.</p></div>
+    </div>
+    <p class="fillnote">Two things stay out of scope here, on purpose, because the review step moves them to a different layer. Silence/heavily-garbled audio is a frontend question (does the recording UI clearly show "nothing was heard"), not something the agent needs to handle. Voice-delivered prompt injection reduces to ordinary text once transcribed — the existing Adversarial category already covers it, and the review step only sharpens that, since the visitor sees the injected text as plain chat content before ever sending it.</p>
+  </section>
+
+  <section id="method">
+    <h2>Design principles</h2>
+    <p class="lede">Follow these when adding, weighting, or phrasing any eval question — text, vision, or audio.</p>
+    <div class="aside">
+      <span class="tag">Crossing isn't mandatory</span>
+      <p>Don't fill a phrasing tag, delivery form, or bundle-size cell just to make the matrix look complete. Add a case only if it reads like something a real person would actually say; leave a gap alone otherwise.</p>
+    </div>
+    <div class="aside">
+      <span class="tag">Weight goes where testing found fragility</span>
+      <p>Knowledge base boundary and Recommendation carry more weight than the rest because repeat sampling found real, documented failure rates there. Synthesis, Amap, and Chit-chat stay lean because nothing in testing suggests they need more — extra samples on an already-stable case mostly buy false confidence, not signal. Weight new cases the same way: point them at a documented failure, not at whichever category looks thin.</p>
+    </div>
+    <div class="aside">
+      <span class="tag">Main-grid reuse is an approach, not a mandate — except for distance-erosion</span>
+      <p>For needs-history-to-parse and personalization-recall, building from a 50-question is the easiest way to get a checkable ground truth for free — but a freshly-written question is equally valid as long as it genuinely tests the mechanism and comes with its own ground truth. Distance-erosion is the one exception: the entire mechanism is a comparison against an exact single-turn sibling's answer, so reuse there isn't a convenience, it's the definition of the tag.</p>
+    </div>
+    <div class="aside">
+      <span class="tag">Sound-check before committing</span>
+      <p>Read every new question back like a real user would say it out loud. Backend language ("你们收录了……这个牌子吗？" — "is this brand indexed?") reads as system language a real visitor wouldn't say — that's a drafting bug, not a legitimate test variant, so rewrite it into something an actual customer would ask rather than keeping it as-is.</p>
+    </div>
+    <div class="aside warn">
+      <span class="tag">Eval-awareness is a separate track, not a phrasing variant</span>
+      <p>Whether the agent answers differently when a question signals it's being tested vs. a genuine customer voice is a real, distinct thing worth measuring — a small paired set, same fact asked naturally vs. with an explicit tell. Keep it as its own tagged track outside the main 50; don't smuggle backend jargon into an ordinary capability cell to test it.</p>
+    </div>
+  </section>
+
+  <footer class="colophon">
+    <p class="foot-note">Where the rest of this lives:</p>
+    <div class="colophon-grid">
+      <div class="colophon-item">
+        <span class="flabel">Question bank</span>
+        <p>Every example this page points to instead of listing — all 50 single-turn questions and the full multi-turn set, by id.</p>
+        <code>backend/eval/design/eval_question_bank_draft.md</code>
+      </div>
+      <div class="colophon-item">
+        <span class="flabel">Full taxonomy &amp; weight table</span>
+        <p>The exhaustive capability &times; phrasing spec and grading-mode table, plus the "adding a new knowledge-base entry" workflow.</p>
+        <code>backend/eval/EVAL_TAXONOMY.md</code>
+      </div>
+      <div class="colophon-item">
+        <span class="flabel">The question set</span>
+        <p>Every question, its grading mode, and its ground truth — the thing <code>run_eval.py</code> actually runs.</p>
+        <code>backend/eval/test_questions.json</code>
+      </div>
+      <div class="colophon-item">
+        <span class="flabel">Findings log</span>
+        <p>Every bug this suite caught, how it was diagnosed, and what fixing it took to verify.</p>
+        <code>backend/eval/first_refinement.md</code>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+</body></html>
