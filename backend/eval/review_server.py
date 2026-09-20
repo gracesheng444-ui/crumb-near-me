@@ -35,30 +35,58 @@ from grade_auto import grade_auto
 from grade_checklist import grade_checklist
 from run_eval import judge
 
-QUESTIONS_PATH = HERE / "test_questions.json"
 RESULTS_DIR = HERE / "results"
-MANUAL_GRADES_PATH = RESULTS_DIR / "manual_grades.json"
 
 app = FastAPI()
 
 
-def _load_questions() -> list:
-    return json.loads(QUESTIONS_PATH.read_text(encoding="utf-8"))
+def _discover_suites() -> list[str]:
+    """A "suite" is any *_questions.json file directly under eval/ whose
+    entries follow the chat-question shape (question_en/turns_en) — this is
+    how test_questions.json already looked before suite selection existed,
+    so a new suite just needs to follow the same convention to show up here,
+    no registry file to keep in sync. vision_questions.json deliberately
+    doesn't qualify: its entries are image-identification cases (an "image"
+    field, no question_en), a different shape this UI doesn't render."""
+    suites = []
+    for path in sorted(HERE.glob("*_questions.json")):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            continue
+        if data and isinstance(data, list) and any("question_en" in q or "turns_en" in q for q in data):
+            suites.append(path.name)
+    return suites
 
 
-def _save_questions(questions: list) -> None:
-    QUESTIONS_PATH.write_text(json.dumps(questions, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+def _resolve_suite(suite: str) -> Path:
+    if suite not in _discover_suites():
+        raise HTTPException(status_code=404, detail=f"unknown suite {suite!r}")
+    return HERE / suite
 
 
-def _load_manual_grades() -> dict:
-    if not MANUAL_GRADES_PATH.exists():
+def _manual_grades_path(suite: str) -> Path:
+    return RESULTS_DIR / f"manual_grades__{Path(suite).stem}.json"
+
+
+def _load_questions(suite: str) -> list:
+    return json.loads(_resolve_suite(suite).read_text(encoding="utf-8"))
+
+
+def _save_questions(suite: str, questions: list) -> None:
+    _resolve_suite(suite).write_text(json.dumps(questions, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def _load_manual_grades(suite: str) -> dict:
+    path = _manual_grades_path(suite)
+    if not path.exists():
         return {}
-    return json.loads(MANUAL_GRADES_PATH.read_text(encoding="utf-8"))
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
-def _save_manual_grades(grades: dict) -> None:
+def _save_manual_grades(suite: str, grades: dict) -> None:
     RESULTS_DIR.mkdir(exist_ok=True)
-    MANUAL_GRADES_PATH.write_text(json.dumps(grades, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    _manual_grades_path(suite).write_text(json.dumps(grades, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 def _latest_results() -> dict:
@@ -78,11 +106,17 @@ def _seed_history(user_id: str, entries: list) -> None:
         add_log(user_id=user_id, **entry)
 
 
+@app.get("/api/suites")
+def get_suites():
+    suites = _discover_suites()
+    return {"suites": suites, "default": suites[0] if suites else None}
+
+
 @app.get("/api/questions")
-def get_questions():
-    questions = _load_questions()
+def get_questions(suite: str):
+    questions = _load_questions(suite)
     latest = _latest_results()
-    manual = _load_manual_grades()
+    manual = _load_manual_grades(suite)
     out = []
     for q in questions:
         for lang in ("en", "zh"):
@@ -104,27 +138,28 @@ class QuestionUpdate(BaseModel):
 
 
 @app.post("/api/questions/{question_id}")
-def update_question(question_id: str, update: QuestionUpdate):
-    questions = _load_questions()
+def update_question(question_id: str, update: QuestionUpdate, suite: str):
+    questions = _load_questions(suite)
     for q in questions:
         if q["id"] == question_id:
             if update.ground_truth is not None:
                 q["ground_truth"] = update.ground_truth
             if update.expects is not None:
                 q["expects"] = update.expects
-            _save_questions(questions)
+            _save_questions(suite, questions)
             return {"ok": True}
     raise HTTPException(status_code=404, detail=f"question {question_id!r} not found")
 
 
 class RunRequest(BaseModel):
+    suite: str
     id: str
     lang: str
 
 
 @app.post("/api/run")
 def run_question(req: RunRequest):
-    questions = _load_questions()
+    questions = _load_questions(req.suite)
     q = next((q for q in questions if q["id"] == req.id), None)
     if q is None:
         raise HTTPException(status_code=404, detail=f"question {req.id!r} not found")
@@ -159,6 +194,7 @@ def run_question(req: RunRequest):
 
 
 class ManualGradeRequest(BaseModel):
+    suite: str
     id: str
     lang: str
     grounded: int | None = None
@@ -168,13 +204,13 @@ class ManualGradeRequest(BaseModel):
 
 @app.post("/api/manual_grade")
 def save_manual_grade(req: ManualGradeRequest):
-    grades = _load_manual_grades()
+    grades = _load_manual_grades(req.suite)
     grades[f"{req.id}/{req.lang}"] = {
         "grounded": req.grounded,
         "on_task": req.on_task,
         "note": req.note,
     }
-    _save_manual_grades(grades)
+    _save_manual_grades(req.suite, grades)
     return {"ok": True}
 
 

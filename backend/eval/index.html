@@ -9,6 +9,9 @@
   body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f6f5f3; color: #2b2a28; }
   #layout { display: flex; height: 100vh; }
   #sidebar { width: 300px; flex-shrink: 0; overflow-y: auto; background: #fff; border-right: 1px solid #e2e0dc; padding: 10px; }
+  #suite-picker { padding: 4px; margin-bottom: 4px; }
+  #suite-picker label { font-size: 12px; color: #6b6659; display: block; margin-bottom: 4px; }
+  #suite-picker select { width: 100%; }
   #sidebar h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #8a8578; margin: 16px 4px 6px; }
   .q-item { padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; display: flex; justify-content: space-between; gap: 6px; }
   .q-item:hover { background: #f0eee9; }
@@ -45,13 +48,42 @@
 </head>
 <body>
 <div id="layout">
-  <div id="sidebar"><div id="sidebar-content">Loading…</div></div>
+  <div id="sidebar">
+    <div id="suite-picker">
+      <label>Eval suite</label>
+      <select id="suite-select" onchange="switchSuite(this.value)"><option>Loading…</option></select>
+    </div>
+    <div id="sidebar-content">Loading…</div>
+  </div>
   <div id="main"><div id="empty">Pick a question from the sidebar.</div></div>
 </div>
 
 <script>
 let QUESTIONS = [];
 let ACTIVE = null; // {id, lang}
+let CURRENT_SUITE = null;
+
+async function loadSuites() {
+  const res = await fetch("/api/suites");
+  const data = await res.json();
+  const select = document.getElementById("suite-select");
+  if (!data.suites.length) {
+    select.innerHTML = `<option>No suites found</option>`;
+    return;
+  }
+  const saved = localStorage.getItem("eval-review-suite");
+  CURRENT_SUITE = data.suites.includes(saved) ? saved : data.default;
+  select.innerHTML = data.suites.map((s) => `<option value="${s}" ${s === CURRENT_SUITE ? "selected" : ""}>${s}</option>`).join("");
+  await loadQuestions();
+}
+
+function switchSuite(suite) {
+  CURRENT_SUITE = suite;
+  localStorage.setItem("eval-review-suite", suite);
+  ACTIVE = null;
+  document.getElementById("main").innerHTML = `<div id="empty">Pick a question from the sidebar.</div>`;
+  loadQuestions();
+}
 
 function scoreBadgeClass(entry) {
   const g = entry.manual_grade?.grounded ?? entry.last_result?.grounded;
@@ -67,7 +99,7 @@ function scoreBadgeText(entry) {
 }
 
 async function loadQuestions() {
-  const res = await fetch("/api/questions");
+  const res = await fetch(`/api/questions?suite=${encodeURIComponent(CURRENT_SUITE)}`);
   QUESTIONS = await res.json();
   renderSidebar();
 }
@@ -204,7 +236,7 @@ async function saveGroundTruth() {
   const must_state = textToPoints(document.getElementById("must-state").value);
   const must_not_state = textToPoints(document.getElementById("must-not-state").value);
   const expects = document.getElementById("expects").value;
-  const res = await fetch(`/api/questions/${encodeURIComponent(ACTIVE.id)}`, {
+  const res = await fetch(`/api/questions/${encodeURIComponent(ACTIVE.id)}?suite=${encodeURIComponent(CURRENT_SUITE)}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ground_truth: { must_state, must_not_state }, expects }),
@@ -223,7 +255,7 @@ async function runAndGrade() {
     const res = await fetch("/api/run", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: ACTIVE.id, lang: ACTIVE.lang }),
+      body: JSON.stringify({ suite: CURRENT_SUITE, id: ACTIVE.id, lang: ACTIVE.lang }),
     });
     const data = await res.json();
     out.innerHTML = `
@@ -242,6 +274,7 @@ async function runAndGrade() {
 async function saveManualGrade() {
   const toIntOrNull = (v) => (v === "null" || v === "" ? null : parseInt(v, 10));
   const body = {
+    suite: CURRENT_SUITE,
     id: ACTIVE.id,
     lang: ACTIVE.lang,
     grounded: toIntOrNull(document.getElementById("manual-grounded").value),
@@ -258,7 +291,7 @@ async function saveManualGrade() {
   renderMain();
 }
 
-loadQuestions();
+loadSuites();
 </script>
 </body>
 </html>
