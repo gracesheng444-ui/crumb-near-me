@@ -29,9 +29,9 @@ right building.
 Set `"canary": true` on a small number of entries containing a detail that
 is **made up and could not be known any other way** (see
 `example_canary.json`). These exist purely to test whether the agent is
-actually retrieving from this knowledge base rather than guessing from
-Claude's general knowledge. Strip canary entries out before any real public
-demo — keep them for your own eval runs only.
+actually retrieving from this knowledge base rather than guessing from the
+model's own general training knowledge. Strip canary entries out before any
+real public demo — keep them for your own eval runs only.
 
 ## Adding real content
 

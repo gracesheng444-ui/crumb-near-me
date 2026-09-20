@@ -24,8 +24,8 @@ this skill's job.
 
 1. `backend/eval/EVAL_TAXONOMY.md` — the "Weighting" table is the
    *relative* target for every (capability × phrasing) cell, and
-   "Grading — auto vs. judge" says which of the two output shapes a new
-   question needs.
+   "Grading — auto vs. checklist vs. judge" says which of the three
+   output shapes a new question needs.
 2. `backend/eval/test_questions.json` — the current implemented set.
    Count existing entries per `(capability, phrasing)` pair, and tally
    `entities` usage frequency across the *whole* file (not just the
@@ -40,18 +40,19 @@ this skill's job.
 
 ## Scaling to a target count
 
-The weight table's numbers (currently summing to 42) are a *ratio*, not
-a hard cap. When the user asks for a bigger set — "generate 84
-questions", "I want another set of 42", "double the eval set" — scale
-every cell's weight by `requested_total / 42` and round to the nearest
-integer (e.g. requesting 84 doubles every cell exactly: Factual lookup
-2/1/2/2 → 4/2/4/4). If rounding doesn't land exactly on the requested
-total, adjust the highest-weighted cells first (Adversarial, Knowledge
-base boundary) rather than the flattest ones (Chit-chat) — that keeps
-the "spend effort where it's costliest to get wrong" intent from the
-original rubric intact at any scale.
+The weight table's numbers (currently summing to 47 — recompute this from
+the table directly, don't trust this number as it drifts every time a cell
+changes) are a *ratio*, not a hard cap. When the user asks for a bigger
+set — "generate 94 questions", "I want another set of 47", "double the
+eval set" — scale every cell's weight by `requested_total / current_total`
+and round to the nearest integer (e.g. requesting double doubles every
+cell exactly: Factual lookup 2/1/2/2 → 4/2/4/4). If rounding doesn't land
+exactly on the requested total, adjust the highest-weighted cells first
+(Adversarial, Knowledge base boundary) rather than the flattest ones
+(Chit-chat) — that keeps the "spend effort where it's costliest to get
+wrong" intent from the original rubric intact at any scale.
 
-A request phrased as "N sets of 42" (rather than "a set of 4×N") most
+A request phrased as "N sets of 47" (rather than "a set of 4×N") most
 often means "I'm worried about running out of distinct questions, not
 that I literally want N separate files" — confirm which one before
 generating if it's unclear, since the two imply different structure
@@ -112,14 +113,23 @@ Before writing new questions for a cell:
 
 Every new entry needs: `id` (unique, `<capability>_<phrasing>_NN`),
 `type` (short capability slug), `capability`, `phrasing`, `grading`
-(`"auto"` or `"judge"`, per the taxonomy's grading table), `entities`
-(see "Avoiding repeats" above), `question_en`/`question_zh` (or
+(`"auto"`, `"checklist"`, or `"judge"`, per the taxonomy's grading table),
+`entities` (see "Avoiding repeats" above), `question_en`/`question_zh` (or
 `turns_en`/`turns_zh` for multiturn), and:
 
 - **`grading: "judge"`** → an `expects` string: a prose ground-truth
   description an LLM judge scores the reply against. State the correct
   answer AND what a wrong answer would look like (dropping part of a
   multi-intent ask, inventing a fact, picking the wrong branch).
+- **`grading: "checklist"`** → a `ground_truth` object with `must_state`
+  and `must_not_state` lists, each point hand-derived from the actual
+  knowledge-base entry (not paraphrased from the question you just wrote —
+  go back to the source JSON). See `grade_checklist.py`'s docstring for
+  the exact spec. Use this over `judge` when the correct answer is a
+  handful of concrete, checkable facts rather than an open-ended "did it
+  reason about this well"; use it over `auto` when a plain regex would be
+  too fragile against real phrasing variance (this is what Factual lookup
+  and Knowledge base boundary questions use today).
 - **`grading: "auto"`** → an `auto_grade` object instead of (or with a
   documentation-only) `expects`. See `grade_auto.py`'s docstring for the
   field spec (`keywords_all`/`keywords_any`/`keywords_forbidden`/

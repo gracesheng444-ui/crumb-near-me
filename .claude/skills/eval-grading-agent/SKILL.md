@@ -1,6 +1,6 @@
 ---
 name: eval-grading-agent
-description: Runs backend/eval/run_eval.py against the Shanghai dessert guide agent and reports results, using rule-based auto-grading (grade_auto.py) for Factual lookup/Amap/Knowledge base boundary/Adversarial and LLM-judge grading for Synthesis/Chit-chat/Multi-turn.
+description: Runs backend/eval/run_eval.py against the Shanghai dessert guide agent and reports results, using rule-based auto-grading (grade_auto.py) for Amap/Adversarial, checklist grading (grade_checklist.py) for Factual lookup/Knowledge base boundary, and LLM-judge grading for Synthesis/Chit-chat/Multi-turn (Recommendation splits across auto and judge).
 ---
 
 # Eval grading agent
@@ -19,21 +19,29 @@ way to catch that before it ships.
 ## How grading actually works here
 
 `backend/eval/run_eval.py` reads each question's `"grading"` field and
-branches:
+branches three ways:
 
-- **`"auto"`** (Factual lookup, Amap API, Knowledge base boundary,
-  Adversarial) → `grade_auto()` in `backend/eval/grade_auto.py`. No LLM
-  call. Checks the reply text against the question's `auto_grade` spec
+- **`"auto"`** (Amap API, Adversarial, part of Recommendation) →
+  `grade_auto()` in `backend/eval/grade_auto.py`. No LLM call. Checks the
+  reply text against the question's `auto_grade` spec
   (`keywords_all`/`keywords_any`/`keywords_forbidden` regexes, plus
   `requires_tool_call` for Amap questions, which inspects the actual
   tool-use blocks in the conversation, not just the final text). Also
   hard-fails any reply matching `agent.py`'s own loop/error fallback
   strings, regardless of what else the spec checks — a stuck-reasoning
   or blank reply is never a pass.
-- **`"judge"`** (Synthesis, Chit-chat, Multi-turn) → `judge()`, an LLM
-  call scoring the reply against the question's prose `expects` field.
+- **`"checklist"`** (Factual lookup, Knowledge base boundary) →
+  `grade_checklist()` in `backend/eval/grade_checklist.py`. One LLM call,
+  but checks a short list of concrete `must_state`/`must_not_state` points
+  (hand-derived from the actual knowledge-base entry) one at a time — the
+  0/2 score is computed in code from those per-point verdicts, not asked
+  of the model directly. Used where plain regex proved too fragile against
+  phrasing variance but the underlying facts are still concrete.
+- **`"judge"`** (Synthesis, Chit-chat, Multi-turn, part of Recommendation)
+  → `judge()`, a freeform LLM call scoring the reply against the
+  question's prose `expects` field.
 
-Both paths return the same shape (`{grounded, on_task, note}`) so
+All three paths return the same shape (`{grounded, on_task, note}`) so
 results report uniformly regardless of which grader ran.
 
 ## Running it
@@ -42,12 +50,14 @@ results report uniformly regardless of which grader ran.
 cd backend && python -m eval.run_eval
 ```
 
-This costs real Anthropic API calls (agent + judge, ×2 for en/zh per
-question) — 42 questions × 2 languages is 84 agent runs plus ~32 judge
-calls (auto-graded ones skip the judge call entirely). Confirm with the
-user before running the full suite if they haven't explicitly asked for
-it this turn; running a filtered subset (see below) is cheaper and
-often enough to verify a specific fix.
+This costs real DashScope (Qwen) API calls — the agent itself runs on
+`qwen-plus`, and both `judge()` and `grade_checklist()` are additional LLM
+calls, not free — ×2 for en/zh per question. 47 questions × 2 languages is
+94 agent runs, plus ~38 judge calls and ~26 checklist-grading calls
+(auto-graded questions, 15 of the 47, skip both). Confirm with the user
+before running the full suite if they haven't explicitly asked for it this
+turn; running a filtered subset (see below) is cheaper and often enough to
+verify a specific fix.
 
 To run a subset (e.g. just-added questions, or just one capability),
 don't edit `run_eval.py` — write a small throwaway script that loads
@@ -61,13 +71,16 @@ the repo.
 A regex that looks right can still miss real phrasing. Before relying
 on a new pattern:
 
-1. Run the actual question through `run_agent` once, in Chinese (the
-   agent always replies in Chinese regardless of input language, so
-   ground every pattern in Chinese phrasing, not the English gloss).
-2. Feed that real reply through `grade_auto()` directly and check the
+1. Run the actual question through `run_agent` once in Chinese and once
+   in English — the agent replies in whichever language the visitor's own
+   message is written in, and every question is tested in both, so a
+   pattern only grounded in the Chinese phrasing will silently miss the
+   English half.
+2. Feed each real reply through `grade_auto()` directly and check the
    verdict matches what a human would say.
 3. If it doesn't, broaden the pattern (add alternation for equivalent
-   phrasings) rather than narrowing the test case to fit the regex.
+   phrasings, in whichever language it was missing) rather than narrowing
+   the test case to fit the regex.
 
 This project has already hit two real bugs this way: a refusal-detection
 regex too tight to match the agent's actual "没有找到...没有查到..." phrasing,

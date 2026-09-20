@@ -149,25 +149,39 @@ Hedging, false starts, filler words, or an indirect description instead
 of a name.
 1. 那个，就是那个卖抹，呃呃茶的冰淇淋，在上海，那个乌鲁木齐路附近的，叫什么名字啊？
 
-## Grading — auto vs. judge
+## Grading — auto vs. checklist vs. judge
 
-Not every capability can be graded the same way. Four of the seven have
-a checkable ground truth (a fact that's either right or wrong, a tool
-call that either happened or didn't, a refusal that either happened or
-didn't) — those get **automatic, rule-based grading**: `grade_auto.py`
-checks the reply against a structured `auto_grade` spec on the question
-(`keywords_all`/`keywords_any`/`keywords_forbidden` regex checks, plus
-`requires_tool_call` for Amap) — no LLM call, no judge prompt, fully
-reproducible. The other three are open-ended enough that "did it do
-this well" isn't a keyword match, so they stay on the existing
-LLM-as-judge path (`judge()` in `run_eval.py`, scored against the
-question's prose `expects` field):
+Not every capability can be graded the same way — and it turns out two
+different capabilities have a checkable ground truth doesn't mean the same
+*kind* of check works for both. Three ways exist, all branched on in
+`run_eval.py` off each question's `"grading"` field:
+
+- **`auto`** (`grade_auto.py`, no LLM call) — a structured `auto_grade` spec
+  on the question (`keywords_all`/`keywords_any`/`keywords_forbidden`
+  regexes, plus `requires_tool_call` for Amap, which inspects the actual
+  tool-use blocks in the conversation). Fully reproducible, but fragile
+  against phrasing variance a regex didn't anticipate.
+- **`checklist`** (`grade_checklist.py`, one LLM call per question) — a
+  `ground_truth` spec with `must_state`/`must_not_state` lists, each point
+  hand-derived from the actual knowledge-base entry the question is about.
+  The model checks each point individually against the reply; the 0/2
+  score is then computed in code from those per-point verdicts, not asked
+  of the model directly, so scoring stays deterministic once the verdicts
+  are in. This is what Factual lookup and Knowledge base boundary actually
+  use, not `auto` — regexes proved too fragile for these (a hyphenated
+  "black-sesame" not matching, a "推荐...#5" proximity pattern confusing a
+  recommendation with a warning), but the underlying facts are still
+  concrete enough not to need a full freeform judge.
+- **`judge`** (`judge()` in `run_eval.py`) — a freeform LLM call scoring
+  the reply holistically against the question's prose `expects` field, for
+  capabilities open-ended enough that "did it do this well" isn't a
+  checklist of discrete facts.
 
 | Capability | Grading |
 |---|---|
-| Factual lookup | auto |
+| Factual lookup | checklist |
 | Amap API | auto |
-| Knowledge base boundary | auto | 
+| Knowledge base boundary | checklist |
 | Adversarial | auto |
 | Recommendation | split — see below |
 | Synthesis | judge |
@@ -234,8 +248,8 @@ variant doesn't change what's actually being tested.
   Chit-chat + 4 Multi-turn + 6 Knowledge base boundary + 6 Adversarial +
   5 Recommendation)
 - **Written and implemented: 47/47** — `test_questions.json` has all 47
-  entries, matching the weight table exactly (28 auto-graded, 19
-  judge-graded)
+  entries, matching the weight table exactly (15 `auto`-graded, 13
+  `checklist`-graded, 19 `judge`-graded)
 
 This treats the four phrasing tags as one shared label per cell rather
 than fully crossing three independent traits (length × intent-count ×
