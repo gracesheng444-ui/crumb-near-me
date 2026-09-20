@@ -6,6 +6,12 @@
       "runtimeExecutable": "backend/.venv/bin/uvicorn",
       "runtimeArgs": ["main:app", "--reload", "--app-dir", "backend", "--port", "8000"],
       "port": 8000
+    },
+    {
+      "name": "eval-review",
+      "runtimeExecutable": "backend/.venv/bin/uvicorn",
+      "runtimeArgs": ["eval.review_server:app", "--reload", "--app-dir", "backend", "--port", "8010"],
+      "port": 8010
     }
   ]
 }

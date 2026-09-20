@@ -4,20 +4,21 @@
     "type": "canary",
     "capability": "factual_lookup",
     "phrasing": "short",
-    "grading": "auto",
+    "grading": "checklist",
     "entities": [
       "example_canary"
     ],
     "question_en": "Does 金桂豆腐花馆 (Golden Osmanthus Tofu Pudding House) have any secret off-menu item?",
     "question_zh": "金桂豆腐花馆有什么隐藏菜单吗？",
     "expects": "Yes — the knowledge base has a canary entry confirming an unlisted off-menu item: a lychee-and-black-sesame tofu pudding, only available if asked for by its exact name. A correct answer states these exact details confidently (proving retrieval, not guessing) rather than hedging or denying it exists. Remove example_canary.json once real canaries are added, at which point this question should correctly start failing.",
-    "auto_grade": {
-      "keywords_all": [
-        "(荔枝.{0,4}黑芝麻|黑芝麻.{0,4}荔枝|lychee.{0,15}(black\\s*sesame)|black\\s*sesame.{0,15}lychee)"
+    "ground_truth": {
+      "must_state": [
+        "States that the shop does have a hidden/secret off-menu item.",
+        "States the specific hidden item is a lychee and black sesame tofu pudding.",
+        "States it's only available by asking for it by its exact name."
       ],
-      "keywords_forbidden": [
-        "没有.{0,10}(隐藏|秘密|特殊)",
-        "no (hidden|secret|special)"
+      "must_not_state": [
+        "Denies that the shop has any hidden or secret menu item."
       ]
     }
   },
@@ -26,7 +27,7 @@
     "type": "factual",
     "capability": "factual_lookup",
     "phrasing": "short",
-    "grading": "auto",
+    "grading": "checklist",
     "entities": [
       "azabuya_taikoohui",
       "azabuya_wanxiangcheng",
@@ -37,13 +38,11 @@
     "question_en": "How many Azabuya branches are there in Shanghai?",
     "question_zh": "麻布屋在上海有几家店？",
     "expects": "Should state 5 branches in Shanghai (per the five azabuya_*.json entries), stated confidently since this is a direct knowledge-base fact.",
-    "auto_grade": {
-      "keywords_any": [
-        "5\\s*家",
-        "五家",
-        "5\\s*(branches|locations|stores)",
-        "five\\s*(branches|locations|stores)"
-      ]
+    "ground_truth": {
+      "must_state": [
+        "States there are 5 Azabuya branches in Shanghai."
+      ],
+      "must_not_state": []
     }
   },
   {
@@ -51,7 +50,7 @@
     "type": "factual",
     "capability": "factual_lookup",
     "phrasing": "long",
-    "grading": "auto",
+    "grading": "checklist",
     "entities": [
       "azabuya_taikoohui",
       "azabuya_wanxiangcheng",
@@ -62,15 +61,12 @@
     "question_en": "I've been thinking about trying Azabuya's matcha gelato — I've read online they have several matcha concentration levels at different prices, and I don't love bitter flavors but still want something reasonably strong and authentic. Which concentration would you recommend?",
     "question_zh": "我最近在纠结要不要去尝试一下麻布屋的抹茶冰淇淋，网上都说他们家抹茶浓度分好几个等级，价格也不一样，我比较怕苦但又想尝尝比较正宗浓郁的那种，你觉得选哪个浓度比较合适？",
     "expects": "Should recommend Matcha #3 as the middle-ground concentration (per every azabuya_*.json entry: '#3 is the recommended middle ground — #5 tends to taste bitter'), not #5 given the visitor explicitly said they dislike bitter flavors.",
-    "auto_grade": {
-      "keywords_any": [
-        "#\\s*3",
-        "3\\s*号",
-        "三号"
+    "ground_truth": {
+      "must_state": [
+        "Recommends Matcha #3 as the concentration to choose."
       ],
-      "keywords_forbidden": [
-        "#\\s*5.{0,15}(推荐|recommend)",
-        "(推荐|recommend).{0,15}#\\s*5"
+      "must_not_state": [
+        "Recommends Matcha #5 as a good/suitable choice for this visitor."
       ]
     }
   },
@@ -79,18 +75,19 @@
     "type": "factual",
     "capability": "factual_lookup",
     "phrasing": "multiintent",
-    "grading": "auto",
+    "grading": "checklist",
     "entities": [
       "pie_bird_xihan"
     ],
     "question_en": "Besides pies, does Pie Bird's West Bund Dream Center branch also sell coffee? What time does it close?",
     "question_zh": "Pie Bird西岸梦中心店除了派还卖咖啡吗？开到几点？",
     "expects": "Should answer both parts: yes, it also serves coffee, tea, smoothies, and gelato (per pie_bird_xihan.json), and it's open until 22:00.",
-    "auto_grade": {
-      "keywords_all": [
-        "咖啡|coffee",
-        "22:?00|晚上?\\s*10\\s*点|10点|10\\s*pm|10:00\\s*pm"
-      ]
+    "ground_truth": {
+      "must_state": [
+        "Confirms the West Bund Dream Center Pie Bird branch also sells coffee (or coffee/tea/smoothies/gelato).",
+        "States the branch closes at 22:00 (10pm)."
+      ],
+      "must_not_state": []
     }
   },
   {
@@ -98,23 +95,19 @@
     "type": "factual",
     "capability": "factual_lookup",
     "phrasing": "multiintent",
-    "grading": "auto",
+    "grading": "checklist",
     "entities": [
       "eau_cafe_wuyi"
     ],
     "question_en": "What time does the EAU Café Wuyi Road branch close? About how much does a whole cake cost there?",
     "question_zh": "EAU Café武夷路店营业到几点？他们家一整个蛋糕大概多少钱？",
     "expects": "Should answer both parts: closes at 19:00 (per eau_cafe_wuyi.json), and a whole cake is about 250-280rmb.",
-    "auto_grade": {
-      "keywords_all": [
-        "19:?00|下午\\s*7\\s*点|晚上?\\s*7\\s*点"
+    "ground_truth": {
+      "must_state": [
+        "States the EAU Café Wuyi Road branch closes at 19:00 (7pm).",
+        "States a whole cake costs about 250-280rmb."
       ],
-      "keywords_any": [
-        "250",
-        "260",
-        "270",
-        "280"
-      ]
+      "must_not_state": []
     }
   },
   {
@@ -122,21 +115,19 @@
     "type": "factual",
     "capability": "factual_lookup",
     "phrasing": "ambiguous",
-    "grading": "auto",
+    "grading": "checklist",
     "entities": [
       "azabuya_wulumuqi"
     ],
     "question_en": "Isn't there a tiramisu place near Wulumuqi Road? No wait, I think it's matcha gelato — do you know what that shop's called?",
     "question_zh": "乌鲁木齐路那边是不是有家做提拉米苏的店？不对，好像是抹茶冰淇淋，你知道那家叫什么吗？",
     "expects": "Should identify Azabuya's Wulumuqi Middle Road branch (azabuya_wulumuqi.json) from the indirect description.",
-    "auto_grade": {
-      "keywords_all": [
-        "麻布屋|[Aa]zabuya"
+    "ground_truth": {
+      "must_state": [
+        "Identifies the shop as Azabuya (麻布屋).",
+        "Identifies the specific branch as the Wulumuqi (Middle) Road location."
       ],
-      "keywords_any": [
-        "乌鲁木齐",
-        "Wulumuqi|Urumqi"
-      ]
+      "must_not_state": []
     }
   },
   {
@@ -144,23 +135,19 @@
     "type": "factual",
     "capability": "factual_lookup",
     "phrasing": "ambiguous",
-    "grading": "auto",
+    "grading": "checklist",
     "entities": [
       "pie_bird_xintiandi"
     ],
     "question_en": "Isn't there a scone shop near Xintiandi? No, wait, it should be American-style pie — do you know what it's called?",
     "question_zh": "新天地那边是不是有家卖司康的店？不对，应该是美式派，你知道叫什么名字吗？",
     "expects": "Should identify Pie Bird's Xintiandi Dongtaili branch (pie_bird_xintiandi.json) from the indirect description.",
-    "auto_grade": {
-      "keywords_all": [
-        "Pie\\s*Bird"
+    "ground_truth": {
+      "must_state": [
+        "Identifies the shop as Pie Bird.",
+        "Identifies the specific branch as the Xintiandi / Dongtaili location."
       ],
-      "keywords_any": [
-        "新天地",
-        "东台里",
-        "Xintiandi",
-        "Dongtaili"
-      ]
+      "must_not_state": []
     }
   },
   {
@@ -177,6 +164,15 @@
     "expects": "Should call get_transit_directions with from_place=锦江乐园 and to_place resolving to the West Bund Dream Center Pie Bird branch (pie_bird_xihan.json), and report a real route rather than an invented-sounding answer.",
     "auto_grade": {
       "requires_tool_call": "get_transit_directions"
+    },
+    "ground_truth": {
+      "must_state": [
+        "Calls get_transit_directions this turn and bases its route/distance/time claims on that tool's actual returned result.",
+        "Correctly identifies the destination as Pie Bird's West Bund Dream Center branch."
+      ],
+      "must_not_state": [
+        "States a specific walking distance or time between the two places that isn't present in this turn's own get_transit_directions tool result."
+      ]
     }
   },
   {
@@ -193,6 +189,15 @@
     "expects": "Should call get_transit_directions with an explicit from_place and to_place resolving to azabuya_taikoohui.json, and report a real route from the API response.",
     "auto_grade": {
       "requires_tool_call": "get_transit_directions"
+    },
+    "ground_truth": {
+      "must_state": [
+        "Calls get_transit_directions this turn and bases its route/distance/time claims on that tool's actual returned result.",
+        "Correctly identifies the destination as Azabuya's Xingye Taikoo Hui branch."
+      ],
+      "must_not_state": [
+        "States a specific walking distance or time between the two places that isn't present in this turn's own get_transit_directions tool result."
+      ]
     }
   },
   {
@@ -209,6 +214,15 @@
     "expects": "Should call get_transit_directions with from_place=徐家汇地铁站 and to_place resolving to eau_cafe_wuyi.json, and report a real route/walking distance rather than a guess.",
     "auto_grade": {
       "requires_tool_call": "get_transit_directions"
+    },
+    "ground_truth": {
+      "must_state": [
+        "Calls get_transit_directions this turn and bases its route/walking-distance claims on that tool's actual returned result.",
+        "Correctly identifies the destination as EAU Café's Wuyi Road branch."
+      ],
+      "must_not_state": [
+        "States a specific walking distance or time between the two places that isn't present in this turn's own get_transit_directions tool result."
+      ]
     }
   },
   {
@@ -225,6 +239,16 @@
     "expects": "Should call get_transit_directions and report both the route and the trip duration from the API response.",
     "auto_grade": {
       "requires_tool_call": "get_transit_directions"
+    },
+    "ground_truth": {
+      "must_state": [
+        "Calls get_transit_directions this turn and bases its route/duration claims on that tool's actual returned result.",
+        "Correctly identifies the destination as EAU Café's Wuyi Road branch.",
+        "States the trip duration from the tool's result."
+      ],
+      "must_not_state": [
+        "States a specific walking distance or time between the two places that isn't present in this turn's own get_transit_directions tool result."
+      ]
     }
   },
   {
@@ -242,6 +266,15 @@
     "expects": "Should call get_transit_directions for the first leg and address the second (EAU Café Yongkang and Azabuya Yongkang are both on/near Yongkang Road, a short walk apart), not drop either part of the bundled ask.",
     "auto_grade": {
       "requires_tool_call": "get_transit_directions"
+    },
+    "ground_truth": {
+      "must_state": [
+        "Calls get_transit_directions this turn for the first leg (Shaanxi South Road station to EAU Café Yongkang Road) and bases its claims on the tool's actual result.",
+        "Addresses the second part of the question (distance from EAU Café Yongkang to Azabuya Yongkang), not just the first leg."
+      ],
+      "must_not_state": [
+        "States a specific walking distance or time for either leg that isn't present in this turn's own tool result(s)."
+      ]
     }
   },
   {
@@ -258,6 +291,15 @@
     "expects": "Should still call get_transit_directions correctly despite the wandering, self-correcting phrasing, resolving to Jinjiang Amusement Park and the West Bund Dream Center Pie Bird branch.",
     "auto_grade": {
       "requires_tool_call": "get_transit_directions"
+    },
+    "ground_truth": {
+      "must_state": [
+        "Calls get_transit_directions this turn despite the wandering/self-correcting phrasing, and bases its claims on the tool's actual returned result.",
+        "Correctly identifies the destination as Pie Bird's West Bund Dream Center branch."
+      ],
+      "must_not_state": [
+        "States a specific walking distance or time between the two places that isn't present in this turn's own get_transit_directions tool result."
+      ]
     }
   },
   {
@@ -274,6 +316,16 @@
     "expects": "Should resolve the vague description to EAU Café's Plaza 66/Henglong branch (eau_cafe_henglong.json) and call get_transit_directions rather than asking the visitor to just restate the name.",
     "auto_grade": {
       "requires_tool_call": "get_transit_directions"
+    },
+    "ground_truth": {
+      "must_state": [
+        "Resolves the vague 'dessert shop near Plaza 66' description to EAU Café's Plaza 66/Henglong branch.",
+        "Calls get_transit_directions this turn and bases its claims on the tool's actual returned result."
+      ],
+      "must_not_state": [
+        "Asks the visitor to simply restate the shop name instead of resolving the description.",
+        "States a specific walking distance or time between the two places that isn't present in this turn's own get_transit_directions tool result."
+      ]
     }
   },
   {
@@ -281,34 +333,17 @@
     "type": "kb_boundary",
     "capability": "kb_boundary",
     "phrasing": "short",
-    "grading": "auto",
+    "grading": "checklist",
     "entities": [],
     "question_en": "Is there a dessert shop called 'Golden Moon Cakehouse' that you know of?",
     "question_zh": "你知道一家叫\"金月饼屋\"的甜品店吗？",
     "expects": "Should say it doesn't have that in its knowledge base, not invent details about a shop that isn't in the data.",
-    "auto_grade": {
-      "keywords_any": [
-        "没有找到",
-        "没有查到",
-        "没有收录",
-        "没有.{0,10}记录",
-        "不在.{0,10}(知识库|数据库|资料)",
-        "找不到",
-        "无法确认",
-        "不确定",
-        "没有相关",
-        "couldn['’]?t find",
-        "don['’]?t have",
-        "not (in|part of)",
-        "no (record|information|entry)",
-        "not sure",
-        "unable to confirm",
-        "doesn['’]?t (list|have|show|contain)",
-        "not aware of"
+    "ground_truth": {
+      "must_state": [
+        "States it doesn't have/can't find a shop called Golden Moon Cakehouse (金月饼屋) in its knowledge base."
       ],
-      "keywords_forbidden": [
-        "金月饼屋.{0,15}(位于|地址[:：]|地址是)",
-        "Golden Moon.{0,15}(located at|address is|address:)"
+      "must_not_state": [
+        "Gives a specific address or confirmed details for 金月饼屋 as if it were a real, verified knowledge-base entry."
       ]
     }
   },
@@ -317,34 +352,17 @@
     "type": "kb_boundary",
     "capability": "kb_boundary",
     "phrasing": "short",
-    "grading": "auto",
+    "grading": "checklist",
     "entities": [],
     "question_en": "Where can I get Häagen-Dazs in Shanghai — do you know?",
     "question_zh": "上海哪里能买到哈根达斯呀，你知道吗？",
     "expects": "Häagen-Dazs is a real, globally known brand with actual Shanghai locations, but it isn't one of the 5 curated brands (Azabuya, Pie Bird, EAU Café, bebaked, Drunk Baker). Per the agent's own rules, retrieve_info should come back empty, which should trigger the automatic web-search augmentation it already has (enable_search=True) — a correct reply admits it's not in the curated guide, then gives general, web-attributed info if the search surfaces any (e.g. '根据网上的信息，哈根达斯在上海有不少门店...'), rather than either inventing a specific unattributed address as if it were a verified curated fact, or flatly claiming no information exists when a web search could actually supply something.",
-    "auto_grade": {
-      "keywords_any": [
-        "没有找到",
-        "没有查到",
-        "没有收录",
-        "没有.{0,10}记录",
-        "不在.{0,10}(知识库|数据库|资料)",
-        "找不到",
-        "无法确认",
-        "不确定",
-        "没有相关",
-        "couldn['’]?t find",
-        "don['’]?t have",
-        "not (in|part of)",
-        "no (record|information|entry)",
-        "not sure",
-        "unable to confirm",
-        "doesn['’]?t (list|have|show|contain)",
-        "not aware of"
+    "ground_truth": {
+      "must_state": [
+        "States that Häagen-Dazs is not one of the curated knowledge-base shops it covers."
       ],
-      "keywords_forbidden": [
-        "哈根达斯.{0,15}(位于|地址[:：]|地址是)",
-        "Häagen-?Dazs.{0,15}(located at|address is|address:)"
+      "must_not_state": [
+        "Gives a specific Shanghai address for Häagen-Dazs attributed to the knowledge base as a verified/curated fact (general web-sourced info is fine and should not be penalized)."
       ]
     }
   },
@@ -353,34 +371,17 @@
     "type": "kb_boundary",
     "capability": "kb_boundary",
     "phrasing": "short",
-    "grading": "auto",
+    "grading": "checklist",
     "entities": [],
     "question_en": "Is there a Japanese wagashi shop in Shanghai called 'Chunji'?",
     "question_zh": "上海有没有一家叫\"椿记\"的日式和菓子店？",
     "expects": "Not in the knowledge base — should say so rather than inventing a plausible-sounding shop.",
-    "auto_grade": {
-      "keywords_any": [
-        "没有找到",
-        "没有查到",
-        "没有收录",
-        "没有.{0,10}记录",
-        "不在.{0,10}(知识库|数据库|资料)",
-        "找不到",
-        "无法确认",
-        "不确定",
-        "没有相关",
-        "couldn['’]?t find",
-        "don['’]?t have",
-        "not (in|part of)",
-        "no (record|information|entry)",
-        "not sure",
-        "unable to confirm",
-        "doesn['’]?t (list|have|show|contain)",
-        "not aware of"
+    "ground_truth": {
+      "must_state": [
+        "States it doesn't have/can't find a shop called Chunji (椿记) in its knowledge base."
       ],
-      "keywords_forbidden": [
-        "椿记.{0,15}(位于|地址[:：]|地址是)",
-        "Chunji.{0,15}(located at|address is|address:)"
+      "must_not_state": [
+        "Invents or confirms a specific address or menu detail for 椿记 as if it were real."
       ]
     }
   },
@@ -389,34 +390,17 @@
     "type": "kb_boundary",
     "capability": "kb_boundary",
     "phrasing": "long",
-    "grading": "auto",
+    "grading": "checklist",
     "entities": [],
     "question_en": "My cousin said that on a trip to Shanghai, she tried a really famous French macaron shop somewhere near Nanjing West Road — she can't remember the exact name, just that it was excellent. Do you know which shop that might be?",
     "question_zh": "我表姐说她之前去上海玩的时候，好像在南京西路附近吃到一家很有名的法式马卡龙专门店，具体叫什么名字她也忘了，就说味道特别好，你知道是哪一家吗？",
     "expects": "The knowledge base has no macaron-specialty shop (categories are matcha gelato, American pie, and cake/bakery cafés) — should say it can't identify one rather than guessing a plausible-sounding macaron shop to be helpful.",
-    "auto_grade": {
-      "keywords_any": [
-        "没有找到",
-        "没有查到",
-        "没有收录",
-        "没有.{0,10}记录",
-        "不在.{0,10}(知识库|数据库|资料)",
-        "找不到",
-        "无法确认",
-        "不确定",
-        "没有相关",
-        "couldn['’]?t find",
-        "don['’]?t have",
-        "not (in|part of)",
-        "no (record|information|entry)",
-        "not sure",
-        "unable to confirm",
-        "doesn['’]?t (list|have|show|contain)",
-        "not aware of"
+    "ground_truth": {
+      "must_state": [
+        "States it can't identify a macaron-specialty shop matching that description in its knowledge base."
       ],
-      "keywords_forbidden": [
-        "马卡龙.{0,15}(位于|地址[:：]|地址是)",
-        "macaron.{0,15}(located at|address is|address:)"
+      "must_not_state": [
+        "Names or guesses a specific shop as if confirmed to be the macaron shop the cousin visited."
       ]
     }
   },
@@ -425,30 +409,17 @@
     "type": "kb_boundary",
     "capability": "kb_boundary",
     "phrasing": "multiintent",
-    "grading": "auto",
+    "grading": "checklist",
     "entities": [],
     "question_en": "Do you know a shop called 'Sweetheart Workshop'? If so, what's their most famous product?",
     "question_zh": "你们知道\"甜心工坊\"这家店吗？如果知道的话，他们家最有名的是什么产品？",
     "expects": "Not in the knowledge base — should say it doesn't know the shop, and critically must NOT still invent a signature product for the second half of the question just to seem helpful.",
-    "auto_grade": {
-      "keywords_any": [
-        "没有找到",
-        "没有查到",
-        "没有收录",
-        "没有.{0,10}记录",
-        "不在.{0,10}(知识库|数据库|资料)",
-        "找不到",
-        "无法确认",
-        "不确定",
-        "没有相关",
-        "couldn['’]?t find",
-        "don['’]?t have",
-        "not (in|part of)",
-        "no (record|information|entry)",
-        "not sure",
-        "unable to confirm",
-        "doesn['’]?t (list|have|show|contain)",
-        "not aware of"
+    "ground_truth": {
+      "must_state": [
+        "States it doesn't know/doesn't have a shop called Sweetheart Workshop (甜心工坊)."
+      ],
+      "must_not_state": [
+        "Names a specific 'most famous product' for Sweetheart Workshop despite not knowing the shop."
       ]
     }
   },
@@ -457,30 +428,17 @@
     "type": "kb_boundary",
     "capability": "kb_boundary",
     "phrasing": "ambiguous",
-    "grading": "auto",
+    "grading": "checklist",
     "entities": [],
     "question_en": "Is there an old-established shop that does Japanese-style desserts? No, wait, it should be Chinese-style — anyway, that kind of long-history dessert shop, do you know which one it is?",
     "question_zh": "有没有一家做日式甜点的老字号？不对，应该是中式的，反正就是历史比较久的那种甜品店，你知道是哪家吗？",
     "expects": "The knowledge base has no old-school/traditional Chinese dessert shop — should say it doesn't have a match, following the corrected (Chinese-style) ask rather than the abandoned Japanese-style mention. Recommending Azabuya (a real Japanese-style brand) because of the discarded first draft of the question is a failure, not a save.",
-    "auto_grade": {
-      "keywords_any": [
-        "没有找到",
-        "没有查到",
-        "没有收录",
-        "没有.{0,10}记录",
-        "不在.{0,10}(知识库|数据库|资料)",
-        "找不到",
-        "无法确认",
-        "不确定",
-        "没有相关",
-        "couldn['’]?t find",
-        "don['’]?t have",
-        "not (in|part of)",
-        "no (record|information|entry)",
-        "not sure",
-        "unable to confirm",
-        "doesn['’]?t (list|have|show|contain)",
-        "not aware of"
+    "ground_truth": {
+      "must_state": [
+        "States it doesn't have a match for an old-established/traditional Chinese dessert shop in its knowledge base."
+      ],
+      "must_not_state": [
+        "Recommends Azabuya (a Japanese-style brand) as an answer, based on the retracted Japanese-style phrasing from earlier in the question."
       ]
     }
   },

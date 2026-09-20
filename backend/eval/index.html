@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Eval Review</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f6f5f3; color: #2b2a28; }
+  #layout { display: flex; height: 100vh; }
+  #sidebar { width: 300px; flex-shrink: 0; overflow-y: auto; background: #fff; border-right: 1px solid #e2e0dc; padding: 10px; }
+  #sidebar h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #8a8578; margin: 16px 4px 6px; }
+  .q-item { padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; display: flex; justify-content: space-between; gap: 6px; }
+  .q-item:hover { background: #f0eee9; }
+  .q-item.active { background: #2b2a28; color: #fff; }
+  .q-item .badge { font-size: 10px; padding: 1px 6px; border-radius: 8px; background: #e2e0dc; color: #6b6659; }
+  .q-item.active .badge { background: #55524a; color: #fff; }
+  .badge.g0 { background: #f5c2c0; color: #7a1f1a; }
+  .badge.g1 { background: #f7e2a6; color: #6b4e00; }
+  .badge.g2 { background: #c3e6c3; color: #1e5c1e; }
+  .badge.pending { background: #e2e0dc; color: #6b6659; }
+  #main { flex: 1; overflow-y: auto; padding: 24px 32px; max-width: 900px; }
+  .panel { background: #fff; border: 1px solid #e2e0dc; border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; }
+  .panel h4 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.03em; color: #8a8578; }
+  .meta { font-size: 12px; color: #8a8578; margin-bottom: 4px; }
+  .qtext { font-size: 15px; line-height: 1.5; white-space: pre-wrap; }
+  textarea { width: 100%; font-family: inherit; font-size: 13px; padding: 8px; border: 1px solid #d8d5cf; border-radius: 6px; resize: vertical; }
+  textarea.points { height: 70px; }
+  textarea.reference { height: 60px; }
+  textarea.reply { height: 90px; background: #faf9f7; }
+  label { font-size: 12px; color: #6b6659; display: block; margin: 8px 0 4px; }
+  button { font-family: inherit; font-size: 13px; padding: 6px 12px; border-radius: 6px; border: 1px solid #2b2a28; background: #2b2a28; color: #fff; cursor: pointer; margin-top: 8px; margin-right: 6px; }
+  button.secondary { background: #fff; color: #2b2a28; }
+  button:disabled { opacity: 0.5; cursor: default; }
+  select { font-family: inherit; font-size: 13px; padding: 4px 8px; border-radius: 6px; border: 1px solid #d8d5cf; }
+  .row { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+  .col { flex: 1; min-width: 220px; }
+  .verdict-list { font-size: 12px; margin: 6px 0 0; padding-left: 18px; }
+  .verdict-list li.bad { color: #a5261f; }
+  .verdict-list li.ok { color: #1e5c1e; }
+  .score-line { font-size: 13px; font-weight: 600; margin-top: 6px; }
+  .note { font-size: 12px; color: #6b6659; margin-top: 4px; }
+  #empty { color: #8a8578; padding: 40px; }
+</style>
+</head>
+<body>
+<div id="layout">
+  <div id="sidebar"><div id="sidebar-content">Loading…</div></div>
+  <div id="main"><div id="empty">Pick a question from the sidebar.</div></div>
+</div>
+
+<script>
+let QUESTIONS = [];
+let ACTIVE = null; // {id, lang}
+
+function scoreBadgeClass(entry) {
+  const g = entry.manual_grade?.grounded ?? entry.last_result?.grounded;
+  if (g === null || g === undefined) return "pending";
+  return "g" + g;
+}
+function scoreBadgeText(entry) {
+  const manual = entry.manual_grade?.grounded;
+  const model = entry.last_result?.grounded;
+  if (manual !== null && manual !== undefined) return "you:" + manual;
+  if (model !== null && model !== undefined) return "model:" + model;
+  return "–";
+}
+
+async function loadQuestions() {
+  const res = await fetch("/api/questions");
+  QUESTIONS = await res.json();
+  renderSidebar();
+}
+
+function renderSidebar() {
+  const byCap = {};
+  for (const q of QUESTIONS) {
+    (byCap[q.capability] ||= []).push(q);
+  }
+  const el = document.getElementById("sidebar-content");
+  el.innerHTML = "";
+  for (const cap of Object.keys(byCap).sort()) {
+    const h = document.createElement("h3");
+    h.textContent = cap;
+    el.appendChild(h);
+    for (const q of byCap[cap]) {
+      const item = document.createElement("div");
+      item.className = "q-item" + (ACTIVE && ACTIVE.id === q.id && ACTIVE.lang === q.lang ? " active" : "");
+      item.innerHTML = `<span>${q.id} <span style="opacity:.6">/${q.lang}</span></span><span class="badge ${scoreBadgeClass(q)}">${scoreBadgeText(q)}</span>`;
+      item.onclick = () => selectQuestion(q.id, q.lang);
+      el.appendChild(item);
+    }
+  }
+}
+
+function findEntry(id, lang) {
+  return QUESTIONS.find((q) => q.id === id && q.lang === lang);
+}
+
+function selectQuestion(id, lang) {
+  ACTIVE = { id, lang };
+  renderSidebar();
+  renderMain();
+}
+
+function pointsToText(arr) {
+  return (arr || []).join("\n");
+}
+function textToPoints(text) {
+  return text.split("\n").map((s) => s.trim()).filter(Boolean);
+}
+
+function renderMain() {
+  const entry = findEntry(ACTIVE.id, ACTIVE.lang);
+  const main = document.getElementById("main");
+  const gt = entry.ground_truth || { must_state: [], must_not_state: [] };
+  const lastResult = entry.last_result;
+  const manual = entry.manual_grade || {};
+
+  main.innerHTML = `
+    <div class="panel">
+      <div class="meta">${entry.id} · ${entry.lang} · capability: ${entry.capability} · phrasing: ${entry.phrasing} · grading: ${entry.grading}</div>
+      <div class="qtext">${escapeHtml(entry.question_text)}</div>
+    </div>
+
+    <div class="panel">
+      <h4>Key points (ground truth)</h4>
+      <label>Must state (one per line)</label>
+      <textarea class="points" id="must-state">${escapeHtml(pointsToText(gt.must_state))}</textarea>
+      <label>Must NOT state (one per line)</label>
+      <textarea class="points" id="must-not-state">${escapeHtml(pointsToText(gt.must_not_state))}</textarea>
+      <label>Reference answer / expects (prose)</label>
+      <textarea class="reference" id="expects">${escapeHtml(entry.expects || "")}</textarea>
+      <div>
+        <button onclick="saveGroundTruth()">Save key points</button>
+        <span class="note" id="save-status"></span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h4>Reply &amp; model grade</h4>
+      ${lastResult ? `
+        <label>Last saved reply (from most recent full eval run)</label>
+        <textarea class="reply" readonly>${escapeHtml(lastResult.reply || "")}</textarea>
+        <div class="score-line">${scoreLine(lastResult)}</div>
+        ${verdictListHtml(lastResult)}
+      ` : `<div class="note">No saved result yet for this question.</div>`}
+      <div>
+        <button onclick="runAndGrade()" id="run-btn">Run agent + grade with model</button>
+      </div>
+      <div id="fresh-run-output"></div>
+    </div>
+
+    <div class="panel">
+      <h4>Your grading</h4>
+      <div class="row">
+        <div class="col">
+          <label>Grounded (0-2)</label>
+          <select id="manual-grounded">
+            ${[null, 0, 1, 2].map((v) => `<option value="${v}" ${manual.grounded === v ? "selected" : ""}>${v === null ? "–" : v}</option>`).join("")}
+          </select>
+        </div>
+        <div class="col">
+          <label>On task (0-2)</label>
+          <select id="manual-on_task">
+            ${[null, 0, 1, 2].map((v) => `<option value="${v}" ${manual.on_task === v ? "selected" : ""}>${v === null ? "–" : v}</option>`).join("")}
+          </select>
+        </div>
+      </div>
+      <label>Note</label>
+      <textarea class="reference" id="manual-note">${escapeHtml(manual.note || "")}</textarea>
+      <div>
+        <button onclick="saveManualGrade()">Save my grade</button>
+        <span class="note" id="manual-save-status"></span>
+      </div>
+    </div>
+  `;
+}
+
+function scoreLine(result) {
+  if (!result || result.grounded === null || result.grounded === undefined) {
+    return `grounded: – &nbsp; on_task: – &nbsp; <span class="note">${escapeHtml(result?.note || "")}</span>`;
+  }
+  return `grounded: ${result.grounded}/2 &nbsp; on_task: ${result.on_task}/2 &nbsp; <span class="note">${escapeHtml(result.note || "")}</span>`;
+}
+
+function verdictListHtml(result) {
+  if (!result.must_state_results && !result.must_not_state_results) return "";
+  const items = [];
+  (result.must_state_results || []).forEach((v, i) => {
+    items.push(`<li class="${v === "satisfied" ? "ok" : "bad"}">must state #${i + 1}: ${v}</li>`);
+  });
+  (result.must_not_state_results || []).forEach((v, i) => {
+    items.push(`<li class="${v === "clear" ? "ok" : "bad"}">must NOT state #${i + 1}: ${v}</li>`);
+  });
+  return `<ul class="verdict-list">${items.join("")}</ul>`;
+}
+
+function escapeHtml(s) {
+  return (s || "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+
+async function saveGroundTruth() {
+  const must_state = textToPoints(document.getElementById("must-state").value);
+  const must_not_state = textToPoints(document.getElementById("must-not-state").value);
+  const expects = document.getElementById("expects").value;
+  const res = await fetch(`/api/questions/${encodeURIComponent(ACTIVE.id)}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ground_truth: { must_state, must_not_state }, expects }),
+  });
+  document.getElementById("save-status").textContent = res.ok ? "Saved." : "Failed to save.";
+  await loadQuestions();
+}
+
+async function runAndGrade() {
+  const btn = document.getElementById("run-btn");
+  btn.disabled = true;
+  btn.textContent = "Running…";
+  const out = document.getElementById("fresh-run-output");
+  out.innerHTML = "";
+  try {
+    const res = await fetch("/api/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: ACTIVE.id, lang: ACTIVE.lang }),
+    });
+    const data = await res.json();
+    out.innerHTML = `
+      <label>Fresh reply</label>
+      <textarea class="reply" readonly>${escapeHtml(data.reply || "")}</textarea>
+      <div class="score-line">${scoreLine(data.score)}</div>
+      ${verdictListHtml(data.score)}
+    `;
+  } catch (e) {
+    out.innerHTML = `<div class="note">Error: ${escapeHtml(String(e))}</div>`;
+  }
+  btn.disabled = false;
+  btn.textContent = "Run agent + grade with model";
+}
+
+async function saveManualGrade() {
+  const toIntOrNull = (v) => (v === "null" || v === "" ? null : parseInt(v, 10));
+  const body = {
+    id: ACTIVE.id,
+    lang: ACTIVE.lang,
+    grounded: toIntOrNull(document.getElementById("manual-grounded").value),
+    on_task: toIntOrNull(document.getElementById("manual-on_task").value),
+    note: document.getElementById("manual-note").value,
+  };
+  const res = await fetch("/api/manual_grade", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  document.getElementById("manual-save-status").textContent = res.ok ? "Saved." : "Failed to save.";
+  await loadQuestions();
+  renderMain();
+}
+
+loadQuestions();
+</script>
+</body>
+</html>

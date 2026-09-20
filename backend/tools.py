@@ -429,27 +429,64 @@ def _resolve_place(query: str) -> tuple[str | None, list[str] | None]:
     if not matches:
         return query, None
 
-    top_score = len(_tokenize(query) & _tokenize(" ".join(
-        [matches[0].get("name_en", ""), matches[0].get("name_zh", ""),
-         matches[0].get("description_en", ""), matches[0].get("description_zh", ""),
-         " ".join(matches[0].get("tags", []))]
-    )))
-    tied = [
-        m for m in matches
-        if len(_tokenize(query) & _tokenize(" ".join(
-            [m.get("name_en", ""), m.get("name_zh", ""),
-             m.get("description_en", ""), m.get("description_zh", ""),
-             " ".join(m.get("tags", []))]
-        ))) == top_score
-    ]
+    query_tokens = _tokenize(query)
+
+    def _score(entry: dict) -> tuple[int, int]:
+        # Deliberately scores against name/address only, never description
+        # or tags: every azabuya_*/eau_cafe_*/pie_bird_*/bebaked_* entry's
+        # own description repeats the FULL list of that brand's sibling
+        # branch names (the "has N locations in Shanghai: A, B, C" sentence,
+        # needed elsewhere for "how many branches" questions) — scoring a
+        # query that names one specific branch against description text
+        # ties it across every branch of the same brand, which is exactly
+        # the "ambiguous" false positive this function exists to avoid.
+        # name/address are each unique per branch and don't have that
+        # cross-contamination.
+        name_tokens = _tokenize(" ".join([entry.get("name_en", ""), entry.get("name_zh", "")]))
+        address_tokens = _tokenize(entry.get("address", ""))
+        return len(query_tokens & name_tokens), len(query_tokens & address_tokens)
+
+    scored = [(m, *_score(m)) for m in matches]
+
+    # A query that doesn't substantially name a brand/shop isn't actually
+    # referring to a shop — pass it through as a literal place name for
+    # Amap to geocode directly, instead of forcing a resolution/disambiguation
+    # nobody asked about. This has to be a fraction of the query's own token
+    # count, not just ">0 tokens overlap": a landmark like "人民广场地铁站"
+    # (People's Square station) shares the generic bigram "广场" with EAU
+    # Café's Plaza-66 branch name ("恒隆广场店") purely by coincidence, which
+    # a bare nonzero-overlap check would wrongly treat as naming that shop.
+    best_name_fraction = max(
+        (name_overlap / len(query_tokens) for _, name_overlap, _address_overlap in scored),
+        default=0,
+    )
+    if best_name_fraction < 0.5:
+        return query, None
+
+    def _total(name_overlap: int, address_overlap: int) -> int:
+        # Name overlap is weighted above address overlap so a query that
+        # names a brand resolves to that brand's branches first, with
+        # address text (e.g. a street name) only breaking ties among them.
+        return name_overlap * 2 + address_overlap
+
+    best = max(_total(n, a) for _, n, a in scored)
+    tied = [m for m, n, a in scored if _total(n, a) == best]
+
     if len(tied) > 1:
         names = [m.get("name_zh") or m.get("name_en", "") for m in tied]
-        if len(set(names)) > 1 or len(tied) > 1:
-            return None, [f"{n} — {m.get('address', '')}" for n, m in zip(names, tied)]
+        return None, [f"{n} — {m.get('address', '')}" for n, m in zip(names, tied)]
 
-    entry = matches[0]
-    name = entry.get("name_zh") or entry.get("name_en", "")
-    return f"{name} {entry.get('address', '')}".strip(), None
+    entry = tied[0]
+    # Every address field ends with a "（距地铁...步行N米）" annotation kept for
+    # the LLM's own use elsewhere — strip it before handing the address off
+    # to geocoding. The shop name is deliberately NOT prepended here: Amap's
+    # POI text search returns zero results for several of these brand names
+    # (e.g. "EAU Café" isn't an indexed POI/brand there, and the accented
+    # "é" doesn't help), which silently broke geocoding for every branch of
+    # those brands even though the plain street address alone resolves
+    # cleanly on its own.
+    address = re.split(r"[（(]距地铁", entry.get("address", ""))[0].strip()
+    return address, None
 
 
 def _amap_geocode(place: str) -> tuple[float, float] | None:

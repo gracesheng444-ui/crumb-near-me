@@ -38,6 +38,7 @@ import dashscope
 from agent import run_agent
 from collection import add_log, delete_log, list_logs
 from grade_auto import grade_auto
+from grade_checklist import grade_checklist
 from tools import DASHSCOPE_API_KEY
 
 RESULTS_DIR = HERE / "results"
@@ -137,10 +138,20 @@ def main():
             else:
                 question_text = q[f"question_{lang}"]
                 outcome = run_agent(question_text, user_id=user_id)
-            if q.get("grading") == "auto":
+            grading = q.get("grading", "judge")
+            if grading == "auto":
                 score = grade_auto(q, outcome)
+            elif grading == "checklist":
+                score = grade_checklist(q, question_text, outcome)
             else:
-                score = judge(question_text, q["expects"], outcome["reply"])
+                # "judge" capabilities (synthesis, chitchat, recommendation,
+                # multiturn) are no longer auto-scored here — grading those
+                # well needs a human eye on tone/creativity/personality, not
+                # a keyword or checklist match. Left blank for manual review
+                # in eval/review_server.py; that tool still offers an
+                # optional one-click LLM opinion per case if you want a
+                # second read alongside your own.
+                score = {"grounded": None, "on_task": None, "note": "pending manual review"}
             results.append(
                 {
                     "id": q["id"],
