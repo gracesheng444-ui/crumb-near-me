@@ -12,6 +12,7 @@ open it on localhost:
 Then open http://127.0.0.1:8010/ in a browser.
 """
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -36,11 +37,23 @@ from grade_checklist import grade_checklist
 from run_eval import judge
 
 RESULTS_DIR = HERE / "results"
+SUITE_NAMES_PATH = HERE / "suite_names.json"
 
 app = FastAPI()
 
 
-def _discover_suites() -> list[str]:
+def _suite_names() -> dict:
+    """Filename -> display label (e.g. "test_questions.json" -> "Eval suite
+    1"), kept in a small hand-edited file so a suite's label can change
+    without renaming the file itself (and everything else, like run_eval.py,
+    that already hardcodes eval-suite filenames). A suite with no entry here
+    just displays under its filename."""
+    if not SUITE_NAMES_PATH.exists():
+        return {}
+    return json.loads(SUITE_NAMES_PATH.read_text(encoding="utf-8"))
+
+
+def _discover_suites() -> list[dict]:
     """A "suite" is any *_questions.json file directly under eval/ whose
     entries follow the chat-question shape (question_en/turns_en) — this is
     how test_questions.json already looked before suite selection existed,
@@ -48,6 +61,7 @@ def _discover_suites() -> list[str]:
     no registry file to keep in sync. vision_questions.json deliberately
     doesn't qualify: its entries are image-identification cases (an "image"
     field, no question_en), a different shape this UI doesn't render."""
+    names = _suite_names()
     suites = []
     for path in sorted(HERE.glob("*_questions.json")):
         try:
@@ -55,12 +69,16 @@ def _discover_suites() -> list[str]:
         except (json.JSONDecodeError, OSError):
             continue
         if data and isinstance(data, list) and any("question_en" in q or "turns_en" in q for q in data):
-            suites.append(path.name)
+            suites.append({"file": path.name, "label": names.get(path.name, path.name)})
     return suites
 
 
+def _suite_filenames() -> list[str]:
+    return [s["file"] for s in _discover_suites()]
+
+
 def _resolve_suite(suite: str) -> Path:
-    if suite not in _discover_suites():
+    if suite not in _suite_filenames():
         raise HTTPException(status_code=404, detail=f"unknown suite {suite!r}")
     return HERE / suite
 
@@ -89,14 +107,35 @@ def _save_manual_grades(suite: str, grades: dict) -> None:
     _manual_grades_path(suite).write_text(json.dumps(grades, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+_RESULTS_FILENAME_RE = re.compile(r"^eval_(\d{8}T\d{6}Z)\.json$")
+
+
+def _latest_results_file() -> Path | None:
+    files = sorted(RESULTS_DIR.glob("eval_*.json"))
+    return files[-1] if files else None
+
+
 def _latest_results() -> dict:
     """Merges the most recent eval_*.json results file by "id/lang" key, so
     the UI can show the last known reply without needing a fresh run."""
-    files = sorted(RESULTS_DIR.glob("eval_*.json"))
-    if not files:
+    latest = _latest_results_file()
+    if latest is None:
         return {}
-    data = json.loads(files[-1].read_text(encoding="utf-8"))
+    data = json.loads(latest.read_text(encoding="utf-8"))
     return {f"{r['id']}/{r['lang']}": r for r in data}
+
+
+def _latest_run_timestamp() -> str | None:
+    """The timestamp baked into the latest results filename (run_eval.py
+    names each run eval_<UTC timestamp>.json), so the UI can show when the
+    suite was last fully run without needing a fresh run just to find out.
+    Results files aren't tagged per-suite today (there's only one suite),
+    so this reflects the most recent run of whichever suite was run last."""
+    latest = _latest_results_file()
+    if latest is None:
+        return None
+    m = _RESULTS_FILENAME_RE.match(latest.name)
+    return m.group(1) if m else None
 
 
 def _seed_history(user_id: str, entries: list) -> None:
@@ -109,7 +148,11 @@ def _seed_history(user_id: str, entries: list) -> None:
 @app.get("/api/suites")
 def get_suites():
     suites = _discover_suites()
-    return {"suites": suites, "default": suites[0] if suites else None}
+    return {
+        "suites": suites,
+        "default": suites[0]["file"] if suites else None,
+        "last_run_timestamp": _latest_run_timestamp(),
+    }
 
 
 @app.get("/api/questions")

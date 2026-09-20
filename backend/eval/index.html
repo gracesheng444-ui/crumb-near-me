@@ -12,6 +12,7 @@
   #suite-picker { padding: 4px; margin-bottom: 4px; }
   #suite-picker label { font-size: 12px; color: #6b6659; display: block; margin-bottom: 4px; }
   #suite-picker select { width: 100%; }
+  #last-run { font-size: 11px; color: #8a8578; margin-top: 6px; }
   #sidebar h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #8a8578; margin: 16px 4px 6px; }
   .q-item { padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; display: flex; justify-content: space-between; gap: 6px; }
   .q-item:hover { background: #f0eee9; }
@@ -52,6 +53,7 @@
     <div id="suite-picker">
       <label>Eval suite</label>
       <select id="suite-select" onchange="switchSuite(this.value)"><option>Loading…</option></select>
+      <div id="last-run"></div>
     </div>
     <div id="sidebar-content">Loading…</div>
   </div>
@@ -62,6 +64,16 @@
 let QUESTIONS = [];
 let ACTIVE = null; // {id, lang}
 let CURRENT_SUITE = null;
+let LAST_RUN_LABEL = null;
+
+function formatRunTimestamp(ts) {
+  // ts is "YYYYMMDDTHHMMSSZ" (run_eval.py's eval_<ts>.json naming)
+  if (!ts) return null;
+  const iso = `${ts.slice(0, 4)}-${ts.slice(4, 6)}-${ts.slice(6, 8)}T${ts.slice(9, 11)}:${ts.slice(11, 13)}:${ts.slice(13, 15)}Z`;
+  const d = new Date(iso);
+  if (isNaN(d)) return ts;
+  return d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+}
 
 async function loadSuites() {
   const res = await fetch("/api/suites");
@@ -71,9 +83,12 @@ async function loadSuites() {
     select.innerHTML = `<option>No suites found</option>`;
     return;
   }
+  const fileNames = data.suites.map((s) => s.file);
   const saved = localStorage.getItem("eval-review-suite");
-  CURRENT_SUITE = data.suites.includes(saved) ? saved : data.default;
-  select.innerHTML = data.suites.map((s) => `<option value="${s}" ${s === CURRENT_SUITE ? "selected" : ""}>${s}</option>`).join("");
+  CURRENT_SUITE = fileNames.includes(saved) ? saved : data.default;
+  select.innerHTML = data.suites.map((s) => `<option value="${s.file}" ${s.file === CURRENT_SUITE ? "selected" : ""}>${escapeHtml(s.label)}</option>`).join("");
+  LAST_RUN_LABEL = formatRunTimestamp(data.last_run_timestamp);
+  document.getElementById("last-run").textContent = LAST_RUN_LABEL ? `Last full eval run: ${LAST_RUN_LABEL}` : "No full eval run saved yet.";
   await loadQuestions();
 }
 
@@ -172,7 +187,7 @@ function renderMain() {
     <div class="panel">
       <h4>Reply &amp; model grade</h4>
       ${lastResult ? `
-        <label>Last saved reply (from most recent full eval run)</label>
+        <label>Last saved reply (from full eval run${LAST_RUN_LABEL ? " at " + escapeHtml(LAST_RUN_LABEL) : ""})</label>
         <textarea class="reply" readonly>${escapeHtml(lastResult.reply || "")}</textarea>
         <div class="score-line">${scoreLine(lastResult)}</div>
         ${verdictListHtml(lastResult)}
@@ -259,7 +274,7 @@ async function runAndGrade() {
     });
     const data = await res.json();
     out.innerHTML = `
-      <label>Fresh reply</label>
+      <label>Fresh reply (run at ${new Date().toLocaleString(undefined, { dateStyle: "medium", timeStyle: "medium" })})</label>
       <textarea class="reply" readonly>${escapeHtml(data.reply || "")}</textarea>
       <div class="score-line">${scoreLine(data.score)}</div>
       ${verdictListHtml(data.score)}
