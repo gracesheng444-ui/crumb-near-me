@@ -1,4 +1,4 @@
-# Shanghai Dessert Guide Agent
+# Crumb Near Me
 
 **Live demo:** https://crumbnearme.com (also reachable at
 https://grand-gateway-agent-production.up.railway.app) — text chat and the
@@ -17,15 +17,9 @@ The UI itself is bilingual (中文/English, toggled from the login screen or
 Settings), and the chat agent replies in whichever language the visitor's
 own message is written in.
 
-This project started scoped to a single mall (Grand Gateway 66, 港汇恒隆广场)
-and was later broadened into a general Shanghai dessert guide once the core
-pattern (grounded retrieval, real routing, graceful degradation) proved out.
-The original mall-tenant entries are preserved in
-`backend/knowledge/_archive_grand_gateway_66/` for reference — they're
-outside `retrieve_info`'s glob, so they're not loaded. Branded "Crumb Near
-Me" in the live UI; accounts are handled by Supabase Auth, with an
-unauthenticated guest mode (a `localStorage`-generated id) also supported so
-visitors can use it without signing up.
+Accounts are handled by Supabase Auth, with an unauthenticated guest mode (a
+`localStorage`-generated id) also supported so visitors can use it without
+signing up.
 
 Built independently, informed by evaluation work during an internship
 building/testing a similar TTS exhibit-guide system (no internal content,
@@ -141,47 +135,42 @@ gaps (a no-signal recommendation question occasionally inventing a fake
 shop, non-deterministic dropped tool calls, and the judge itself
 occasionally hallucinating in its own grading rationale).
 
+A redesigned, larger next iteration — 50 single-turn questions (reweighted
+toward the capabilities repeat sampling found fragile: knowledge-base
+boundary and recommendation) plus a new 34-question multi-turn track
+(needs-history-to-parse, distance-erosion, personalization-recall) — is
+drafted in [`backend/eval/design/`](backend/eval/design/); the reasoning
+behind it is written up at
+[gracesheng444-ui.github.io/crumb-near-me](https://gracesheng444-ui.github.io/crumb-near-me/).
+Not yet wired into `test_questions.json` — the 47-question suite above is
+what actually runs today.
+
 ## Status
 
 - [x] Project scaffold, bilingual agent loop (now on Qwen, `qwen-plus`), keyword-based retrieval, TTS/vision tools wired
-- [x] Repurposed from a single-mall guide to a city-wide Shanghai dessert guide, branded "Crumb Near Me"
-- [x] Real knowledge base content — 5 brands (~16 branch entries) hand-verified so far, growing as more are added
+- [x] Real knowledge base content — 5 brands (14 branch entries) hand-verified so far, growing as more are added
 - [x] Live transit directions via Amap — verified working end-to-end (metro/bus routing)
 - [x] TTS and vision endpoints verified live (TTS needs ElevenLabs billing set up to actually speak; degrades gracefully to text-only if it fails)
 - [x] Any tool failure degrades gracefully instead of crashing the whole turn
 - [x] Migrated auth to Supabase (accounts + guest mode); personal dessert log, wishlist, and community notes shipped
 - [x] Deployed to Railway (crumbnearme.com)
 - [x] Eval expanded to 47 weighted text questions + a 6-case vision eval, with documented findings (`backend/eval/first_refinement.md`)
+- [ ] Next eval iteration drafted (50 single-turn + 34 multi-turn questions, reweighted toward documented failure modes) — design finished, not yet wired into the running suite
 
 ## Eval iteration history
 
-Runs 1-4 below are from the original single-mall version, before the pivot
-to a city-wide dessert guide — kept as the historical record of how the
-score moved with each diagnosed fix. Runs against the dessert-scoped
-knowledge base start fresh at Run 5, below.
-
 Raw runs are in `backend/eval/results/`. The average `grounded`/`on_task`
-score (out of 2) across the test set, run to run:
-
-| Run | grounded | on_task | What changed |
-|---|---|---|---|
-| 1 | 1.33 | 1.50 | Baseline after first working end-to-end version |
-| 2 | 1.67 | 1.67 | Fixed the system prompt to require confident, consistent grounding regardless of reply language (it was hedging on retrieved facts in Chinese but not English); fixed the eval judge, which was penalizing correct answers it couldn't independently verify as plausible |
-| 3 | 1.50 | 1.67 | Real content replaced placeholder/canary-only data — score dipped because Chinese-language retrieval was silently broken (see bug list below), which the smaller placeholder set hadn't exposed |
-| 4 | 1.67 | 1.67 | Fixed the Chinese tokenizer bug; fixed a crash in the judge caused by extended-thinking response blocks; corrected an eval question's expected-answer field that was too narrow, causing the judge to dock credit for additional true details |
-
-The score isn't the interesting part on its own — it's that each change maps
-to a specific, diagnosed cause, not prompt-tweaking by vibes.
-
-### Dessert-scoped baseline (2026-09-12)
-
-First runs against the city-wide dessert guide, after the knowledge base
-grew to 5 brands (Azabuya, Drunk Baker, Pie Bird, EAU Café, bebaked).
+score (out of 2) across the test set, after the knowledge base grew to 5
+brands (Azabuya, Drunk Baker, Pie Bird, EAU Café, bebaked) — run numbering
+continues from earlier prototype iterations:
 
 | Run | grounded | on_task | What changed |
 |---|---|---|---|
 | 5 | 1.00 | 1.00 | Baseline — same 3 test questions, updated knowledge base |
-| 6 | 1.83 | 2.00 | Fixed 3 bugs found by this run: a stale "Grand Gateway 66" reference in `retrieve_info`'s tool description, `max_tokens` too small once extended thinking is in play (blank replies), and the canary's own `"canary": true`/`"example"` metadata leaking into the model's tool result (see bugs below) |
+| 6 | 1.83 | 2.00 | Fixed 3 bugs found by this run: a stale, scope-mismatched reference left in `retrieve_info`'s tool description, `max_tokens` too small once extended thinking is in play (blank replies), and the canary's own `"canary": true`/`"example"` metadata leaking into the model's tool result (see bugs below) |
+
+The score isn't the interesting part on its own — it's that each change maps
+to a specific, diagnosed cause, not prompt-tweaking by vibes.
 
 Run 6's remaining gap from a perfect score is the judge docking
 `canary_01`'s Chinese answer for citing the canary entry's `address` field
@@ -216,13 +205,13 @@ match its category's naming convention — same question, same `"type":
   in what actually got uploaded to Railway (worked locally, 404'd in
   prod), and the public domain was pointed at the wrong port. Both only
   surfaced by testing the live deployed URL, not the local dev server.
-- **The agent hallucinated mall references on plain dessert questions.**
-  `retrieve_info`'s tool description still read "Search the Grand Gateway
-  66 knowledge base..." — leftover text from before the single-mall→
-  city-wide pivot that the system prompt rewrite had missed. The model
-  took that description at face value and worked "Grand Gateway 66" into
-  answers about shops that have nothing to do with it. Found by the
-  `unknown_fact_01` eval case; fixed by rewriting the tool description.
+- **The agent hallucinated out-of-scope venue references on plain dessert
+  questions.** `retrieve_info`'s tool description still described an
+  earlier, narrower scope — leftover text a prior system-prompt rewrite had
+  missed. The model took that description at face value and worked the
+  stale reference into answers about shops that had nothing to do with it.
+  Found by the `unknown_fact_01` eval case; fixed by rewriting the tool
+  description.
 - **The agent sometimes returned a completely blank reply.** `max_tokens`
   was set to 1024, but extended-thinking tokens count against that same
   budget — on a harder judgment call the model spent the entire 1024
