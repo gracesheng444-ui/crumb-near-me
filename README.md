@@ -1,10 +1,7 @@
 # Crumb Near Me
 
 **Live demo:** https://crumbnearme.com (also reachable at
-https://grand-gateway-agent-production.up.railway.app) — text chat and the
-dessert log work out of the box; voice narration needs the demo's
-ElevenLabs billing to be active, falling back to text-only rather than
-erroring if it isn't.
+https://grand-gateway-agent-production.up.railway.app).
 
 A conversational guide to dessert spots across Shanghai — chocolate, cakes,
 gelato, Chinese sweet soups, bubble tea, and more. Given a photo or a typed
@@ -28,27 +25,30 @@ codebase are original).
 
 ## Why this exists
 
-Most "AI agent" demos are a single prompt-and-respond call. This one is
-actually agentic: the model (`qwen-plus`, via DashScope) decides when to
-call `retrieve_info` before stating a fact, refuses to answer ungrounded
-questions, and calls `speak` only once a reply is grounded. Groundedness is
-verified with a "canary" technique — a deliberately fabricated fact planted
-in the knowledge base (see `backend/knowledge/example_canary.json`) that
-the agent can only get right by actually retrieving it.
+Most "AI agent" demos are a single prompt-and-response call with no way to
+check whether the answer is real. This one is built around a single rule:
+never state a fact the agent hasn't actually retrieved. The model
+(`qwen-plus`, via DashScope) decides when to call `retrieve_info` before
+answering, refuses when the knowledge base doesn't have what's being asked,
+and calls `speak` only once a reply is grounded. Groundedness is verified
+with a "canary" technique — a deliberately fabricated fact planted in the
+knowledge base (see `backend/knowledge/example_canary.json`) that the agent
+can only get right by actually retrieving it, not by pattern-matching a
+plausible-sounding answer.
 
-Grounding turned out to need more than a system-prompt instruction to hold
-up under open-ended questions ("what should I try?") — see
-`backend/eval/first_refinement.md` for the specific failure modes found (inventing a
-shop, or stretching a real one with fabricated supporting detail) and the
-post-hoc verification checks added to catch them before a reply reaches the
-user.
+That rule turned out to need more than a single system-prompt instruction
+to hold up — especially under open-ended questions like "what should I
+try?", where there's no one retrieved fact to check the reply against.
+`backend/eval/first_refinement.md` documents the specific ways it broke
+(inventing a shop outright, or stretching a real one with fabricated
+supporting detail) and the post-hoc verification checks added to catch
+those before a reply reaches the user.
 
-Directions work on the same grounding principle: `get_transit_directions`
-calls Amap's real transit-routing API for metro/bus directions between two
-places, rather than letting the model guess a line or a bus number. If Amap
-can't resolve a place or find a route, the agent says so plainly instead of
-inventing turns — same philosophy as `retrieve_info`, just for wayfinding
-instead of facts.
+Directions follow the same rule, just for wayfinding instead of facts:
+`get_transit_directions` calls Amap's real transit-routing API for
+metro/bus directions between two places, rather than letting the model
+guess a line or a bus number — and says so plainly if Amap can't resolve a
+place or find a route, instead of inventing turns.
 
 ## Architecture
 
@@ -114,36 +114,49 @@ Scores are saved to `backend/eval/results/` with a timestamp — the point is
 to watch the average `grounded`/`on_task` score go up as you tighten the
 system prompt and retrieval logic, not just to run it once.
 
-## Eval question design
+## Eval design
 
-`backend/eval/test_questions.json` has grown well past the original
-regression-check size — it's now 47 weighted questions crossing 8
-capabilities (factual lookup, synthesis, Amap routing, chit-chat,
-knowledge-base-boundary refusals, adversarial probing, recommendation, and
-multi-turn) against 4 phrasing styles (short/long/multi-intent/ambiguous),
-graded either by rule-based auto-checks or an LLM judge depending on
-whether the capability has a checkable ground truth. There's also a
-separate 6-case vision eval (`backend/eval/vision_questions.json`) against
-real photos, covering `identify_exhibit`'s brand/food/not-in-KB matching.
+The eval suite is designed in three parts — **text**, **vision**, and
+**audio** — each targeting a different surface of the agent (chat replies,
+photo identification, and voice input). Full reasoning is written up at
+[gracesheng444-ui.github.io/crumb-near-me](https://gracesheng444-ui.github.io/crumb-near-me/);
+the question bank itself is drafted in
+[`backend/eval/design/`](backend/eval/design/).
 
-The full taxonomy — what each capability/phrasing cell tests, how the
-weighting was chosen, and which cells are auto- vs. judge-graded — is in
+- **Text** — 50 single-turn questions crossing 7 capabilities (factual
+  lookup, synthesis, Amap routing, chit-chat, knowledge-base-boundary
+  refusals, adversarial probing, recommendation) against 4 phrasing styles
+  (short/long/multi-intent/ambiguous), weighted toward the capabilities
+  repeat sampling found fragile — plus a 34-question multi-turn track
+  (needs-history-to-parse, distance-erosion, personalization-recall).
+- **Vision** — still on the way: a redesigned 12-case bank against real
+  photos, concentrated on documented failure modes (brand mismatches,
+  degraded-quality photos, out-of-domain images, visual prompt injection).
+- **Audio** — still on the way: tests the voice-input transcription layer
+  (Qwen3-ASR-Flash) and, separately, whether the chat agent stays grounded
+  when handed a plausible mistranscription.
+
+### What's actually running today
+
+`backend/eval/test_questions.json` is an earlier, 47-question version —
+crossing 8 capabilities (the 7 above, plus multi-turn bundled in as its own
+capability) against the same 4 phrasing styles — graded either by
+rule-based auto-checks or an LLM judge depending on whether the capability
+has a checkable ground truth. There's also a separate 6-case vision eval
+(`backend/eval/vision_questions.json`) against real photos, covering
+`identify_exhibit`'s brand/food/not-in-KB matching. Neither has been
+replaced by the redesign above yet.
+
+The full taxonomy for what's running today — what each capability/phrasing
+cell tests, how the weighting was chosen, and which cells are auto- vs.
+judge-graded — is in
 [`backend/eval/EVAL_TAXONOMY.md`](backend/eval/EVAL_TAXONOMY.md). Findings
 from running it against Qwen, and the fixes each one led to, are in
-[`backend/eval/first_refinement.md`](backend/eval/first_refinement.md) — including several still-open
-gaps (a no-signal recommendation question occasionally inventing a fake
-shop, non-deterministic dropped tool calls, and the judge itself
-occasionally hallucinating in its own grading rationale).
-
-A redesigned, larger next iteration — 50 single-turn questions (reweighted
-toward the capabilities repeat sampling found fragile: knowledge-base
-boundary and recommendation) plus a new 34-question multi-turn track
-(needs-history-to-parse, distance-erosion, personalization-recall) — is
-drafted in [`backend/eval/design/`](backend/eval/design/); the reasoning
-behind it is written up at
-[gracesheng444-ui.github.io/crumb-near-me](https://gracesheng444-ui.github.io/crumb-near-me/).
-Not yet wired into `test_questions.json` — the 47-question suite above is
-what actually runs today.
+[`backend/eval/first_refinement.md`](backend/eval/first_refinement.md) —
+including several still-open gaps (a no-signal recommendation question
+occasionally inventing a fake shop, non-deterministic dropped tool calls,
+and the judge itself occasionally hallucinating in its own grading
+rationale).
 
 ## Status
 
